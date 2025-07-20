@@ -1,0 +1,91 @@
+[versions]
+agp = "8.5.2"
+android-compileSdk = "34"
+android-minSdk = "24"
+android-targetSdk = "34"
+androidx-activityCompose = "1.9.3"
+androidx-appcompat = "1.7.0"
+androidx-constraintlayout = "2.2.0"
+androidx-core-ktx = "1.15.0"
+androidx-espresso-core = "3.6.1"
+androidx-lifecycle = "2.8.4"
+androidx-material = "1.12.0"
+androidx-test-junit = "1.2.1"
+compose-multiplatform = "1.7.0"
+junit = "4.13.2"
+kotlinx-coroutines = "1.10.1"
+ktor = "3.0.3"
+logback = "1.5.16"
+kaverit = "2.10.0"
+korlibs = "6.0.0"
+gdx = "1.13.1"
+gdx-vis="1.5.1"
+ktx="1.13.1-rc1"
+
+kotlin = "2.1.20"
+kotlinPoet = "2.1.0"
+ksp = "2.1.20-1.0.32"
+
+junit-jupiter = "5.9.3"
+mockk = "1.13.8"
+
+[libraries]
+gdx-core = { module = "com.badlogicgames.gdx:gdx", version.ref = "gdx" }
+gdx-vis = { module="com.kotcrab.vis:vis-ui", version.ref="gdx-vis" }
+gdx-ktx-vis = { module="io.github.libktx:ktx-vis", version.ref="ktx"}
+gdx-ktx-log = { module="io.github.libktx:ktx-log", version.ref="ktx" }
+gdx-ktx-graphics = { module="io.github.libktx:ktx-graphics", version.ref="ktx"}
+
+junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit-jupiter" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlin-mockito = {module = "org.mockito.kotlin:mockito-kotlin", version="5.2.0"}
+kotlin-mockito-core = {module = "org.mockito:mockito-core", version="5.2.0"}
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
+androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-espresso-core" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
+androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidx-constraintlayout" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
+ktor-server-tests = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "ktor" }
+kotlinPoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }
+kodein-kaverit = { module = "org.kodein.type:kaverit", version.ref = "kaverit" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-atomics = { group="org.jetbrains.kotlinx", name="atomicfu", version="0.25.0" }
+korlibs-audio = { module = "com.soywiz:korlibs-audio", version.ref = "korlibs" }
+korlibs-image = { module = "com.soywiz:korlibs-image", version.ref = "korlibs" }
+korlibs-inject = { module = "com.soywiz:korlibs-inject", version.ref = "korlibs" }
+korlibs-template = { module = "com.soywiz:korlibs-template", version.ref = "korlibs" }
+korlibs-time = { module = "com.soywiz:korlibs-time", version.ref = "korlibs" }
+korlibs-serialization = { module = "com.soywiz:korlibs-serialization", version.ref = "korlibs" }
+korlibs-datastructure = { module = "com.soywiz:korlibs-datastructure", version.ref = "korlibs" }
+korlibs-datastructure-core = { module = "com.soywiz:korlibs-datastructure-core", version.ref = "korlibs" }
+korlibs-memory = { module = "com.soywiz:korlibs-memory", version.ref = "korlibs" }
+korlibs-io-stream = { module = "com.soywiz:korlibs-io-stream", version.ref = "korlibs" }
+korge = { module = "com.soywiz.korge:korge", version = "5.4.0" }
+google-ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+#korge = { id = "com.soywiz.korge", version = "5.4.0" }
+google-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
+[bundles]
+korlibs-all = ["korlibs-datastructure", "korlibs-datastructure-core", "korlibs-image"]

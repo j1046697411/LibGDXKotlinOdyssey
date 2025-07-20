@@ -1,0 +1,6 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="lko-gdx-template-desktop">
+    <output-path>$PROJECT_DIR$/lko-gdx-libs/lko-gdx-template/build/libs</output-path>
+    <root id="archive" name="lko-gdx-template-desktop.jar" />
+  </artifact>
+</component>
