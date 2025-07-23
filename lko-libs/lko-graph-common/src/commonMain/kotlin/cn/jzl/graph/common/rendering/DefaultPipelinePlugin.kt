@@ -82,8 +82,8 @@ class DefaultPipelinePlugin : PipelinePlugin {
 
         pipelineRegistry.register(Provider())
 
-        pipelineRegistry.register(PrimitiveFieldTypes.FloatFieldType)
-        pipelineRegistry.register(PrimitiveFieldTypes.BooleanFieldType)
+        pipelineRegistry.registerFieldTypes(PrimitiveFieldTypes.FloatFieldType)
+        pipelineRegistry.registerFieldTypes(PrimitiveFieldTypes.BooleanFieldType)
 
         pipelineRegistry.addDefaultFieldType(PrimitiveFieldTypes.FloatFieldType)
 

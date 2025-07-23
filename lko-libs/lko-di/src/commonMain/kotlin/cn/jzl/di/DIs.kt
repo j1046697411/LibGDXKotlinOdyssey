@@ -153,6 +153,10 @@ inline fun <reified A1 : Any, reified A2 : Any, T> DirectDIAware<*>.new(
     constructor: (A1, A2) -> T
 ): T = constructor(instance(), instance())
 
+inline fun <reified A1 : Any, reified A2 : Any, reified A3 : Any, T> DirectDIAware<*>.new(
+    constructor: (A1, A2, A3) -> T
+): T = constructor(instance(), instance(), instance())
+
 inline fun <reified A1 : Any, reified A2 : Any, reified A3 : Any, reified A4 : Any, T> DirectDIAware<*>.new(
     constructor: (A1, A2, A3, A4) -> T
 ): T = constructor(instance(), instance(), instance(), instance())

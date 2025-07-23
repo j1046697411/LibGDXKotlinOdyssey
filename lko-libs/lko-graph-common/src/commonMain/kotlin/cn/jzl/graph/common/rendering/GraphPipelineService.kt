@@ -5,16 +5,15 @@ import cn.jzl.di.instance
 import cn.jzl.ecs.System
 import cn.jzl.ecs.World
 import cn.jzl.graph.common.DefaultGraphPipelineRecipe
+import cn.jzl.graph.common.GraphPipelineRecipe
 import cn.jzl.graph.common.data.GraphWithProperties
 
 class GraphPipelineService(world: World) : System(world) {
 
-    private val pipelineRegistry by world.instance<DefaultPipelineRegistry>()
-    private val graphPipelineRecipe by lazy {
-        DefaultGraphPipelineRecipe(pipelineRegistry)
-    }
+    private val graphPipelineRecipe by world.instance<GraphPipelineRecipe>()
 
     init {
+        val pipelineRegistry by world.instance<PipelineRegistry>()
         val pipelinePlugins by world.allInstance<PipelinePlugin>()
         pipelinePlugins.forEach { plugin -> plugin.setup(pipelineRegistry) }
     }
@@ -24,7 +23,7 @@ class GraphPipelineService(world: World) : System(world) {
         endNodeId: String,
         inputFields: Array<String> = DefaultGraphPipelineRecipe.EMPTY_INPUT_FIELDS
     ): List<RenderingPipelineNode> {
-        return graphPipelineRecipe.buildGraphPipeline(world, graph, endNodeId, inputFields, pipelineRegistry)
+        return graphPipelineRecipe.buildGraphPipeline(world, graph, endNodeId, inputFields)
     }
 }
 

@@ -1,11 +1,12 @@
 package cn.jzl.graph.common.producer
 
+import cn.jzl.graph.common.GraphType
 import cn.jzl.graph.common.PipelineNode
 import cn.jzl.graph.impl.NamedGraphNodeInput
 
-abstract class AcceptingMultipleSingleInputPipelineNodeProducer<PN : PipelineNode>(
+abstract class AcceptingMultipleSingleInputPipelineNodeProducer<PN : PipelineNode, GT : GraphType<PN>>(
     name: String,
     type: String
-) : SingleOutputPipelineNodeProducer<PN>(name, type) {
+) : SingleOutputPipelineNodeProducer<PN, GT>(name, type) {
     protected abstract val inputs: NamedGraphNodeInput
 }

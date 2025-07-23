@@ -7,10 +7,11 @@ import cn.jzl.graph.common.PipelineNodeOutput
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.field.PrimitiveFieldTypes
 import cn.jzl.graph.common.producer.SingleOutputPipelineNodeProducer
+import cn.jzl.graph.common.rendering.RenderGraphType
 import cn.jzl.graph.common.rendering.RenderingPipelineNode
 import cn.jzl.graph.common.rendering.set
 
-class Provider : SingleOutputPipelineNodeProducer<RenderingPipelineNode>("provider", "provider") {
+class Provider : SingleOutputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>("provider", "provider") {
 
     override val output = createNodeOutput(
         "output",
@@ -21,6 +22,7 @@ class Provider : SingleOutputPipelineNodeProducer<RenderingPipelineNode>("provid
     override fun createSingleOutputNode(
         world: World,
         graph: GraphWithProperties,
+        graphType: RenderGraphType,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>,
         output: PipelineNodeOutput

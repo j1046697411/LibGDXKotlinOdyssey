@@ -8,9 +8,10 @@ import cn.jzl.graph.common.PipelineNodeOutput
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.field.PrimitiveFieldTypes
 import cn.jzl.graph.common.producer.AbstractPipelineNodeProducer
+import cn.jzl.graph.common.rendering.RenderGraphType
 import cn.jzl.graph.common.rendering.RenderingPipelineNode
 
-class Time : AbstractPipelineNodeProducer<RenderingPipelineNode>("time", "time") {
+class Time : AbstractPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>("time", "time") {
 
     private val time = createNodeOutput(
         fieldId = "time",
@@ -27,6 +28,7 @@ class Time : AbstractPipelineNodeProducer<RenderingPipelineNode>("time", "time")
     override fun createNode(
         world: World,
         graph: GraphWithProperties,
+        graphType: RenderGraphType,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>,
         outputs: Map<String, PipelineNodeOutput>

@@ -8,6 +8,7 @@ import cn.jzl.graph.common.calculator.SingleInputCalculator
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.producer.SingleInputPipelineNodeProducer
 import cn.jzl.graph.GraphNode
+import cn.jzl.graph.common.rendering.RenderGraphType
 import cn.jzl.graph.common.rendering.RenderingPipelineNode
 import cn.jzl.graph.common.rendering.get
 import cn.jzl.graph.common.rendering.set
@@ -15,11 +16,12 @@ import cn.jzl.graph.common.rendering.set
 abstract class SingleInputRenderingPipelineNodeProducer(
     name: String,
     type: String
-) : SingleInputPipelineNodeProducer<RenderingPipelineNode>(name, type) {
+) : SingleInputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>(name, type) {
 
     override fun createSingleInputNode(
         world: World,
         graph: GraphWithProperties,
+        graphType: RenderGraphType,
         graphNode: GraphNode,
         input: PipelineNodeInput,
         output: PipelineNodeOutput

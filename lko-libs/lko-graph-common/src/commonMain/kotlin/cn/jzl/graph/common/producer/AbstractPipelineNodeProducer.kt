@@ -4,6 +4,7 @@ import cn.jzl.graph.GraphNode
 import cn.jzl.graph.GraphNodeInputSide
 import cn.jzl.graph.GraphNodeOutputSide
 import cn.jzl.graph.NodeConfiguration
+import cn.jzl.graph.common.GraphType
 import cn.jzl.graph.common.PipelineNode
 import cn.jzl.graph.common.PipelineNodeInput
 import cn.jzl.graph.common.PipelineNodeProducer
@@ -14,10 +15,10 @@ import cn.jzl.graph.common.field.FieldType
 import cn.jzl.graph.common.field.SimpleAcceptedTypePredicate
 import cn.jzl.graph.impl.*
 
-abstract class AbstractPipelineNodeProducer<PN : PipelineNode>(
+abstract class AbstractPipelineNodeProducer<PN : PipelineNode, GT : GraphType<PN>>(
     name: String,
     type: String
-) : PipelineNodeProducer<PN> {
+) : PipelineNodeProducer<PN, GT> {
     private val menuNodeConfiguration = DefaultNodeConfiguration(name, type)
     final override val configuration: NodeConfiguration get() = menuNodeConfiguration
 

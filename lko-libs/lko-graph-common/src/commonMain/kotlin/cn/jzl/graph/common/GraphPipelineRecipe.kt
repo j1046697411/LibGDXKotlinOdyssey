@@ -8,7 +8,6 @@ interface GraphPipelineRecipe {
         world: World,
         graph: GraphWithProperties,
         endNodeId: String,
-        inputFields: Array<String>,
-        resolver: PipelineNodeProducerResolver<out PN>
+        inputFields: Array<String>
     ): List<PN>
 }

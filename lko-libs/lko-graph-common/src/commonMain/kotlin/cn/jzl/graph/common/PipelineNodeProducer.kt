@@ -5,7 +5,7 @@ import cn.jzl.graph.GraphNode
 import cn.jzl.graph.NodeConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 
-interface PipelineNodeProducer<PN : PipelineNode> {
+interface PipelineNodeProducer<PN : PipelineNode, GT : GraphType<PN>> {
 
     val configuration: NodeConfiguration
 
@@ -18,6 +18,7 @@ interface PipelineNodeProducer<PN : PipelineNode> {
     fun createNode(
         world: World,
         graph: GraphWithProperties,
+        graphType: GT,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>,
         outputs: Map<String, PipelineNodeOutput>

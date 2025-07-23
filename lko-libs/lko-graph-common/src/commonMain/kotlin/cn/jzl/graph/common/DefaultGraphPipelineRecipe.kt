@@ -5,10 +5,12 @@ import cn.jzl.graph.GraphConnection
 import cn.jzl.graph.GraphNode
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.field.FieldType
-import cn.jzl.graph.common.field.PipelineFieldTypeResolver
+import cn.jzl.graph.common.field.FieldTypeResolver
 
 class DefaultGraphPipelineRecipe(
-    private val pipelineFieldTypeResolver: PipelineFieldTypeResolver
+    private val graphTypeResolver: GraphTypeResolver,
+    private val fieldTypeResolver: FieldTypeResolver,
+    private val pipelineNodeProducerResolver: PipelineNodeProducerResolver
 ) : GraphPipelineRecipe {
 
     override fun <PN : PipelineNode> buildGraphPipeline(
@@ -16,11 +18,11 @@ class DefaultGraphPipelineRecipe(
         graph: GraphWithProperties,
         endNodeId: String,
         inputFields: Array<String>,
-        resolver: PipelineNodeProducerResolver<out PN>
     ): List<PN> {
+        val graphType = graphTypeResolver.resolve<PN>(graph.type)
         // 预先构建节点ID到生产者的映射
         val pipelineNodeProducers = graph.nodes.associate { node ->
-            node.id to (node to resolver.resolve(node))
+            node.id to (node to pipelineNodeProducerResolver.resolve(graphType,node))
         }
 
         // 预先构建连接映射: [目标节点ID -> [目标字段ID -> 连接列表]]
@@ -28,7 +30,7 @@ class DefaultGraphPipelineRecipe(
             .groupBy { it.nodeTo }
             .mapValues { (_, connections) -> connections.groupBy { it.fieldTo } }
 
-        val preparedGraphNodes = mutableMapOf<String, PreparedGraphNode<out PN>>()
+        val preparedGraphNodes = mutableMapOf<String, PreparedGraphNode<PN>>()
         populatePreparedGraphNodes(
             graph = graph,
             graphNodeId = endNodeId,
@@ -37,15 +39,15 @@ class DefaultGraphPipelineRecipe(
             preparedGraphNodes = preparedGraphNodes,
             connectionsByTarget = connectionsByTarget
         )
-        return createPipelineNodes(world, graph, preparedGraphNodes)
+        return createPipelineNodes(world, graph, graphType, preparedGraphNodes)
     }
 
     private fun <PN : PipelineNode> populatePreparedGraphNodes(
         graph: GraphWithProperties,
         graphNodeId: String,
         inputFields: Array<String>,
-        pipelineNodeProducers: Map<String, Pair<GraphNode, PipelineNodeProducer<out PN>>>,
-        preparedGraphNodes: MutableMap<String, PreparedGraphNode<out PN>>,
+        pipelineNodeProducers: Map<String, Pair<GraphNode, PipelineNodeProducer<PN, GraphType<PN>>>>,
+        preparedGraphNodes: MutableMap<String, PreparedGraphNode<PN>>,
         connectionsByTarget: Map<String, Map<String, List<GraphConnection>>>
     ) {
         // 检查节点是否已处理
@@ -97,7 +99,7 @@ class DefaultGraphPipelineRecipe(
         // 构建输出列表及快速查找映射
         val outputs = outputTypes.mapValues { (fieldId, fieldType) ->
             val output = nodeConfiguration.nodeOutputs.first { it.fieldId == fieldId }
-            val pipelineFieldType = pipelineFieldTypeResolver.resolve(fieldType) as FieldType<Any>
+            val pipelineFieldType = fieldTypeResolver.resolve(fieldType) as FieldType<Any>
             PipelineNodeOutput(output, pipelineFieldType)
         }
         // 存储处理后的节点
@@ -113,12 +115,14 @@ class DefaultGraphPipelineRecipe(
     private fun <PN : PipelineNode> createPipelineNodes(
         world: World,
         graph: GraphWithProperties,
-        preparedGraphNodes: Map<String, PreparedGraphNode<out PN>>
+        graphType: GraphType<PN>,
+        preparedGraphNodes: Map<String, PreparedGraphNode<PN>>
     ): List<PN> {
         return preparedGraphNodes.values.sortedBy { it.index }.map { node ->
             node.pipelineNodeProducer.createNode(
                 world,
                 graph,
+                graphType,
                 node.graphNode,
                 node.inputs,
                 node.outputs
@@ -129,7 +133,7 @@ class DefaultGraphPipelineRecipe(
     data class PreparedGraphNode<PN : PipelineNode>(
         val index: Int,
         val graphNode: GraphNode,
-        val pipelineNodeProducer: PipelineNodeProducer<PN>,
+        val pipelineNodeProducer: PipelineNodeProducer<PN, GraphType<PN>>,
         val inputs: List<PipelineNodeInput>,
         val outputs: Map<String, PipelineNodeOutput>,
     )

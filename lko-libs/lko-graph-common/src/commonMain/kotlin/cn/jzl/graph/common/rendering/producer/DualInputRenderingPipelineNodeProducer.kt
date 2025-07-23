@@ -8,6 +8,7 @@ import cn.jzl.graph.common.PipelineNodeOutput
 import cn.jzl.graph.common.calculator.DualInputCalculator
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.producer.DualInputPipelineNodeProducer
+import cn.jzl.graph.common.rendering.RenderGraphType
 import cn.jzl.graph.common.rendering.RenderingPipelineNode
 import cn.jzl.graph.common.rendering.get
 import cn.jzl.graph.common.rendering.set
@@ -15,8 +16,16 @@ import cn.jzl.graph.common.rendering.set
 abstract class DualInputRenderingPipelineNodeProducer(
     name: String,
     type: String,
-) : DualInputPipelineNodeProducer<RenderingPipelineNode>(name, type) {
-    override fun createDualInputNode(world: World, graph: GraphWithProperties, graphNode: GraphNode, first: PipelineNodeInput, second: PipelineNodeInput, output: PipelineNodeOutput): RenderingPipelineNode {
+) : DualInputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>(name, type) {
+    override fun createDualInputNode(
+        world: World,
+        graph: GraphWithProperties,
+        graphType: RenderGraphType,
+        graphNode: GraphNode,
+        first: PipelineNodeInput,
+        second: PipelineNodeInput,
+        output: PipelineNodeOutput
+    ): RenderingPipelineNode {
         val calculator by world.instance<DualInputCalculator>()
         return RenderingPipelineNode { blackboard ->
             val firstValue = blackboard[first]

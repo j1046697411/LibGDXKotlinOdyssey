@@ -2,6 +2,7 @@ package cn.jzl.graph.common
 
 import cn.jzl.graph.GraphNode
 
-fun interface PipelineNodeProducerResolver<PN : PipelineNode> {
-    fun resolve(graphNode: GraphNode): PipelineNodeProducer<PN>
+interface PipelineNodeProducerResolver {
+    fun <PN : PipelineNode, GT : GraphType<PN>> resolve(graphType: GT, graphNode: GraphNode): PipelineNodeProducer<PN, GT>
 }
+
