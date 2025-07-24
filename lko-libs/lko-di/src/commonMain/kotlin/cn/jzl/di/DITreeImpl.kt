@@ -51,10 +51,12 @@ internal class DITreeImpl(
                 .forEach { (treeKey, translator) ->
                     cache[treeKey] = Triple(key, definitions, translator)
                     val typeChecker =
-                        if (definitions.first().binding.supportSubTypes) TypeChecker.Up(treeKey.targetType) else TypeChecker.Down(treeKey.targetType)
+                        if (definitions.first().binding.supportSubTypes) TypeChecker.Up(treeKey.targetType) else TypeChecker.Down(
+                            treeKey.targetType
+                        )
                     val contextTypeTree = boundTypeTree.getOrPut(typeChecker) { hashMapOf() }
                     val argumentTypeTree = contextTypeTree.getOrPut(TypeChecker.Up(treeKey.contextType)) { hashMapOf() }
-                    val tagTree = argumentTypeTree.getOrPut(TypeChecker.Down(treeKey.argType)) { hashMapOf() }
+                    val tagTree = argumentTypeTree.getOrPut(TypeChecker.Up(treeKey.argType)) { hashMapOf() }
                     val treeKeys = tagTree.getOrPut(treeKey.tag) { arrayListOf() }
                     if (treeKey !in treeKeys) {
                         treeKeys.add(treeKey)
@@ -128,10 +130,8 @@ internal class DITreeImpl(
         return sequence.map { it.value }
     }
 
-    private fun Sequence<TagTree>.findByTag(
-        tag: Any? = null
-    ): Sequence<DITreeKey<*, *, *, *>> {
-        return if (tag != null) {
+    private fun Sequence<TagTree>.findByTag(tag: Any? = null): Sequence<DITreeKey<*, *, *, *>> {
+        return if (tag != TagAll) {
             mapNotNull { it[tag]?.asSequence() }.flatMap { it }
         } else {
             flatMap { it.values.asSequence() }.flatMap { it }

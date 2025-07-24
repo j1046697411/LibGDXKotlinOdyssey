@@ -5,6 +5,8 @@ import org.kodein.type.erasedOf
 import org.kodein.type.generic
 import kotlin.reflect.KProperty
 
+object TagAll
+
 fun <C : Any> DirectDIAware<*>.on(context: DIContext<C>): DirectDI<C> = directDI.on(context)
 fun <C : Any> DIAware.on(context: DIContext<C>): DirectDI<C> = di.on(context)
 fun <A, T : Any> DIFactory<A, T>.toProvider(argProvider: DIProvider<A>): DIProvider<T> = { this(argProvider()) }
@@ -67,16 +69,16 @@ inline fun <reified T : Any> DirectDIAware<*>.providerOrNull(
 ): DIProvider<T>? = providerOrNull(tag, unitProvider)
 
 inline fun <reified A : Any, reified T : Any> DirectDIAware<*>.allFactories(
-    tag: Any? = null
+    tag: Any? = TagAll
 ): Sequence<DIFactory<A, T>> = directDI.allFactories(generic<A>(), generic<T>(), tag)
 
 inline fun <reified A : Any, reified T : Any> DirectDIAware<*>.allProviders(
-    tag: Any? = null,
+    tag: Any? = TagAll,
     noinline provider: DIProvider<A>
 ): Sequence<DIProvider<T>> = directDI.allFactories(generic<A>(), generic<T>(), tag).map { it.toProvider(provider) }
 
 inline fun <reified T : Any> DirectDIAware<*>.allProviders(
-    tag: Any? = null
+    tag: Any? = TagAll
 ): Sequence<DIProvider<T>> = allProviders(tag, unitProvider)
 
 inline fun <reified A : Any, reified T : Any> DirectDIAware<*>.instance(
@@ -96,12 +98,12 @@ inline fun <reified T : Any> DirectDIAware<*>.instanceOrNull(
 ): T? = instanceOrNull(tag, unitProvider)
 
 inline fun <reified A : Any, reified T : Any> DirectDIAware<*>.allInstance(
-    tag: Any? = null,
+    tag: Any? = TagAll,
     noinline argProvider: DIProvider<A>
 ): Sequence<T> = directDI.allProviders<A, T>(tag, argProvider).map { it() }
 
 inline fun <reified T : Any> DirectDIAware<*>.allInstance(
-    tag: Any? = null,
+    tag: Any? = TagAll,
 ): Sequence<T> = directDI.allInstance(tag, unitProvider)
 
 
@@ -137,11 +139,11 @@ inline fun <reified T : Any> DIAware.instanceOrNull(
 ): LazyDelegate<T?> = delegate { instanceOrNull(tag, unitProvider) }
 
 inline fun <reified T : Any> DIAware.allInstance(
-    tag: Any? = null
+    tag: Any? = TagAll
 ): LazyDelegate<Sequence<T>> = allInstance(tag, unitProvider)
 
 inline fun <reified A : Any, reified T : Any> DIAware.allInstance(
-    tag: Any? = null,
+    tag: Any? = TagAll,
     noinline argProvider: DIProvider<A>
 ): LazyDelegate<Sequence<T>> = delegate { allInstance(tag, argProvider) }
 

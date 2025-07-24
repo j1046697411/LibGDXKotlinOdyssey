@@ -1,5 +1,6 @@
 package cn.jzl.graph.common.rendering
 
+import cn.jzl.di.TagAll
 import cn.jzl.di.allInstance
 import cn.jzl.di.instance
 import cn.jzl.ecs.System
@@ -13,8 +14,8 @@ class GraphPipelineService(world: World) : System(world) {
     private val graphPipelineRecipe by world.instance<GraphPipelineRecipe>()
 
     init {
-        val pipelineRegistry by world.instance<PipelineRegistry>()
-        val pipelinePlugins by world.allInstance<PipelinePlugin>()
+        val pipelineRegistry by world.instance<PipelineRegistry>(TAG_PIPELINE_REGISTRY)
+        val pipelinePlugins by world.allInstance<PipelinePlugin>(TagAll)
         pipelinePlugins.forEach { plugin -> plugin.setup(pipelineRegistry) }
     }
 
