@@ -16,7 +16,7 @@ class GraphPipelineService(world: World) : System(world) {
     init {
         val pipelineRegistry by world.instance<PipelineRegistry>(TAG_PIPELINE_REGISTRY)
         val pipelinePlugins by world.allInstance<PipelinePlugin>(TagAll)
-        pipelinePlugins.forEach { plugin -> plugin.setup(pipelineRegistry) }
+        pipelinePlugins.forEach { plugin -> plugin.setup(world, pipelineRegistry) }
     }
 
     fun buildGraphPipeline(

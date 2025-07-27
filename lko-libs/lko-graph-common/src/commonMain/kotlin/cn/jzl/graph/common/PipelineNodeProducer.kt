@@ -5,7 +5,7 @@ import cn.jzl.graph.GraphNode
 import cn.jzl.graph.NodeConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 
-interface PipelineNodeProducer<PN : PipelineNode, GT : GraphType<PN>> {
+interface PipelineNodeProducer<PN : PipelineNode, GT : GraphType<in PN>> {
 
     val configuration: NodeConfiguration
 

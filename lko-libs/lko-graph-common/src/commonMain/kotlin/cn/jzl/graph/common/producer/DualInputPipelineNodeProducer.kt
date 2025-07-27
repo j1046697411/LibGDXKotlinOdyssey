@@ -13,6 +13,7 @@ abstract class DualInputPipelineNodeProducer<PN : PipelineNode, GT : GraphType<P
     name: String,
     type: String
 ) : SingleOutputPipelineNodeProducer<PN, GT>(name, type) {
+
     protected abstract val first: NamedGraphNodeInput
     protected abstract val second: NamedGraphNodeInput
 
@@ -28,8 +29,8 @@ abstract class DualInputPipelineNodeProducer<PN : PipelineNode, GT : GraphType<P
         graph,
         graphType,
         graphNode,
-        inputs.single { it.input == first },
-        inputs.single { it.input == second },
+        inputs.firstOrNull { it.input == first },
+        inputs.firstOrNull { it.input == second },
         output
     )
 
@@ -38,8 +39,8 @@ abstract class DualInputPipelineNodeProducer<PN : PipelineNode, GT : GraphType<P
         graph: GraphWithProperties,
         graphType: GT,
         graphNode: GraphNode,
-        first: PipelineNodeInput,
-        second: PipelineNodeInput,
+        first: PipelineNodeInput?,
+        second: PipelineNodeInput?,
         output: PipelineNodeOutput,
     ): PN
 }

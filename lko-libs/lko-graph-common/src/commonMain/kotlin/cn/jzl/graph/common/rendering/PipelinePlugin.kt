@@ -1,6 +1,8 @@
 package cn.jzl.graph.common.rendering
 
-interface PipelinePlugin {
-    fun setup(pipelineRegistry: PipelineRegistry)
+import cn.jzl.ecs.World
+
+fun interface PipelinePlugin {
+    fun setup(world: World, pipelineRegistry: PipelineRegistry)
 }
 

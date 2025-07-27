@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
 class DefaultPipelineNodeProducerRegistry : PipelineNodeProducerRegistry, PipelineNodeProducerResolver {
     private val producers = hashMapOf<KClass<*>, MutableMap<String, PipelineNodeProducer<*, *>>>()
 
-    override fun <PN : PipelineNode, GT : GraphType<PN>> register(
+    override fun <PN : PipelineNode, GT : GraphType<in PN>> register(
         type: KClass<GT>,
         producer: PipelineNodeProducer<PN, GT>
     ) {

@@ -23,11 +23,14 @@ abstract class TripleInputRenderingPipelineNodeProducer(
         graph: GraphWithProperties,
         graphType: RenderGraphType,
         graphNode: GraphNode,
-        first: PipelineNodeInput,
-        second: PipelineNodeInput,
-        third: PipelineNodeInput,
+        first: PipelineNodeInput?,
+        second: PipelineNodeInput?,
+        third: PipelineNodeInput?,
         output: PipelineNodeOutput
     ): RenderingPipelineNode {
+        check(this.first.required && first != null) { "first input is required" }
+        check(this.second.required && second != null) { "second input is required" }
+        check(this.third.required && third != null) { "third input is required" }
         val calculator by world.instance<TripleInputCalculator>()
         return RenderingPipelineNode { blackboard ->
             val firstValue = blackboard[first]

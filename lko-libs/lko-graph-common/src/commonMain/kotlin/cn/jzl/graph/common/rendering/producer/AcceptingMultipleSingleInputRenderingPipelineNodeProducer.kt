@@ -25,6 +25,9 @@ abstract class AcceptingMultipleSingleInputRenderingPipelineNodeProducer(
         inputs: List<PipelineNodeInput>,
         output: PipelineNodeOutput
     ): RenderingPipelineNode {
+        check(this.inputs.required && this.inputs.acceptingMultiple && inputs.isNotEmpty()) {
+            "inputs are required and accepting multiple, but inputs is empty"
+        }
         val calculator by world.instance<DualInputCalculator>()
         return RenderingPipelineNode { blackboard ->
             val outputValue = inputs.map {

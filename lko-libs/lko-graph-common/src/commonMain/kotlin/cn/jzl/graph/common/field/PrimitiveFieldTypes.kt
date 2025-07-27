@@ -14,8 +14,13 @@ object PrimitiveFieldTypes {
 
     fun values(): List<FieldType<*>> = fieldTypes
 
-    abstract class AbstractFieldType<T : Any>(kType: KClass<T>) : FieldType<T> {
+    abstract class AbstractFieldType<T : Any>(private val kType: KClass<T>) : FieldType<T> {
+
         override val fieldType: String = kType.simpleName ?: "unknown"
+
+        override fun accepts(value: Any): Boolean {
+            return kType.isInstance(value)
+        }
     }
 
     sealed interface PrimitiveFieldType<T> : FieldType<T>

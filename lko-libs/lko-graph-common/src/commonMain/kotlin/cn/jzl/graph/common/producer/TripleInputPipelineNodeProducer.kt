@@ -31,9 +31,9 @@ abstract class TripleInputPipelineNodeProducer<PN : PipelineNode, GT : GraphType
         graph,
         graphType,
         graphNode,
-        inputs.single { it.input == first },
-        inputs.single { it.input == second },
-        inputs.single { it.input == third },
+        inputs.firstOrNull { it.input == first },
+        inputs.firstOrNull { it.input == second },
+        inputs.firstOrNull { it.input == third },
         output
     )
 
@@ -42,9 +42,9 @@ abstract class TripleInputPipelineNodeProducer<PN : PipelineNode, GT : GraphType
         graph: GraphWithProperties,
         graphType: GT,
         graphNode: GraphNode,
-        first: PipelineNodeInput,
-        second: PipelineNodeInput,
-        third: PipelineNodeInput,
+        first: PipelineNodeInput?,
+        second: PipelineNodeInput?,
+        third: PipelineNodeInput?,
         output: PipelineNodeOutput
     ): PN
 }

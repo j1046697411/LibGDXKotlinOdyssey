@@ -28,7 +28,7 @@ abstract class SingleInputPipelineNodeProducer<PN : PipelineNode, GT : GraphType
         graph,
         graphType,
         graphNode,
-        inputs.single { it.input == input },
+        inputs.firstOrNull { it.input == input },
         output
     )
 
@@ -37,7 +37,7 @@ abstract class SingleInputPipelineNodeProducer<PN : PipelineNode, GT : GraphType
         graph: GraphWithProperties,
         graphType: GT,
         graphNode: GraphNode,
-        input: PipelineNodeInput,
+        input: PipelineNodeInput?,
         output: PipelineNodeOutput
     ): PN
 }

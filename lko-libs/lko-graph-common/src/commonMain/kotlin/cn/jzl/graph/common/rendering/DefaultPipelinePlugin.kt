@@ -1,5 +1,6 @@
 package cn.jzl.graph.common.rendering
 
+import cn.jzl.ecs.World
 import cn.jzl.graph.common.calculator.FloatCalculator
 import cn.jzl.graph.common.field.PrimitiveFieldTypes
 import cn.jzl.graph.common.rendering.producer.math.Abs
@@ -40,7 +41,7 @@ import cn.jzl.graph.common.rendering.producer.math.Times
 import cn.jzl.graph.common.rendering.producer.provided.Provider
 
 class DefaultPipelinePlugin : PipelinePlugin {
-    override fun setup(pipelineRegistry: PipelineRegistry) {
+    override fun setup(world: World, pipelineRegistry: PipelineRegistry) {
         pipelineRegistry.register(Div())
         pipelineRegistry.register(Minus())
         pipelineRegistry.register(OneMinus())

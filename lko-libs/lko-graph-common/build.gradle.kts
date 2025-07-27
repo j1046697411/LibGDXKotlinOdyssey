@@ -11,8 +11,8 @@ kotlin {
         val commonMain by getting
         val desktopMain by getting
         commonMain.dependencies {
-            implementation(projects.lkoEcs)
-            implementation(projects.lkoGraph)
+            api(projects.lkoEcs)
+            api(projects.lkoGraph)
         }
 
         commonTest.dependencies {

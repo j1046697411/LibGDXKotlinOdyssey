@@ -22,10 +22,12 @@ abstract class DualInputRenderingPipelineNodeProducer(
         graph: GraphWithProperties,
         graphType: RenderGraphType,
         graphNode: GraphNode,
-        first: PipelineNodeInput,
-        second: PipelineNodeInput,
+        first: PipelineNodeInput?,
+        second: PipelineNodeInput?,
         output: PipelineNodeOutput
     ): RenderingPipelineNode {
+        check(this.first.required && first != null) { "first input is required" }
+        check(this.second.required && second != null) { "second input is required" }
         val calculator by world.instance<DualInputCalculator>()
         return RenderingPipelineNode { blackboard ->
             val firstValue = blackboard[first]

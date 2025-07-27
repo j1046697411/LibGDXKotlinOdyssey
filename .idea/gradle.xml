@@ -9,6 +9,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/lko-gdx-libs/lko-gdx-render" />
+            <option value="$PROJECT_DIR$/lko-gdx-libs/lko-gdx-shader" />
             <option value="$PROJECT_DIR$/lko-gdx-libs/lko-gdx-template" />
             <option value="$PROJECT_DIR$/lko-libs/lko-di" />
             <option value="$PROJECT_DIR$/lko-libs/lko-ecs" />

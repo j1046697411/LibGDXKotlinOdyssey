@@ -8,7 +8,7 @@ import org.kodein.type.generic
 
 internal const val TAG_PIPELINE_REGISTRY = "tag_pipeline_registry"
 
-inline fun <reified PN : PipelineNode, reified GT : GraphType<PN>> PipelineNodeProducerRegistry.register(
+inline fun <reified PN : PipelineNode, reified GT : GraphType<in PN>> PipelineNodeProducerRegistry.register(
     producer: PipelineNodeProducer<PN, GT>
 ) = this.register(GT::class, producer)
 

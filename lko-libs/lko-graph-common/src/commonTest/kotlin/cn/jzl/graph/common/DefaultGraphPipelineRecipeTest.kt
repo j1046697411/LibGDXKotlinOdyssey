@@ -23,7 +23,7 @@ class DefaultGraphPipelineRecipeTest {
         module(pipelineModule())
         this bind singleton {
             object : PipelinePlugin {
-                override fun setup(pipelineRegistry: PipelineRegistry) {
+                override fun setup(world: World, pipelineRegistry: PipelineRegistry) {
                     pipelineRegistry.registerGraphTypes(TestRenderGraphType("testType"))
                 }
             }

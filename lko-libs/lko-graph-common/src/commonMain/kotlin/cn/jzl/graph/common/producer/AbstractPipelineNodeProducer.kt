@@ -15,7 +15,7 @@ import cn.jzl.graph.common.field.FieldType
 import cn.jzl.graph.common.field.SimpleAcceptedTypePredicate
 import cn.jzl.graph.impl.*
 
-abstract class AbstractPipelineNodeProducer<PN : PipelineNode, GT : GraphType<PN>>(
+abstract class AbstractPipelineNodeProducer<PN : PipelineNode, GT : GraphType<in PN>>(
     name: String,
     type: String
 ) : PipelineNodeProducer<PN, GT> {
