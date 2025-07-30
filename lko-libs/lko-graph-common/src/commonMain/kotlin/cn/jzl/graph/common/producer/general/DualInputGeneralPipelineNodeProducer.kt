@@ -1,4 +1,4 @@
-package cn.jzl.graph.common.rendering.producer
+package cn.jzl.graph.common.producer.general
 
 import cn.jzl.di.instance
 import cn.jzl.ecs.World
@@ -8,28 +8,26 @@ import cn.jzl.graph.common.PipelineNodeOutput
 import cn.jzl.graph.common.calculator.DualInputCalculator
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.producer.DualInputPipelineNodeProducer
-import cn.jzl.graph.common.rendering.RenderGraphType
-import cn.jzl.graph.common.rendering.RenderingPipelineNode
 import cn.jzl.graph.common.rendering.get
 import cn.jzl.graph.common.rendering.set
 
-abstract class DualInputRenderingPipelineNodeProducer(
+abstract class DualInputGeneralPipelineNodeProducer(
     name: String,
     type: String,
-) : DualInputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>(name, type) {
+) : DualInputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>(name, type) {
     override fun createDualInputNode(
         world: World,
         graph: GraphWithProperties,
-        graphType: RenderGraphType,
+        graphType: GeneralGraphType,
         graphNode: GraphNode,
         first: PipelineNodeInput?,
         second: PipelineNodeInput?,
         output: PipelineNodeOutput
-    ): RenderingPipelineNode {
+    ): GeneralPipelineNode {
         check(this.first.required && first != null) { "first input is required" }
         check(this.second.required && second != null) { "second input is required" }
         val calculator by world.instance<DualInputCalculator>()
-        return RenderingPipelineNode { blackboard ->
+        return GeneralPipelineNode { blackboard ->
             val firstValue = blackboard[first]
             val secondValue = blackboard[second]
             check(firstValue != null && secondValue != null)

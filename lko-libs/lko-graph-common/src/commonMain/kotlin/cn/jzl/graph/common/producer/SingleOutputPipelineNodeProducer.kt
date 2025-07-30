@@ -9,7 +9,7 @@ import cn.jzl.graph.common.PipelineNodeOutput
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.impl.NamedGraphNodeOutput
 
-abstract class SingleOutputPipelineNodeProducer<PN : PipelineNode, GT : GraphType<PN>>(
+abstract class SingleOutputPipelineNodeProducer<PN : PipelineNode, GT : GraphType<in PN>>(
     name: String,
     type: String
 ) : AbstractPipelineNodeProducer<PN, GT>(name, type) {

@@ -1,4 +1,4 @@
-package cn.jzl.graph.common.rendering.producer.provided
+package cn.jzl.graph.common.producer.general.provided
 
 import cn.jzl.di.instance
 import cn.jzl.ecs.World
@@ -8,10 +8,10 @@ import cn.jzl.graph.common.PipelineNodeOutput
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.field.PrimitiveFieldTypes
 import cn.jzl.graph.common.producer.AbstractPipelineNodeProducer
-import cn.jzl.graph.common.rendering.RenderGraphType
-import cn.jzl.graph.common.rendering.RenderingPipelineNode
+import cn.jzl.graph.common.producer.general.GeneralGraphType
+import cn.jzl.graph.common.producer.general.GeneralPipelineNode
 
-class Time : AbstractPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>("time", "time") {
+class Time : AbstractPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>("time", "time") {
 
     private val time = createNodeOutput(
         fieldId = "time",
@@ -28,13 +28,13 @@ class Time : AbstractPipelineNodeProducer<RenderingPipelineNode, RenderGraphType
     override fun createNode(
         world: World,
         graph: GraphWithProperties,
-        graphType: RenderGraphType,
+        graphType: GeneralGraphType,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>,
         outputs: Map<String, PipelineNodeOutput>
-    ): RenderingPipelineNode {
+    ): GeneralPipelineNode {
         val timeProvider by world.instance<TimeProvider>()
-        return RenderingPipelineNode { blackboard ->
+        return GeneralPipelineNode { blackboard ->
             blackboard[graphNode, time, PrimitiveFieldTypes.FloatFieldType] = timeProvider.time
             blackboard[graphNode, deltaTime, PrimitiveFieldTypes.FloatFieldType] = timeProvider.deltaTime
         }

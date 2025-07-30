@@ -1,5 +1,5 @@
 package cn.jzl.graph.common.rendering
 
-import cn.jzl.graph.common.GraphType
+import cn.jzl.graph.common.producer.general.GeneralGraphType
 
-interface RenderGraphType : GraphType<RenderingPipelineNode>
+interface RenderGraphType : GeneralGraphType

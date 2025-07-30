@@ -1,4 +1,4 @@
-package cn.jzl.graph.common.rendering.producer.provided
+package cn.jzl.graph.common.producer.general.provided
 
 import cn.jzl.ecs.World
 import cn.jzl.graph.GraphNode
@@ -7,11 +7,13 @@ import cn.jzl.graph.common.PipelineNodeOutput
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.field.PrimitiveFieldTypes
 import cn.jzl.graph.common.producer.SingleOutputPipelineNodeProducer
+import cn.jzl.graph.common.producer.general.GeneralGraphType
+import cn.jzl.graph.common.producer.general.GeneralPipelineNode
 import cn.jzl.graph.common.rendering.RenderGraphType
 import cn.jzl.graph.common.rendering.RenderingPipelineNode
 import cn.jzl.graph.common.rendering.set
 
-class Provider : SingleOutputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>("provider", "provider") {
+class Provider : SingleOutputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>("provider", "provider") {
 
     override val output = createNodeOutput(
         "output",
@@ -22,11 +24,11 @@ class Provider : SingleOutputPipelineNodeProducer<RenderingPipelineNode, RenderG
     override fun createSingleOutputNode(
         world: World,
         graph: GraphWithProperties,
-        graphType: RenderGraphType,
+        graphType: GeneralGraphType,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>,
         output: PipelineNodeOutput
-    ): RenderingPipelineNode = RenderingPipelineNode { blackboard ->
+    ): GeneralPipelineNode = GeneralPipelineNode { blackboard ->
         blackboard[graphNode, output] = graphNode.payloads["provider"] ?: 0f
     }
 }

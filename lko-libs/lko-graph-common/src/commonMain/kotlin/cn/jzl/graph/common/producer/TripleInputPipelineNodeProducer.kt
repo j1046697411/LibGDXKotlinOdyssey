@@ -9,7 +9,7 @@ import cn.jzl.graph.common.PipelineNodeOutput
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.impl.NamedGraphNodeInput
 
-abstract class TripleInputPipelineNodeProducer<PN : PipelineNode, GT : GraphType<PN>>(
+abstract class TripleInputPipelineNodeProducer<PN : PipelineNode, GT : GraphType<in PN>>(
     name: String,
     type: String
 ) : SingleOutputPipelineNodeProducer<PN, GT>(name, type) {

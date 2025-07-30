@@ -1,26 +1,26 @@
-package cn.jzl.graph.common.rendering.producer.math
+package cn.jzl.graph.common.producer.general.math
 
-import cn.jzl.graph.common.rendering.producer.DualInputRenderingPipelineNodeProducer
-import cn.jzl.graph.common.rendering.producer.SingleInputRenderingPipelineNodeProducer
-import cn.jzl.graph.common.rendering.producer.TripleInputRenderingPipelineNodeProducer
+import cn.jzl.graph.common.producer.general.DualInputGeneralPipelineNodeProducer
+import cn.jzl.graph.common.producer.general.SingleInputGeneralPipelineNodeProducer
+import cn.jzl.graph.common.producer.general.TripleInputGeneralPipelineNodeProducer
 import cn.jzl.graph.impl.NamedGraphNodeInput
 import cn.jzl.graph.impl.NamedGraphNodeOutput
 import kotlin.math.*
 
 
-class Abs : SingleInputRenderingPipelineNodeProducer("abs", "abs") {
+class Abs : SingleInputGeneralPipelineNodeProducer("abs", "abs") {
     override val input = createNodeInput("input", "input")
     override val output = createNodeOutput("output", "Result")
     override fun executeFunction(value: Float): Float = abs(value)
 }
 
-class Ceiling : SingleInputRenderingPipelineNodeProducer("ceil", "ceiling") {
+class Ceiling : SingleInputGeneralPipelineNodeProducer("ceil", "ceiling") {
     override val input = createNodeInput("input", "input")
     override val output = createNodeOutput("output", "Result")
     override fun executeFunction(value: Float): Float = ceil(value)
 }
 
-class Clamp : TripleInputRenderingPipelineNodeProducer("Clamp", "clamp") {
+class Clamp : TripleInputGeneralPipelineNodeProducer("Clamp", "clamp") {
     override val first = createNodeInput("input", "input")
     override val second = createNodeInput("min", "min")
     override val third = createNodeInput("max", "max")
@@ -29,19 +29,19 @@ class Clamp : TripleInputRenderingPipelineNodeProducer("Clamp", "clamp") {
     override fun executeFunction(first: Float, second: Float, third: Float): Float = first.coerceIn(second, third)
 }
 
-class Floor : SingleInputRenderingPipelineNodeProducer("Floor", "Floor") {
+class Floor : SingleInputGeneralPipelineNodeProducer("Floor", "Floor") {
     override val input = createNodeInput("input", "input")
     override val output = createNodeOutput("output", "Result")
     override fun executeFunction(value: Float): Float = floor(value)
 }
 
-class FractionalPart : SingleInputRenderingPipelineNodeProducer("FractionalPart", "FractionalPart") {
+class FractionalPart : SingleInputGeneralPipelineNodeProducer("FractionalPart", "FractionalPart") {
     override val input = createNodeInput("input", "input")
     override val output = createNodeOutput("output", "Result")
     override fun executeFunction(value: Float): Float = value - floor(value)
 }
 
-class Lerp : TripleInputRenderingPipelineNodeProducer("Clamp", "clamp") {
+class Lerp : TripleInputGeneralPipelineNodeProducer("Clamp", "clamp") {
     override val first = createNodeInput("form", "Form")
     override val second = createNodeInput("to", "To")
     override val third = createNodeInput("progress", "progress")
@@ -50,34 +50,34 @@ class Lerp : TripleInputRenderingPipelineNodeProducer("Clamp", "clamp") {
     override fun executeFunction(first: Float, second: Float, third: Float): Float = first + (second - first) * third
 }
 
-class Max : DualInputRenderingPipelineNodeProducer("max", "max") {
+class Max : DualInputGeneralPipelineNodeProducer("max", "max") {
     override val first: NamedGraphNodeInput = createNodeInput("a", "A")
     override val second: NamedGraphNodeInput = createNodeInput("b", "B")
     override val output: NamedGraphNodeOutput = createNodeOutput("output", "Result")
     override fun executeFunction(a: Float, b: Float): Float = max(a, b)
 }
 
-class Min : DualInputRenderingPipelineNodeProducer("min", "min") {
+class Min : DualInputGeneralPipelineNodeProducer("min", "min") {
     override val first: NamedGraphNodeInput = createNodeInput("a", "A")
     override val second: NamedGraphNodeInput = createNodeInput("b", "B")
     override val output: NamedGraphNodeOutput = createNodeOutput("output", "Result")
     override fun executeFunction(a: Float, b: Float): Float = min(a, b)
 }
 
-class Modulo : DualInputRenderingPipelineNodeProducer("Modulo", "Modulo") {
+class Modulo : DualInputGeneralPipelineNodeProducer("Modulo", "Modulo") {
     override val first: NamedGraphNodeInput = createNodeInput("a", "A")
     override val second: NamedGraphNodeInput = createNodeInput("b", "B")
     override val output: NamedGraphNodeOutput = createNodeOutput("output", "Result")
     override fun executeFunction(a: Float, b: Float): Float = a - b * floor(a / b)
 }
 
-class Saturate : SingleInputRenderingPipelineNodeProducer("Saturate", "Saturate") {
+class Saturate : SingleInputGeneralPipelineNodeProducer("Saturate", "Saturate") {
     override val input = createNodeInput("input", "input")
     override val output = createNodeOutput("output", "Result")
     override fun executeFunction(value: Float): Float = value.coerceIn(0f, 1f)
 }
 
-class Signum : SingleInputRenderingPipelineNodeProducer("Signum", "Signum") {
+class Signum : SingleInputGeneralPipelineNodeProducer("Signum", "Signum") {
     override val input = createNodeInput("input", "input")
     override val output = createNodeOutput("output", "Result")
     override fun executeFunction(value: Float): Float = when {
@@ -87,7 +87,7 @@ class Signum : SingleInputRenderingPipelineNodeProducer("Signum", "Signum") {
     }
 }
 
-class Smoothstep : TripleInputRenderingPipelineNodeProducer("Smoothstep", "Smoothstep") {
+class Smoothstep : TripleInputGeneralPipelineNodeProducer("Smoothstep", "Smoothstep") {
     override val first = createNodeInput("input", "input")
     override val second = createNodeInput("edge0", "edge0")
     override val third = createNodeInput("edge1", "edge1")
@@ -99,7 +99,7 @@ class Smoothstep : TripleInputRenderingPipelineNodeProducer("Smoothstep", "Smoot
     }
 }
 
-class Step : DualInputRenderingPipelineNodeProducer("Step", "Step") {
+class Step : DualInputGeneralPipelineNodeProducer("Step", "Step") {
     override val first: NamedGraphNodeInput = createNodeInput("input", "input")
     override val second: NamedGraphNodeInput = createNodeInput("edge", "edge")
     override val output: NamedGraphNodeOutput = createNodeOutput("output", "Result")

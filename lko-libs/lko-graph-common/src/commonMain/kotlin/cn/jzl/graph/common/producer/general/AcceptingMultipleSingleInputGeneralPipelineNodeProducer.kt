@@ -1,35 +1,33 @@
-package cn.jzl.graph.common.rendering.producer
+package cn.jzl.graph.common.producer.general
 
 import cn.jzl.di.instance
 import cn.jzl.ecs.World
-import cn.jzl.graph.common.producer.AcceptingMultipleSingleInputPipelineNodeProducer
 import cn.jzl.graph.GraphNode
 import cn.jzl.graph.common.PipelineNodeInput
 import cn.jzl.graph.common.PipelineNodeOutput
 import cn.jzl.graph.common.calculator.DualInputCalculator
 import cn.jzl.graph.common.data.GraphWithProperties
-import cn.jzl.graph.common.rendering.RenderGraphType
-import cn.jzl.graph.common.rendering.RenderingPipelineNode
+import cn.jzl.graph.common.producer.AcceptingMultipleSingleInputPipelineNodeProducer
 import cn.jzl.graph.common.rendering.get
 import cn.jzl.graph.common.rendering.set
 
-abstract class AcceptingMultipleSingleInputRenderingPipelineNodeProducer(
+abstract class AcceptingMultipleSingleInputGeneralPipelineNodeProducer(
     name: String,
     type: String
-) : AcceptingMultipleSingleInputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>(name, type) {
+) : AcceptingMultipleSingleInputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>(name, type) {
     override fun createSingleOutputNode(
         world: World,
         graph: GraphWithProperties,
-        graphType: RenderGraphType,
+        graphType: GeneralGraphType,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>,
         output: PipelineNodeOutput
-    ): RenderingPipelineNode {
+    ): GeneralPipelineNode {
         check(this.inputs.required && this.inputs.acceptingMultiple && inputs.isNotEmpty()) {
             "inputs are required and accepting multiple, but inputs is empty"
         }
         val calculator by world.instance<DualInputCalculator>()
-        return RenderingPipelineNode { blackboard ->
+        return GeneralPipelineNode { blackboard ->
             val outputValue = inputs.map {
                 val result = blackboard[it]
                 check(result != null)
