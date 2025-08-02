@@ -8,6 +8,7 @@ import cn.jzl.graph.common.calculator.TripleInputCalculator
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.producer.TripleInputPipelineNodeProducer
 import cn.jzl.graph.GraphNode
+import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.rendering.get
 import cn.jzl.graph.common.rendering.set
 
@@ -19,6 +20,7 @@ abstract class TripleInputGeneralPipelineNodeProducer(
     override fun createTripleInputNode(
         world: World,
         graph: GraphWithProperties,
+        configuration: GraphPipelineConfiguration,
         graphType: GeneralGraphType,
         graphNode: GraphNode,
         first: PipelineNodeInput?,

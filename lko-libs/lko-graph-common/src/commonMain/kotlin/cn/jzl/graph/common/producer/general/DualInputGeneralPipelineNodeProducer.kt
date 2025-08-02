@@ -6,6 +6,7 @@ import cn.jzl.graph.GraphNode
 import cn.jzl.graph.common.PipelineNodeInput
 import cn.jzl.graph.common.PipelineNodeOutput
 import cn.jzl.graph.common.calculator.DualInputCalculator
+import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.producer.DualInputPipelineNodeProducer
 import cn.jzl.graph.common.rendering.get
@@ -18,6 +19,7 @@ abstract class DualInputGeneralPipelineNodeProducer(
     override fun createDualInputNode(
         world: World,
         graph: GraphWithProperties,
+        configuration: GraphPipelineConfiguration,
         graphType: GeneralGraphType,
         graphNode: GraphNode,
         first: PipelineNodeInput?,

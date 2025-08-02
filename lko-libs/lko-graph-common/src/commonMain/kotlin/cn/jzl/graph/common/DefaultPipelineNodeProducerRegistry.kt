@@ -12,6 +12,7 @@ class DefaultPipelineNodeProducerRegistry : PipelineNodeProducerRegistry, Pipeli
     ) {
         val producers = this.producers.getOrPut(type) { hashMapOf() }
         producers[producer.configuration.type] = producer
+        println("Register producer: ${producer.configuration.type} for type: ${type.simpleName}")
     }
 
     @Suppress("UNCHECKED_CAST")

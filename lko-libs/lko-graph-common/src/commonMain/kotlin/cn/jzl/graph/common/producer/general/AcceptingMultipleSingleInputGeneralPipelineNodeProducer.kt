@@ -6,6 +6,7 @@ import cn.jzl.graph.GraphNode
 import cn.jzl.graph.common.PipelineNodeInput
 import cn.jzl.graph.common.PipelineNodeOutput
 import cn.jzl.graph.common.calculator.DualInputCalculator
+import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.producer.AcceptingMultipleSingleInputPipelineNodeProducer
 import cn.jzl.graph.common.rendering.get
@@ -18,13 +19,14 @@ abstract class AcceptingMultipleSingleInputGeneralPipelineNodeProducer(
     override fun createSingleOutputNode(
         world: World,
         graph: GraphWithProperties,
+        configuration: GraphPipelineConfiguration,
         graphType: GeneralGraphType,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>,
         output: PipelineNodeOutput
     ): GeneralPipelineNode {
         check(this.inputs.required && this.inputs.acceptingMultiple && inputs.isNotEmpty()) {
-            "inputs are required and accepting multiple, but inputs is empty"
+            "${this.configuration.name} inputs are required and accepting multiple, but inputs is empty"
         }
         val calculator by world.instance<DualInputCalculator>()
         return GeneralPipelineNode { blackboard ->

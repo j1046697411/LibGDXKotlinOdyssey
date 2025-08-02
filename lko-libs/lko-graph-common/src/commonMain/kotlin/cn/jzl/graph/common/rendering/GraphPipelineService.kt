@@ -7,6 +7,8 @@ import cn.jzl.ecs.System
 import cn.jzl.ecs.World
 import cn.jzl.graph.common.DefaultGraphPipelineRecipe
 import cn.jzl.graph.common.GraphPipelineRecipe
+import cn.jzl.graph.common.PipelineNode
+import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 
 class GraphPipelineService(world: World) : System(world) {
@@ -19,12 +21,13 @@ class GraphPipelineService(world: World) : System(world) {
         pipelinePlugins.forEach { plugin -> plugin.setup(world, pipelineRegistry) }
     }
 
-    fun buildGraphPipeline(
+    fun <PN : PipelineNode> buildGraphPipeline(
         graph: GraphWithProperties,
+        configuration: GraphPipelineConfiguration,
         endNodeId: String,
         inputFields: Array<String> = DefaultGraphPipelineRecipe.EMPTY_INPUT_FIELDS
-    ): List<RenderingPipelineNode> {
-        return graphPipelineRecipe.buildGraphPipeline(world, graph, endNodeId, inputFields)
+    ): List<PN> {
+        return graphPipelineRecipe.buildGraphPipeline(world, configuration, graph, endNodeId, inputFields)
     }
 }
 

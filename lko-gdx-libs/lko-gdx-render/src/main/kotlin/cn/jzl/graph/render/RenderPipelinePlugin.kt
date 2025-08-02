@@ -2,19 +2,17 @@ package cn.jzl.graph.render
 
 import cn.jzl.di.module
 import cn.jzl.di.new
+import cn.jzl.di.prototype
 import cn.jzl.di.singleton
 import cn.jzl.ecs.World
-import cn.jzl.graph.common.rendering.*
+import cn.jzl.graph.common.rendering.PipelinePlugin
+import cn.jzl.graph.common.rendering.PipelineRegistry
+import cn.jzl.graph.common.rendering.register
 import cn.jzl.graph.render.calculator.*
-import cn.jzl.graph.render.field.CameraType
-import cn.jzl.graph.render.field.ColorType
-import cn.jzl.graph.render.field.Matrix4Type
-import cn.jzl.graph.render.field.RenderingPipelineType
-import cn.jzl.graph.render.field.TextureType
-import cn.jzl.graph.render.field.Vector2Type
-import cn.jzl.graph.render.field.Vector3Type
-import cn.jzl.graph.render.field.Vector4Type
+import cn.jzl.graph.render.field.*
 import cn.jzl.graph.render.producer.EndRenderingPipelineNodeProducer
+import cn.jzl.graph.render.producer.PipelineRendererNodeProducer
+import cn.jzl.graph.render.producer.StartRenderingPipelineNodeProducer
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
@@ -23,6 +21,13 @@ import org.kodein.type.TypeToken
 
 fun renderPipelineModule() = module(TypeToken.Any, "RenderPipelineModule") {
     this bind singleton { new(::RenderPipelinePlugin) }
+
+    this bind singleton { new(::DefaultBufferCopyHelper) }
+    this bind singleton { new(::DefaultFullScreenRender) }
+    this bind singleton { new(::DefaultTextureFrameBufferCache) }
+    this bind singleton { new(::StateOpenGLContext) }
+    this bind prototype { new(::DefaultRenderingPipeline) }
+    this bind singleton { new(::DefaultPipelineRendererLoader) }
 }
 
 class RenderPipelinePlugin : PipelinePlugin {
@@ -30,6 +35,10 @@ class RenderPipelinePlugin : PipelinePlugin {
     override fun setup(world: World, pipelineRegistry: PipelineRegistry) {
 
         pipelineRegistry.register(EndRenderingPipelineNodeProducer())
+        pipelineRegistry.register(StartRenderingPipelineNodeProducer())
+        pipelineRegistry.register(PipelineRendererNodeProducer())
+
+        pipelineRegistry.registerGraphTypes(DefaultRenderGraphType("Render_Pipeline"))
 
         pipelineRegistry.registerFieldTypes(RenderingPipelineType)
         pipelineRegistry.registerFieldTypes(CameraType)

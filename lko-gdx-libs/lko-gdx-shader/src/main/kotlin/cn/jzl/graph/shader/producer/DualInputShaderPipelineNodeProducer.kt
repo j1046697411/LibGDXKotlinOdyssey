@@ -5,6 +5,7 @@ import cn.jzl.ecs.World
 import cn.jzl.graph.GraphNode
 import cn.jzl.graph.common.PipelineNodeInput
 import cn.jzl.graph.common.PipelineNodeOutput
+import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.producer.DualInputPipelineNodeProducer
 import cn.jzl.graph.impl.NamedGraphNodeInput
@@ -27,6 +28,7 @@ abstract class DualInputShaderPipelineNodeProducer(
     override fun createDualInputNode(
         world: World,
         graph: GraphWithProperties,
+        configuration: GraphPipelineConfiguration,
         graphType: ShaderGraphType,
         graphNode: GraphNode,
         first: PipelineNodeInput?,
@@ -45,7 +47,7 @@ abstract class DualInputShaderPipelineNodeProducer(
             val secondFieldOutput = blackboard[second.fromGraphNode, second.fromOutput, secondShaderFieldType]
             val representation = buildFragmentNodeDualInputs(commonShaderBuilder, firstFieldOutput, secondFieldOutput)
             val result = "name_${graphNode.id}"
-            commonShaderBuilder.addMainLine("// ${configuration.type} node")
+            commonShaderBuilder.addMainLine("// ${this.configuration.type} node")
             commonShaderBuilder.addMainLine("${outputFieldType.fieldType} $result = $representation;")
             blackboard[graphNode, output.output, outputFieldType] = createFieldOutput(outputFieldType, result)
         }

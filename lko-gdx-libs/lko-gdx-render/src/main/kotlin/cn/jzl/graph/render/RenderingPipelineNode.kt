@@ -1,13 +1,14 @@
-package cn.jzl.graph.common.rendering
+package cn.jzl.graph.render
 
 import cn.jzl.graph.common.producer.general.GeneralPipelineNode
+import cn.jzl.graph.common.rendering.PipelineBlackboard
 
 fun interface RenderingPipelineNode : GeneralPipelineNode {
 
-    fun beforeFrame(): Unit = Unit
+    fun begin(): Unit = Unit
 
     override fun executeNode(blackboard: PipelineBlackboard)
 
-    fun afterFrame(): Unit = Unit
+    fun end(): Unit = Unit
 }
 

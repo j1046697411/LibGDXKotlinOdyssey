@@ -37,6 +37,28 @@ gdx-ktx-log = { module="io.github.libktx:ktx-log", version.ref="ktx" }
 gdx-ktx-graphics = { module="io.github.libktx:ktx-graphics", version.ref="ktx"}
 gdx-ktx-collections = { module="io.github.libktx:ktx-collections", version.ref="ktx"}
 
+gdx-ktx-actors = { module = "io.github.libktx:ktx-actors", version.ref = "ktx" }
+gdx-ktx-ai = { module = "io.github.libktx:ktx-ai", version.ref = "ktx" }
+gdx-ktx-app = { module = "io.github.libktx:ktx-app", version.ref = "ktx" }
+gdx-ktx-artemis = { module = "io.github.libktx:ktx-artemis", version.ref = "ktx" }
+gdx-ktx-ashley = { module = "io.github.libktx:ktx-ashley", version.ref = "ktx" }
+gdx-ktx-assets = { module = "io.github.libktx:ktx-assets", version.ref = "ktx" }
+gdx-ktx-assets-async = { module = "io.github.libktx:ktx-assets-async", version.ref = "ktx" }
+gdx-ktx-async = { module = "io.github.libktx:ktx-async", version.ref = "ktx" }
+gdx-ktx-box2d = { module = "io.github.libktx:ktx-box2d", version.ref = "ktx" }
+gdx-ktx-freetype = { module = "io.github.libktx:ktx-freetype", version.ref = "ktx" }
+gdx-ktx-freetype-async = { module = "io.github.libktx:ktx-freetype-async", version.ref = "ktx" }
+gdx-ktx-i18n = { module = "io.github.libktx:ktx-i18n", version.ref = "ktx" }
+gdx-ktx-inject = { module = "io.github.libktx:ktx-inject", version.ref = "ktx" }
+gdx-ktx-json = { module = "io.github.libktx:ktx-json", version.ref = "ktx" }
+gdx-ktx-math = { module = "io.github.libktx:ktx-math", version.ref = "ktx" }
+gdx-ktx-preferences = { module = "io.github.libktx:ktx-preferences", version.ref = "ktx" }
+gdx-ktx-reflect = { module = "io.github.libktx:ktx-reflect", version.ref = "ktx" }
+gdx-ktx-scene2d = { module = "io.github.libktx:ktx-scene2d", version.ref = "ktx" }
+gdx-ktx-script = { module = "io.github.libktx:ktx-script", version.ref = "ktx" }
+gdx-ktx-style = { module = "io.github.libktx:ktx-style", version.ref = "ktx" }
+gdx-ktx-tiled = { module = "io.github.libktx:ktx-tiled", version.ref = "ktx" }
+gdx-ktx-vis-style = { module = "io.github.libktx:ktx-vis-style", version.ref = "ktx" }
 
 
 junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit-jupiter" }

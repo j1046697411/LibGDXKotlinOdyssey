@@ -8,6 +8,7 @@ import cn.jzl.graph.common.calculator.SingleInputCalculator
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.producer.SingleInputPipelineNodeProducer
 import cn.jzl.graph.GraphNode
+import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.rendering.get
 import cn.jzl.graph.common.rendering.set
 
@@ -19,6 +20,7 @@ abstract class SingleInputGeneralPipelineNodeProducer(
     override fun createSingleInputNode(
         world: World,
         graph: GraphWithProperties,
+        configuration: GraphPipelineConfiguration,
         graphType: GeneralGraphType,
         graphNode: GraphNode,
         input: PipelineNodeInput?,

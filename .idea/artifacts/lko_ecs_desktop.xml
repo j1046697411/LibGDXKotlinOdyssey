@@ -1,8 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="lko-ecs-desktop">
     <output-path>$PROJECT_DIR$/lko-libs/lko-ecs/build/libs</output-path>
-    <root id="archive" name="lko-ecs-desktop.jar">
-      <element id="module-output" name="LibGDXKotlinOdyssey.lko-ecs.desktopMain" />
-    </root>
+    <root id="archive" name="lko-ecs-desktop.jar" />
   </artifact>
 </component>

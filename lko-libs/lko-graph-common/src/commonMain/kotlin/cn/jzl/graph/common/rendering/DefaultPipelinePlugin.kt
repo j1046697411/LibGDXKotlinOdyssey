@@ -3,42 +3,10 @@ package cn.jzl.graph.common.rendering
 import cn.jzl.ecs.World
 import cn.jzl.graph.common.calculator.FloatCalculator
 import cn.jzl.graph.common.field.PrimitiveFieldTypes
-import cn.jzl.graph.common.producer.general.math.Abs
-import cn.jzl.graph.common.producer.general.math.Arccos
-import cn.jzl.graph.common.producer.general.math.Arcsin
-import cn.jzl.graph.common.producer.general.math.Arctan
-import cn.jzl.graph.common.producer.general.math.Ceiling
-import cn.jzl.graph.common.producer.general.math.Clamp
-import cn.jzl.graph.common.producer.general.math.Cos
-import cn.jzl.graph.common.producer.general.math.Degrees
-import cn.jzl.graph.common.producer.general.math.Div
-import cn.jzl.graph.common.producer.general.math.Exponential
-import cn.jzl.graph.common.producer.general.math.ExponentialBase2
-import cn.jzl.graph.common.producer.general.math.Floor
-import cn.jzl.graph.common.producer.general.math.FractionalPart
-import cn.jzl.graph.common.producer.general.math.InverseSqrt
-import cn.jzl.graph.common.producer.general.math.Lerp
-import cn.jzl.graph.common.producer.general.math.LogarithmBase2
-import cn.jzl.graph.common.producer.general.math.Max
-import cn.jzl.graph.common.producer.general.math.Min
-import cn.jzl.graph.common.producer.general.math.Minus
-import cn.jzl.graph.common.producer.general.math.Modulo
-import cn.jzl.graph.common.producer.general.math.NaturalLogarithm
-import cn.jzl.graph.common.producer.general.math.OneMinus
-import cn.jzl.graph.common.producer.general.math.Plus
-import cn.jzl.graph.common.producer.general.math.Power
-import cn.jzl.graph.common.producer.general.math.Radians
-import cn.jzl.graph.common.producer.general.math.Reciprocal
-import cn.jzl.graph.common.producer.general.math.Rem
-import cn.jzl.graph.common.producer.general.math.Saturate
-import cn.jzl.graph.common.producer.general.math.Signum
-import cn.jzl.graph.common.producer.general.math.Sin
-import cn.jzl.graph.common.producer.general.math.Smoothstep
-import cn.jzl.graph.common.producer.general.math.Square
-import cn.jzl.graph.common.producer.general.math.Step
-import cn.jzl.graph.common.producer.general.math.Tan
-import cn.jzl.graph.common.producer.general.math.Times
+import cn.jzl.graph.common.producer.general.math.*
+import cn.jzl.graph.common.producer.general.provided.Constant
 import cn.jzl.graph.common.producer.general.provided.Provider
+import cn.jzl.graph.common.producer.general.provided.Time
 
 class DefaultPipelinePlugin : PipelinePlugin {
     override fun setup(world: World, pipelineRegistry: PipelineRegistry) {
@@ -82,6 +50,8 @@ class DefaultPipelinePlugin : PipelinePlugin {
         pipelineRegistry.register(Tan())
 
         pipelineRegistry.register(Provider())
+        pipelineRegistry.register(Constant())
+        pipelineRegistry.register(Time())
 
         pipelineRegistry.registerFieldTypes(PrimitiveFieldTypes.FloatFieldType)
         pipelineRegistry.registerFieldTypes(PrimitiveFieldTypes.BooleanFieldType)

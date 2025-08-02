@@ -5,6 +5,7 @@ import cn.jzl.ecs.World
 import cn.jzl.graph.GraphNode
 import cn.jzl.graph.common.PipelineNodeInput
 import cn.jzl.graph.common.PipelineNodeOutput
+import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.producer.AbstractPipelineNodeProducer
 import cn.jzl.graph.render.field.ColorType
@@ -29,6 +30,7 @@ class Merge : AbstractPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphT
     override fun createNode(
         world: World,
         graph: GraphWithProperties,
+        configuration: GraphPipelineConfiguration,
         graphType: ShaderGraphType,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>,

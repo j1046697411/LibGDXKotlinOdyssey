@@ -3,6 +3,7 @@ package cn.jzl.graph.common
 import cn.jzl.ecs.World
 import cn.jzl.graph.GraphNode
 import cn.jzl.graph.NodeConfiguration
+import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 
 interface PipelineNodeProducer<PN : PipelineNode, GT : GraphType<in PN>> {
@@ -18,6 +19,7 @@ interface PipelineNodeProducer<PN : PipelineNode, GT : GraphType<in PN>> {
     fun createNode(
         world: World,
         graph: GraphWithProperties,
+        configuration: GraphPipelineConfiguration,
         graphType: GT,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>,

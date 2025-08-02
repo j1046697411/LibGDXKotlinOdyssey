@@ -6,6 +6,7 @@ import cn.jzl.graph.common.GraphType
 import cn.jzl.graph.common.PipelineNode
 import cn.jzl.graph.common.PipelineNodeInput
 import cn.jzl.graph.common.PipelineNodeOutput
+import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.impl.NamedGraphNodeOutput
 
@@ -15,25 +16,30 @@ abstract class SingleOutputPipelineNodeProducer<PN : PipelineNode, GT : GraphTyp
 ) : AbstractPipelineNodeProducer<PN, GT>(name, type) {
     protected abstract val output: NamedGraphNodeOutput
 
-    override fun createNode(
+    final override fun createNode(
         world: World,
         graph: GraphWithProperties,
+        configuration: GraphPipelineConfiguration,
         graphType: GT,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>,
         outputs: Map<String, PipelineNodeOutput>
-    ): PN = createSingleOutputNode(
-        world = world,
-        graph = graph,
-        graphType = graphType,
-        graphNode = graphNode,
-        inputs = inputs,
-        output = requireNotNull(outputs[output.fieldId])
-    )
+    ): PN {
+        return createSingleOutputNode(
+            world = world,
+            graph = graph,
+            configuration = configuration,
+            graphType = graphType,
+            graphNode = graphNode,
+            inputs = inputs,
+            output = requireNotNull(outputs[output.fieldId])
+        )
+    }
 
     protected abstract fun createSingleOutputNode(
         world: World,
         graph: GraphWithProperties,
+        configuration: GraphPipelineConfiguration,
         graphType: GT,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>,

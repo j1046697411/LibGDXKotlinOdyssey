@@ -20,7 +20,7 @@ class Minus : DualInputGeneralPipelineNodeProducer("minus", "minus") {
 }
 
 class Times : AcceptingMultipleSingleInputGeneralPipelineNodeProducer("times", "times") {
-    override val inputs = createNodeInput("inputs", "inputs", acceptingMultiple = true)
+    override val inputs = createNodeInput("inputs", "inputs", required = true, acceptingMultiple = true)
     override val output = createNodeOutput("output", "Result")
     override fun executeFunction(a: Float, b: Float): Float = a * b
 }

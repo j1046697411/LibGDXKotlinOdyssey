@@ -3,6 +3,7 @@ package cn.jzl.graph.common
 import cn.jzl.ecs.World
 import cn.jzl.graph.GraphConnection
 import cn.jzl.graph.GraphNode
+import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.field.FieldType
 import cn.jzl.graph.common.field.FieldTypeResolver
@@ -15,6 +16,7 @@ class DefaultGraphPipelineRecipe(
 
     override fun <PN : PipelineNode> buildGraphPipeline(
         world: World,
+        configuration: GraphPipelineConfiguration,
         graph: GraphWithProperties,
         endNodeId: String,
         inputFields: Array<String>,
@@ -22,7 +24,7 @@ class DefaultGraphPipelineRecipe(
         val graphType = graphTypeResolver.resolve<PN>(graph.type)
         // 预先构建节点ID到生产者的映射
         val pipelineNodeProducers = graph.nodes.associate { node ->
-            node.id to (node to pipelineNodeProducerResolver.resolve(graphType,node))
+            node.id to (node to pipelineNodeProducerResolver.resolve(graphType, node))
         }
 
         // 预先构建连接映射: [目标节点ID -> [目标字段ID -> 连接列表]]
@@ -39,7 +41,7 @@ class DefaultGraphPipelineRecipe(
             preparedGraphNodes = preparedGraphNodes,
             connectionsByTarget = connectionsByTarget
         )
-        return createPipelineNodes(world, graph, graphType, preparedGraphNodes)
+        return createPipelineNodes(world, graph, configuration, graphType, preparedGraphNodes)
     }
 
     private fun <PN : PipelineNode> populatePreparedGraphNodes(
@@ -115,6 +117,7 @@ class DefaultGraphPipelineRecipe(
     private fun <PN : PipelineNode> createPipelineNodes(
         world: World,
         graph: GraphWithProperties,
+        configuration: GraphPipelineConfiguration,
         graphType: GraphType<PN>,
         preparedGraphNodes: Map<String, PreparedGraphNode<PN>>
     ): List<PN> {
@@ -122,6 +125,7 @@ class DefaultGraphPipelineRecipe(
             node.pipelineNodeProducer.createNode(
                 world,
                 graph,
+                configuration,
                 graphType,
                 node.graphNode,
                 node.inputs,

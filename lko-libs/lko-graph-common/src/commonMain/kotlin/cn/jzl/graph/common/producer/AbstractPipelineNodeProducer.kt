@@ -22,7 +22,11 @@ abstract class AbstractPipelineNodeProducer<PN : PipelineNode, GT : GraphType<in
     private val menuNodeConfiguration = DefaultNodeConfiguration(name, type)
     final override val configuration: NodeConfiguration get() = menuNodeConfiguration
 
-    override fun getOutputTypes(graph: GraphWithProperties, graphNode: GraphNode, inputs: List<PipelineNodeInput>): Map<String, String> {
+    override fun getOutputTypes(
+        graph: GraphWithProperties,
+        graphNode: GraphNode,
+        inputs: List<PipelineNodeInput>
+    ): Map<String, String> {
         return configuration.nodeOutputs.associateBy({ it.fieldId }, { output ->
             output.determineFieldType(
                 configuration,
@@ -31,6 +35,12 @@ abstract class AbstractPipelineNodeProducer<PN : PipelineNode, GT : GraphType<in
             )
         })
     }
+
+    protected fun createNodeOutput(
+        fieldId: String,
+        fieldName: String,
+        vararg producedTypes: FieldType<*>
+    ): NamedGraphNodeOutput = createNodeOutput(fieldId, fieldName, producedTypes.toList())
 
     protected fun createNodeOutput(
         fieldId: String,
@@ -88,11 +98,31 @@ abstract class AbstractPipelineNodeProducer<PN : PipelineNode, GT : GraphType<in
     protected fun createNodeInput(
         fieldId: String,
         fieldName: String,
+        vararg fieldTypes: FieldType<*>
+    ): NamedGraphNodeInput = createNodeInput(
+        fieldId,
+        fieldName,
+        acceptingMultiple = false,
+        side = GraphNodeInputSide.Left,
+        required = false,
+        fieldTypes = fieldTypes
+    )
+
+    protected fun createNodeInput(
+        fieldId: String,
+        fieldName: String,
         acceptingMultiple: Boolean = false,
         side: GraphNodeInputSide = GraphNodeInputSide.Left,
         required: Boolean = false,
         vararg fieldTypes: FieldType<*>
     ): NamedGraphNodeInput {
-        return createNodeInput(fieldId, fieldName, acceptingMultiple, side, required, SimpleAcceptedTypePredicate(fieldTypes))
+        return createNodeInput(
+            fieldId,
+            fieldName,
+            acceptingMultiple,
+            side,
+            required,
+            SimpleAcceptedTypePredicate(fieldTypes)
+        )
     }
 }

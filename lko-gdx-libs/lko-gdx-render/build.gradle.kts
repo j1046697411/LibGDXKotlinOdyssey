@@ -7,5 +7,6 @@ dependencies {
     api(projects.lkoGraphCommon)
 
     implementation(libs.gdx.ktx.log)
+    implementation(libs.gdx.ktx.collections)
 }
 

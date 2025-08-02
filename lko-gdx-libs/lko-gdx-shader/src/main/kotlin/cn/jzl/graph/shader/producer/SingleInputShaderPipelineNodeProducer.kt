@@ -5,6 +5,7 @@ import cn.jzl.ecs.World
 import cn.jzl.graph.GraphNode
 import cn.jzl.graph.common.PipelineNodeInput
 import cn.jzl.graph.common.PipelineNodeOutput
+import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.producer.SingleInputPipelineNodeProducer
 import cn.jzl.graph.shader.core.CommonShaderBuilder
@@ -24,6 +25,7 @@ abstract class SingleInputShaderPipelineNodeProducer(
     override fun createSingleInputNode(
         world: World,
         graph: GraphWithProperties,
+        configuration: GraphPipelineConfiguration,
         graphType: ShaderGraphType,
         graphNode: GraphNode,
         input: PipelineNodeInput?,
@@ -43,7 +45,7 @@ abstract class SingleInputShaderPipelineNodeProducer(
                 outputFieldOutput
             )
             val result = "name_${graphNode.id}"
-            commonShaderBuilder.addMainLine("// ${configuration.type} node")
+            commonShaderBuilder.addMainLine("// ${this.configuration.type} node")
             commonShaderBuilder.addMainLine("${fieldOutputType.fieldType} $result = $representation;")
             blackboard[graphNode, output.output, fieldOutputType] = createFieldOutput(fieldOutputType, result)
         }
