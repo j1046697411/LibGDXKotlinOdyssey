@@ -13,16 +13,19 @@ interface UniformRegistry {
     fun registerLocalStructArrayUniform(alias: String, fieldNames: Array<String>, setter: StructArrayUniformSetter)
 
     fun interface UniformSetter {
-        fun set(shaderContext: ShaderContext, shader: Shader, location: Int)
+        fun set(shaderContext: ShaderContext, shader: GraphShader, location: Int)
     }
 
     fun interface StructArrayUniformSetter {
         fun set(
             shaderContext: ShaderContext,
-            shader: Shader,
+            shader: GraphShader,
             startingLocation: Int,
             fieldOffsets: IntArray,
             structSize: Int
         )
     }
+
+    fun apply(shader: Shader, binder: ShaderLocationBinder)
 }
+

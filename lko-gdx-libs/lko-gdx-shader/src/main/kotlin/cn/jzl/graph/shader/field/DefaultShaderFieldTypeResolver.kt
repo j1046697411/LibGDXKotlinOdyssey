@@ -11,7 +11,8 @@ internal class DefaultShaderFieldTypeResolver : ShaderFieldTypeResolver {
             PrimitiveFieldTypes.FloatFieldType -> FloatShaderFieldType
             Vector2Type -> Vector2ShaderFieldType
             Vector3Type -> Vector3ShaderFieldType
-            Vector4Type, ColorType -> Vector4ShaderFieldType(fieldType)
+            Vector4Type -> Vector4ShaderFieldType
+            ColorType -> ColorShaderFieldType
             Matrix4Type -> Matrix4ShaderFieldType
             TextureType -> TextureShaderFieldType
             else -> DefaultShaderFieldType(fieldType)

@@ -8,27 +8,25 @@ import cn.jzl.ecs.World
 import cn.jzl.graph.common.rendering.PipelinePlugin
 import cn.jzl.graph.common.rendering.PipelineRegistry
 import cn.jzl.graph.common.rendering.register
-import cn.jzl.graph.shader.core.DefaultShaderGraphType
+import cn.jzl.graph.shader.core.ModelShaderGraphType
 import cn.jzl.graph.shader.field.DefaultShaderFieldTypeResolver
 import cn.jzl.graph.shader.field.ShaderFieldTypeResolver
-import cn.jzl.graph.shader.producer.math.*
-import cn.jzl.graph.shader.producer.util.Constant
-import cn.jzl.graph.shader.producer.util.Merge
-import cn.jzl.graph.shader.producer.util.Remap
-import cn.jzl.graph.shader.producer.util.RemapValue
-import cn.jzl.graph.shader.producer.util.Split
+import cn.jzl.graph.shader.builder.core.EndModelShaderNodeProducer
+import cn.jzl.graph.shader.builder.math.*
+import cn.jzl.graph.shader.builder.util.*
 import org.kodein.type.TypeToken
 
 fun shaderPipelineModule() = module(TypeToken.Any, "shaderPipelineModule") {
     this bind singleton { new(::ShaderPipelinePlugin) }
     this bind singleton { new(::DefaultShaderFieldTypeResolver) }
+    this bind singleton { new(::DefaultModelShaderLoader) }
 }
 
 class ShaderPipelinePlugin : PipelinePlugin {
 
     override fun setup(world: World, pipelineRegistry: PipelineRegistry) {
         val shaderFieldTypeResolver by world.instance<ShaderFieldTypeResolver>()
-        pipelineRegistry.registerGraphTypes(DefaultShaderGraphType(shaderFieldTypeResolver, "Model_Shader"))
+        pipelineRegistry.registerGraphTypes(ModelShaderGraphType(shaderFieldTypeResolver, "Model_Shader"))
 
         // 注册Arithmetics.kt中的节点
         pipelineRegistry.register(Plus())
@@ -86,5 +84,7 @@ class ShaderPipelinePlugin : PipelinePlugin {
         pipelineRegistry.register(Remap())
         pipelineRegistry.register(RemapValue())
         pipelineRegistry.register(Constant())
+
+        pipelineRegistry.register(EndModelShaderNodeProducer())
     }
 }

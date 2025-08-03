@@ -8,7 +8,7 @@ class VertexShaderBuilder(uniformRegistry: UniformRegistry) : CommonShaderBuilde
 
     private val attributes = ktx.collections.GdxMap<String, Attribute>()
 
-    fun registerAttribute(name: String, componentCount: Int, type: String, comment: String) {
+    fun addAttribute(name: String, componentCount: Int, type: String, comment: String) {
         if (name in attributes) {
             throw IllegalArgumentException("Already contains vertex attribute of that name with different type")
         }
@@ -29,7 +29,7 @@ class VertexShaderBuilder(uniformRegistry: UniformRegistry) : CommonShaderBuilde
         }
     }
 
-    private data class Attribute(
+    data class Attribute(
         val name: String,
         val type: String,
         val componentCount: Int,

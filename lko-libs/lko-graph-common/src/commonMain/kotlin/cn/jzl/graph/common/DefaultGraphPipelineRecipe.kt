@@ -1,6 +1,7 @@
 package cn.jzl.graph.common
 
 import cn.jzl.ecs.World
+import cn.jzl.ecs.world
 import cn.jzl.graph.GraphConnection
 import cn.jzl.graph.GraphNode
 import cn.jzl.graph.common.config.GraphPipelineConfiguration
@@ -34,6 +35,7 @@ class DefaultGraphPipelineRecipe(
 
         val preparedGraphNodes = mutableMapOf<String, PreparedGraphNode<PN>>()
         populatePreparedGraphNodes(
+            world = world,
             graph = graph,
             graphNodeId = endNodeId,
             inputFields = inputFields,
@@ -45,6 +47,7 @@ class DefaultGraphPipelineRecipe(
     }
 
     private fun <PN : PipelineNode> populatePreparedGraphNodes(
+        world: World,
         graph: GraphWithProperties,
         graphNodeId: String,
         inputFields: Array<String>,
@@ -73,6 +76,7 @@ class DefaultGraphPipelineRecipe(
             for (connection in connections) {
                 // 递归处理源节点
                 populatePreparedGraphNodes(
+                    world,
                     graph = graph,
                     graphNodeId = connection.nodeFrom,
                     EMPTY_INPUT_FIELDS,
@@ -97,7 +101,7 @@ class DefaultGraphPipelineRecipe(
             }
         }
         // 计算输出类型
-        val outputTypes = pipelineNodeProducer.getOutputTypes(graph, graphNode, inputs)
+        val outputTypes = pipelineNodeProducer.getOutputTypes(world, graph, graphNode, inputs)
         // 构建输出列表及快速查找映射
         val outputs = outputTypes.mapValues { (fieldId, fieldType) ->
             val output = nodeConfiguration.nodeOutputs.first { it.fieldId == fieldId }

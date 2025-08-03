@@ -7,3 +7,4 @@ interface TextureFieldOutput : FieldOutput {
     val uWrap: Texture.TextureWrap
     val vWrap: Texture.TextureWrap
 }
+

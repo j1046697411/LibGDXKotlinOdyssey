@@ -1,6 +1,5 @@
 package cn.jzl.graph.shader.core
 
-import cn.jzl.graph.shader.core.UniformRegistry
 import ktx.collections.isNotEmpty
 import ktx.collections.set
 
@@ -12,7 +11,6 @@ abstract class CommonShaderBuilder(protected val uniformRegistry: UniformRegistr
     private val variables = ktx.collections.GdxMap<String, Variable>()
     private val uniformVariables = ktx.collections.GdxMap<String, UniformVariable>()
     private val functions = ktx.collections.GdxMap<String, String>()
-
 
     fun addStructArrayUniformVariable(
         name: String,

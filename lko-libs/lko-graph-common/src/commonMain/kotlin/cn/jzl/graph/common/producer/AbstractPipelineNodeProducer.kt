@@ -1,5 +1,6 @@
 package cn.jzl.graph.common.producer
 
+import cn.jzl.ecs.World
 import cn.jzl.graph.GraphNode
 import cn.jzl.graph.GraphNodeInputSide
 import cn.jzl.graph.GraphNodeOutputSide
@@ -23,6 +24,7 @@ abstract class AbstractPipelineNodeProducer<PN : PipelineNode, GT : GraphType<in
     final override val configuration: NodeConfiguration get() = menuNodeConfiguration
 
     override fun getOutputTypes(
+        world: World,
         graph: GraphWithProperties,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>

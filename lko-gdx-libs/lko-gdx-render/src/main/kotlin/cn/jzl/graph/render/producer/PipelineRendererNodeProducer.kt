@@ -14,7 +14,6 @@ import cn.jzl.graph.render.field.RenderingPipelineType
 import cn.jzl.graph.render.field.Vector2Type
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
-import ktx.log.logger
 
 class PipelineRendererNodeProducer :
     SingleOutputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>("Pipeline Renderer", "PipelineRenderer") {
@@ -67,11 +66,7 @@ class PipelineRendererNodeProducer :
                 width,
                 height
             )
-            log.debug { "draw texture $position $width, $height" }
             blackboard[graphNode, output.output, RenderingPipelineType] = renderingPipeline
         }
-    }
-    companion object {
-        val log = logger<PipelineRendererNodeProducer>()
     }
 }

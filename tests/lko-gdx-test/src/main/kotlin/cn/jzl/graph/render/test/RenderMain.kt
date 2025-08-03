@@ -11,6 +11,8 @@ import cn.jzl.graph.impl.DefaultGraphNode
 import cn.jzl.graph.render.PipelineRendererLoader
 import cn.jzl.graph.render.RenderOutput
 import cn.jzl.graph.render.renderPipelineModule
+import cn.jzl.graph.shader.ModelShaderLoader
+import cn.jzl.graph.shader.shaderPipelineModule
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
@@ -18,6 +20,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.profiling.GLProfiler
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.Align
@@ -53,9 +56,11 @@ class RenderScreen : KtxScreen {
     private val world = world {
         module(renderPipelineModule())
         module(pipelineModule())
+        module(shaderPipelineModule())
     }
     private val timeProvider = DefaultTimeKeeper()
     private val pipelineRendererLoader by world.instance<PipelineRendererLoader>()
+    private val modelShaderLoader by world.instance<ModelShaderLoader>()
 
     private val graph by lazy {
         val graph = DefaultGraphWithProperties("Render_Pipeline")
@@ -92,6 +97,19 @@ class RenderScreen : KtxScreen {
         graph
     }
 
+    private val shaderGraph by lazy {
+        val graph = DefaultGraphWithProperties("Model_Shader")
+        graph.addGraphNode(DefaultGraphNode("end", "ShaderEnd"))
+
+        graph.addGraphNode(DefaultGraphNode("position", "Constant", hashMapOf("constant" to Vector3(100f, 100f, 100f))))
+        graph.addGraphNode(DefaultGraphNode("color", "Constant", hashMapOf("constant" to Color.WHITE)))
+
+        graph.addGraphConnection(DefaultGraphConnection("position", "output", "end", "position"))
+        graph.addGraphConnection(DefaultGraphConnection("color", "output", "end", "color"))
+
+        graph
+    }
+
     private val pipelineRenderer by lazy {
         val configuration = DefaultGraphPipelineConfiguration(timeProvider)
         pipelineRendererLoader.loadPipelineRenderer(graph, configuration, "End")
@@ -112,7 +130,8 @@ class RenderScreen : KtxScreen {
                 debugInfo = visLabel("Hello World")
             }
         }
-        stage.isDebugAll = true
+        val configuration = DefaultGraphPipelineConfiguration(timeProvider)
+        modelShaderLoader.loadShader(shaderGraph, configuration, "Model_Shader", "end")
     }
 
     override fun render(delta: Float) {

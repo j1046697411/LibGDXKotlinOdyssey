@@ -5,7 +5,7 @@ import cn.jzl.graph.common.calculator.FloatCalculator
 import cn.jzl.graph.common.field.PrimitiveFieldTypes
 import cn.jzl.graph.common.producer.general.math.*
 import cn.jzl.graph.common.producer.general.provided.Constant
-import cn.jzl.graph.common.producer.general.provided.Provider
+import cn.jzl.graph.common.producer.general.provided.Property
 import cn.jzl.graph.common.producer.general.provided.Time
 
 class DefaultPipelinePlugin : PipelinePlugin {
@@ -49,9 +49,9 @@ class DefaultPipelinePlugin : PipelinePlugin {
         pipelineRegistry.register(Sin())
         pipelineRegistry.register(Tan())
 
-        pipelineRegistry.register(Provider())
         pipelineRegistry.register(Constant())
         pipelineRegistry.register(Time())
+        pipelineRegistry.register(Property())
 
         pipelineRegistry.registerFieldTypes(PrimitiveFieldTypes.FloatFieldType)
         pipelineRegistry.registerFieldTypes(PrimitiveFieldTypes.BooleanFieldType)

@@ -11,6 +11,7 @@ interface PipelineNodeProducer<PN : PipelineNode, GT : GraphType<in PN>> {
     val configuration: NodeConfiguration
 
     fun getOutputTypes(
+        world: World,
         graph: GraphWithProperties,
         graphNode: GraphNode,
         inputs: List<PipelineNodeInput>
