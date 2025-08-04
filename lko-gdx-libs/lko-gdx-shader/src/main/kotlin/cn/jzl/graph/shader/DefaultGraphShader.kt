@@ -64,7 +64,7 @@ class DefaultGraphShader(
                 struct.setter.set(shaderContext, this, struct.startIndex, struct.fieldOffsets, struct.size)
             }
         }
-        configuration.render(shaderContext, shaderContext.model) { attributes.getValue(it).location }
+        configuration.render(shaderContext, shaderProgram, shaderContext.model) { attributes.getValue(it).location }
     }
 
     override fun setUniform(location: Int, value: Matrix4) {

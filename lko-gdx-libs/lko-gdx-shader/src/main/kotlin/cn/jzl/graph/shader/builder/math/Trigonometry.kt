@@ -9,8 +9,7 @@ class ArcCos : SingleInputShaderPipelineNodeProducer("ArcCos", "ArcCos") {
 
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "acos(${inputFieldOutput.representation})"
 }
 
@@ -18,8 +17,7 @@ class ArcSin : SingleInputShaderPipelineNodeProducer("ArcSin", "ArcSin") {
 
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "asin(${inputFieldOutput.representation})"
 }
 
@@ -35,47 +33,41 @@ class ArcTan2 : DualInputShaderPipelineNodeProducer("ArcTan2", "ArcTan2") {
 class ArcTan : SingleInputShaderPipelineNodeProducer("ArcTan", "ArcTan") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "atan(${inputFieldOutput.representation})"
 }
 
 class Cos : SingleInputShaderPipelineNodeProducer("Cos", "Cos") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "cos(${inputFieldOutput.representation})"
 }
 
 class Sin : SingleInputShaderPipelineNodeProducer("Sin", "Sin") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "sin(${inputFieldOutput.representation})"
 }
 
 class Degrees : SingleInputShaderPipelineNodeProducer("Degrees", "Degrees") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "degrees(${inputFieldOutput.representation})"
 }
 
 class Radians : SingleInputShaderPipelineNodeProducer("Radians", "Radians") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "radians(${inputFieldOutput.representation})"
 }
 
 class Tan : SingleInputShaderPipelineNodeProducer("Tan", "Tan") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "tan(${inputFieldOutput.representation})"
 }

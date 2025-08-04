@@ -3,6 +3,7 @@ package cn.jzl.graph.shader.core
 import cn.jzl.graph.common.config.CompositePropertyContainer
 import cn.jzl.graph.common.config.PropertyContainer
 import com.badlogic.gdx.graphics.Camera
+import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.math.Vector3
 
@@ -45,12 +46,8 @@ class SimpleShaderRendererConfiguration(
         model: RenderableModel
     ): Boolean = model.isRendered(shader, camera)
 
-    override fun render(
-        shader: ShaderContext,
-        model: RenderableModel,
-        propertyToLocationMapping: (String) -> Int
-    ) {
-        TODO("Not yet implemented")
+    override fun render(shader: ShaderContext, shaderProgram: ShaderProgram, model: RenderableModel, propertyToLocationMapping: (String) -> Int) {
+        model.render(shader.camera, shaderProgram, propertyToLocationMapping)
     }
 
     override fun minusAssign(model: RenderableModel) {

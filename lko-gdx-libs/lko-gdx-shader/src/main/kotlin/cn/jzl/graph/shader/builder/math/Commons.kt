@@ -10,24 +10,21 @@ import cn.jzl.graph.shader.builder.TripleInputShaderPipelineNodeProducer
 class Abs : SingleInputShaderPipelineNodeProducer("Abs", "Abs") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "abs(${inputFieldOutput.representation})"
 }
 
 class Ceiling : SingleInputShaderPipelineNodeProducer("Ceiling", "Ceiling") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "ceil(${inputFieldOutput.representation})"
 }
 
 class Floor : SingleInputShaderPipelineNodeProducer("Floor", "Floor") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "floor(${inputFieldOutput.representation})"
 }
 
@@ -48,8 +45,7 @@ class Clamp : TripleInputShaderPipelineNodeProducer("Clamp", "Clamp") {
 class Fractional : SingleInputShaderPipelineNodeProducer("Fractional", "Fractional") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "fract(${inputFieldOutput.representation})"
 }
 
@@ -92,8 +88,7 @@ class Modulo : DualInputShaderPipelineNodeProducer("Modulo", "Modulo") {
 class Saturate : SingleInputShaderPipelineNodeProducer("Saturate", "Saturate") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "clamp(${inputFieldOutput.representation}, 0.0, 1.0)"
 }
 
@@ -101,8 +96,7 @@ class Saturate : SingleInputShaderPipelineNodeProducer("Saturate", "Saturate") {
 class Sign : SingleInputShaderPipelineNodeProducer("Sign", "Sign") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "sign(${inputFieldOutput.representation})"
 }
 

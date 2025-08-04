@@ -29,4 +29,9 @@ internal class GraphShaderContext(
         this.camera = camera
         this.model = model
     }
+
+    fun unbind() {
+        graphShader?.end()
+        graphShader = null
+    }
 }

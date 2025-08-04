@@ -41,15 +41,13 @@ class DotProduct : DualInputShaderPipelineNodeProducer("DotProduct", "DotProduct
 class Length : SingleInputShaderPipelineNodeProducer("Length", "Length") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "length(${inputFieldOutput.representation})"
 }
 
 class Normalize : SingleInputShaderPipelineNodeProducer("Normalize", "Normalize") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "normalize(${inputFieldOutput.representation})"
 }

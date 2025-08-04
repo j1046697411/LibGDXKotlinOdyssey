@@ -9,7 +9,6 @@ class RemapValue : SingleInputShaderPipelineNodeProducer("RemapValue", "RemapVal
     override val output = createNodeOutput("output", "Output")
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = TODO()
 }

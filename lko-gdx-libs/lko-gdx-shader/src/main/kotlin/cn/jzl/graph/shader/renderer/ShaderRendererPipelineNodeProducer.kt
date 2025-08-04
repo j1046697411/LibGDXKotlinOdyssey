@@ -100,6 +100,7 @@ class ShaderRendererPipelineNodeProducer : TripleInputPipelineNodeProducer<Rende
         }
 
         override fun end() {
+            shaderContext.unbind()
         }
     }
 }

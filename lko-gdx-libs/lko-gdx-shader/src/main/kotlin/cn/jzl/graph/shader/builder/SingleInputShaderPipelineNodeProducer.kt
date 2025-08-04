@@ -38,11 +38,9 @@ abstract class SingleInputShaderPipelineNodeProducer(
             val inputFieldOutputType = shaderFieldTypeResolver.resolve<FieldOutput>(input.outputType)
             val fieldOutputType = shaderFieldTypeResolver.resolve<FieldOutput>(output.outputType)
             val inputFieldOutput = blackboard[input.fromGraphNode, input.fromOutput, inputFieldOutputType]
-            val outputFieldOutput = blackboard[graphNode, output.output, fieldOutputType]
             val representation = buildFragmentNodeSingleInput(
                 commonShaderBuilder,
-                inputFieldOutput,
-                outputFieldOutput
+                inputFieldOutput
             )
             val result = "name_${graphNode.id}"
             commonShaderBuilder.addMainLine("// ${this.configuration.type} node")
@@ -58,7 +56,6 @@ abstract class SingleInputShaderPipelineNodeProducer(
 
     protected abstract fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String
 }

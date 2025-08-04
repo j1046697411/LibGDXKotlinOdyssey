@@ -9,40 +9,35 @@ class ExponentialBase2: SingleInputShaderPipelineNodeProducer("ExponentialBase2"
 
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "exp2(${inputFieldOutput.representation})"
 }
 
 class Exponential : SingleInputShaderPipelineNodeProducer("Exponential", "Exponential") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "exp(${inputFieldOutput.representation})"
 }
 
 class InverseSquareRoot : SingleInputShaderPipelineNodeProducer("InverseSquareRoot", "InverseSquareRoot") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "inversesqrt(${inputFieldOutput.representation})"
 }
 
 class LogarithmBase2 : SingleInputShaderPipelineNodeProducer("LogarithmBase2", "LogarithmBase2") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "log2(${inputFieldOutput.representation})"
 }
 
 class NaturalLogarithm : SingleInputShaderPipelineNodeProducer("NaturalLogarithm", "NaturalLogarithm") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "log(${inputFieldOutput.representation})"
 }
 
@@ -58,7 +53,6 @@ class PowerShader : DualInputShaderPipelineNodeProducer("Power", "Power") {
 class SquareRoot : SingleInputShaderPipelineNodeProducer("SquareRoot", "SquareRoot") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "sqrt(${inputFieldOutput.representation})"
 }

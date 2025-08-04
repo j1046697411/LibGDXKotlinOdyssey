@@ -56,8 +56,7 @@ class Rem : DualInputShaderPipelineNodeProducer("Rem", "Rem") {
 class OneMinus : SingleInputShaderPipelineNodeProducer("OneMinus", "OneMinus") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "1.0 - ${inputFieldOutput.representation}"
 }
 
@@ -65,7 +64,6 @@ class OneMinus : SingleInputShaderPipelineNodeProducer("OneMinus", "OneMinus") {
 class Reciprocal : SingleInputShaderPipelineNodeProducer("Reciprocal", "Reciprocal") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
-        inputFieldOutput: FieldOutput,
-        outputFieldOutput: FieldOutput
+        inputFieldOutput: FieldOutput
     ): String = "1.0 / ${inputFieldOutput.representation}"
 }
