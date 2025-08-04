@@ -91,7 +91,7 @@ class DefaultGraphPipelineRecipe(
 
                 val sourceOutput = sourceNode.outputs[connection.fieldFrom]
                     ?: throw IllegalStateException("Output field ${connection.fieldFrom} not found in node ${connection.nodeFrom}")
-
+                sourceOutput.isUse = true
                 inputs += PipelineNodeInput(
                     sourceNode.graphNode,
                     sourceOutput.output,

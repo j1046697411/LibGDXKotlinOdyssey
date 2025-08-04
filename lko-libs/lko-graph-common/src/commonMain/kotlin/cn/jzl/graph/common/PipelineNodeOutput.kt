@@ -5,5 +5,6 @@ import cn.jzl.graph.common.field.FieldType
 
 data class PipelineNodeOutput(
     val output: GraphNodeOutput,
-    val outputType: FieldType<Any>
+    val outputType: FieldType<Any>,
+    var isUse: Boolean = false
 )
