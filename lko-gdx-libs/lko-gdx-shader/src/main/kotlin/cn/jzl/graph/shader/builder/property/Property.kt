@@ -12,8 +12,6 @@ import cn.jzl.graph.common.producer.SingleOutputPipelineNodeProducer
 import cn.jzl.graph.shader.builder.GraphShaderPipelineNode
 import cn.jzl.graph.shader.core.ShaderGraphType
 import cn.jzl.graph.shader.field.FieldOutput
-import cn.jzl.graph.shader.field.ShaderFieldType
-import com.badlogic.gdx.graphics.Texture
 
 class Property : SingleOutputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>("FloatProperty", "Float property") {
 
@@ -37,29 +35,4 @@ class Property : SingleOutputPipelineNodeProducer<GraphShaderPipelineNode, Shade
             blackboard[graphNode, output.output, shaderFieldType] = fieldOutput
         }
     }
-}
-
-interface GraphShaderPropertyProducer {
-    val shaderFieldType: ShaderFieldType<out FieldOutput>
-    fun createProperty(world: World, graph: GraphWithProperties, graphNode: GraphNode) : ShaderPropertySource
-}
-
-interface ShaderPropertySource {
-    val shaderFieldType: ShaderFieldType<out FieldOutput>
-    val propertyIndex: Int
-    val propertyName: String
-    fun getPropertyName(index: Int): String
-    val propertyLocation: PropertyLocation
-    val attributeFunction: String?
-}
-
-interface TextureShaderPropertySource : ShaderPropertySource {
-    val minFilter: Texture.TextureFilter
-    val magFilter: Texture.TextureFilter
-}
-
-enum class PropertyLocation {
-    Attribute,
-    Uniform,
-    GlobalUniform
 }

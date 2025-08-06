@@ -75,12 +75,11 @@ class ShaderRendererPipelineNodeProducer : TripleInputPipelineNodeProducer<Rende
         return RenderingPipelineNode { blackboard ->
             val enabled = first?.let { blackboard[it.fromGraphNode, it.fromOutput, PrimitiveFieldTypes.BooleanFieldType] } ?: true
             val renderPipeline = blackboard[third.fromGraphNode, third.fromOutput, RenderingPipelineType]
-            if (!enabled) {
-                blackboard[graphNode, output.output, output.outputType] = renderPipeline
-                return@RenderingPipelineNode
+            if (enabled) {
+                val camera = blackboard[second.fromGraphNode, second.fromOutput, CameraType]
+                renderingStrategy.processModels(renderPipeline, shaderConfiguration, sequenceOf(shader), camera, strategyCallback)
             }
-            val camera = blackboard[second.fromGraphNode, second.fromOutput, CameraType]
-            renderingStrategy.processModels(renderPipeline, shaderConfiguration, sequenceOf(shader), camera, strategyCallback)
+            blackboard[graphNode, output.output, output.outputType] = renderPipeline
         }
     }
 

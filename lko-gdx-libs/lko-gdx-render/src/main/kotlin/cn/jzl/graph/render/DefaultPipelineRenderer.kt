@@ -14,12 +14,11 @@ class DefaultPipelineRenderer(
     private val fullScreenRender by world.instance<FullScreenRender>()
 
     override fun render(renderOutput: RenderOutput) {
-        preparedRenderingPipeline.begin()
-        val renderingPipeline = preparedRenderingPipeline.execute(blackboard)
         openGLContext.begin()
-        renderOutput.output(openGLContext, fullScreenRender, renderingPipeline)
-        openGLContext.end()
+        preparedRenderingPipeline.begin()
+        renderOutput.output(openGLContext, fullScreenRender, preparedRenderingPipeline.execute(blackboard))
         preparedRenderingPipeline.end()
+        openGLContext.end()
     }
 
     override fun dispose() {

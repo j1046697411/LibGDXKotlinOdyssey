@@ -8,12 +8,14 @@ import cn.jzl.ecs.World
 import cn.jzl.graph.common.rendering.PipelinePlugin
 import cn.jzl.graph.common.rendering.PipelineRegistry
 import cn.jzl.graph.common.rendering.register
+import cn.jzl.graph.shader.builder.core.EndModelShaderNodeProducer
+import cn.jzl.graph.shader.builder.math.*
+import cn.jzl.graph.shader.builder.property.Property
+import cn.jzl.graph.shader.builder.util.*
 import cn.jzl.graph.shader.core.ModelShaderGraphType
 import cn.jzl.graph.shader.field.DefaultShaderFieldTypeResolver
 import cn.jzl.graph.shader.field.ShaderFieldTypeResolver
-import cn.jzl.graph.shader.builder.core.EndModelShaderNodeProducer
-import cn.jzl.graph.shader.builder.math.*
-import cn.jzl.graph.shader.builder.util.*
+import cn.jzl.graph.shader.renderer.ShaderRendererPipelineNodeProducer
 import org.kodein.type.TypeToken
 
 fun shaderPipelineModule() = module(TypeToken.Any, "shaderPipelineModule") {
@@ -27,6 +29,7 @@ class ShaderPipelinePlugin : PipelinePlugin {
     override fun setup(world: World, pipelineRegistry: PipelineRegistry) {
         val shaderFieldTypeResolver by world.instance<ShaderFieldTypeResolver>()
         pipelineRegistry.registerGraphTypes(ModelShaderGraphType(shaderFieldTypeResolver, "Model_Shader"))
+        pipelineRegistry.register(ShaderRendererPipelineNodeProducer())
 
         // 注册Arithmetics.kt中的节点
         pipelineRegistry.register(Plus())
@@ -48,6 +51,9 @@ class ShaderPipelinePlugin : PipelinePlugin {
         pipelineRegistry.register(Minimum())
         pipelineRegistry.register(Modulo())
         pipelineRegistry.register(Saturate())
+        pipelineRegistry.register(Step())
+        pipelineRegistry.register(SmoothStep())
+        pipelineRegistry.register(Sign())
 
         // 注册Exponential.kt中的节点
         pipelineRegistry.register(ExponentialBase2())
@@ -84,6 +90,7 @@ class ShaderPipelinePlugin : PipelinePlugin {
         pipelineRegistry.register(Remap())
         pipelineRegistry.register(RemapValue())
         pipelineRegistry.register(Constant())
+        pipelineRegistry.register(Property())
 
         pipelineRegistry.register(EndModelShaderNodeProducer())
     }

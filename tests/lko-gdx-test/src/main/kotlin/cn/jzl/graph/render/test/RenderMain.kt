@@ -3,6 +3,8 @@ package cn.jzl.graph.render.test
 import cn.jzl.di.instance
 import cn.jzl.ecs.world
 import cn.jzl.graph.common.config.DefaultGraphPipelineConfiguration
+import cn.jzl.graph.common.config.DefaultPropertyContainer
+import cn.jzl.graph.common.config.PropertyContainer
 import cn.jzl.graph.common.data.DefaultGraphWithProperties
 import cn.jzl.graph.common.rendering.pipelineModule
 import cn.jzl.graph.common.time.DefaultTimeKeeper
@@ -12,14 +14,24 @@ import cn.jzl.graph.render.PipelineRendererLoader
 import cn.jzl.graph.render.RenderOutput
 import cn.jzl.graph.render.renderPipelineModule
 import cn.jzl.graph.shader.ModelShaderLoader
+import cn.jzl.graph.shader.core.GraphShader
+import cn.jzl.graph.shader.core.RenderableModel
+import cn.jzl.graph.shader.core.ShaderRendererConfiguration
+import cn.jzl.graph.shader.core.SimpleShaderRendererConfiguration
 import cn.jzl.graph.shader.shaderPipelineModule
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
+import com.badlogic.gdx.graphics.Camera
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.Mesh
+import com.badlogic.gdx.graphics.VertexAttribute
+import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.badlogic.gdx.graphics.profiling.GLErrorListener
 import com.badlogic.gdx.graphics.profiling.GLProfiler
-import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Label
@@ -61,38 +73,27 @@ class RenderScreen : KtxScreen {
     private val timeProvider = DefaultTimeKeeper()
     private val pipelineRendererLoader by world.instance<PipelineRendererLoader>()
     private val modelShaderLoader by world.instance<ModelShaderLoader>()
+    private val screenViewport by lazy { ScreenViewport() }
 
     private val graph by lazy {
         val graph = DefaultGraphWithProperties("Render_Pipeline")
         graph.addGraphNode(DefaultGraphNode("Start", "PipelineStart"))
+        graph.addGraphNode(DefaultGraphNode("end", "end"))
+        graph.addGraphNode(DefaultGraphNode("Color", "constant", hashMapOf("constant" to Color.WHITE)))
+        graph.addGraphNode(DefaultGraphNode("camera", "constant", hashMapOf("constant" to screenViewport.camera)))
 
-        graph.addGraphNode(DefaultGraphNode("background", "constant", hashMapOf("constant" to Color.WHITE)))
+        graph.addGraphNode(
+            DefaultGraphNode(
+                id = "GraphShaderRenderer",
+                type = "GraphShaderRenderer",
+                payloads = mapOf("shaders" to shaderGraph, "tag" to "test", "endNodeId" to "end")
+            )
+        )
 
-        graph.addGraphNode(DefaultGraphNode("background1", "constant", hashMapOf("constant" to Color.BLACK)))
-        graph.addGraphNode(DefaultGraphNode("position", "constant", hashMapOf("constant" to Vector2(100f, 100f))))
-        graph.addGraphNode(DefaultGraphNode("size", "constant", hashMapOf("constant" to Vector2(200f, 200f))))
-
-        graph.addGraphNode(DefaultGraphNode("time", "time"))
-        graph.addGraphNode(DefaultGraphNode("times", "times"))
-
-        graph.addGraphNode(DefaultGraphNode("Start1", "PipelineStart"))
-        graph.addGraphNode(DefaultGraphNode("PipelineRenderer", "PipelineRenderer"))
-
-        graph.addGraphNode(DefaultGraphNode("End", "end"))
-
-        graph.addGraphConnection(DefaultGraphConnection("Start", "output", "PipelineRenderer", "input"))
-        graph.addGraphConnection(DefaultGraphConnection("Start1", "output", "PipelineRenderer", "pipeline"))
-        graph.addGraphConnection(DefaultGraphConnection("background1", "output", "Start1", "background"))
-        graph.addGraphConnection(DefaultGraphConnection("PipelineRenderer", "output", "End", "input"))
-        graph.addGraphConnection(DefaultGraphConnection("position", "output", "PipelineRenderer", "position"))
-        graph.addGraphConnection(DefaultGraphConnection("size", "output", "PipelineRenderer", "size"))
-
-        graph.addGraphConnection(DefaultGraphConnection("background", "output", "times", "inputs"))
-        graph.addGraphConnection(DefaultGraphConnection("time", "sinTime", "times", "inputs"))
-
-        graph.addGraphConnection(DefaultGraphConnection("times", "output", "Start", "background"))
-
-        graph.addGraphConnection(DefaultGraphConnection("PipelineRenderer", "output", "End", "input"))
+        graph.addGraphConnection(DefaultGraphConnection("camera", "output", "GraphShaderRenderer", "camera"))
+        graph.addGraphConnection(DefaultGraphConnection("Color", "output", "Start", "background"))
+        graph.addGraphConnection(DefaultGraphConnection("Start", "output", "GraphShaderRenderer", "input"))
+        graph.addGraphConnection(DefaultGraphConnection("GraphShaderRenderer", "output", "end", "input"))
 
         graph
     }
@@ -112,7 +113,9 @@ class RenderScreen : KtxScreen {
 
     private val pipelineRenderer by lazy {
         val configuration = DefaultGraphPipelineConfiguration(timeProvider)
-        pipelineRendererLoader.loadPipelineRenderer(graph, configuration, "End")
+        val shaderRendererConfiguration = SimpleShaderRendererConfiguration(DefaultPropertyContainer())
+        configuration.setConfiguration(ShaderRendererConfiguration::class, shaderRendererConfiguration)
+        pipelineRendererLoader.loadPipelineRenderer(graph, configuration, "end")
     }
     private val stage by lazy { Stage(ScreenViewport()) }
 
@@ -122,6 +125,7 @@ class RenderScreen : KtxScreen {
         super.show()
         Gdx.app.logLevel = Application.LOG_DEBUG
         this.profiler = GLProfiler(Gdx.app.graphics)
+        profiler.listener = GLErrorListener { log.debug { "error code $it" } }
         VisUI.load(VisUI.SkinScale.X2)
         stage.actors {
             verticalGroup {
@@ -130,8 +134,6 @@ class RenderScreen : KtxScreen {
                 debugInfo = visLabel("Hello World")
             }
         }
-        val configuration = DefaultGraphPipelineConfiguration(timeProvider)
-        modelShaderLoader.loadShader(shaderGraph, configuration, "Model_Shader", "end")
     }
 
     override fun render(delta: Float) {
@@ -141,7 +143,8 @@ class RenderScreen : KtxScreen {
         timeProvider.update(delta.toDouble().toDuration(DurationUnit.SECONDS))
         pipelineRenderer.render(RenderOutput)
         if (profiler.isEnabled) {
-            debugInfo.setText("""
+            debugInfo.setText(
+                """
                 Time: ${timeProvider.time.toString(DurationUnit.SECONDS, 2)}
                 GL Calls: ${profiler.calls}
                 Draw calls: ${profiler.drawCalls}
@@ -150,7 +153,8 @@ class RenderScreen : KtxScreen {
                 Vertex calls: ${profiler.vertexCount.total}
                 fps: ${Gdx.graphics.framesPerSecond}
                 memory: ${(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024)} MB
-            """.trimIndent())
+            """.trimIndent()
+            )
             stage.act(delta)
             stage.draw()
             profiler.reset()
@@ -159,5 +163,33 @@ class RenderScreen : KtxScreen {
 
     companion object {
         private val log = logger<RenderScreen>()
+    }
+}
+
+class TestRenderableModel : RenderableModel {
+
+    private val mesh = Mesh(true,4, 6, VertexAttribute.Position())
+    private val vertices = floatArrayOf(
+        0f, 0f, 0f, 1f, 0f, 0f, 0f,
+        100f, 0f, 0f, 0f, 1f, 0f, 0f,
+        100f, 100f, 0f, 0f, 0f, 1f, 0f,
+        0f, 100f, 0f, 1f, 1f, 1f, 0f
+    )
+    private val indices = shortArrayOf(0, 1, 2, 2, 3, 0)
+    init {
+        mesh.setVertices(vertices)
+        mesh.setIndices(indices)
+    }
+
+
+    override val position: Vector3 = Vector3.Zero
+    override val worldTransform: Matrix4 = Matrix4().idt()
+    override val propertyContainer: PropertyContainer = DefaultPropertyContainer()
+    override fun isRendered(shader: GraphShader, camera: Camera): Boolean {
+        return true
+    }
+
+    override fun render(camera: Camera, shaderProgram: ShaderProgram, propertyToLocationMapping: (String) -> Int) {
+        mesh.render(shaderProgram, GL20.GL_TRIANGLES)
     }
 }
