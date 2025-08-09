@@ -5,9 +5,7 @@ import cn.jzl.graph.shader.field.ShaderFieldType
 
 interface ShaderPropertySource {
     val shaderFieldType: ShaderFieldType<out FieldOutput>
-    val propertyIndex: Int
     val propertyName: String
-    fun getPropertyName(index: Int): String
     val propertyLocation: PropertyLocation
     val attributeFunction: String?
 }

@@ -10,16 +10,11 @@ import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.field.PrimitiveFieldTypes
 import cn.jzl.graph.common.producer.TripleInputPipelineNodeProducer
-import cn.jzl.graph.common.rendering.PipelineBlackboard
-import cn.jzl.graph.render.OpenGLContext
-import cn.jzl.graph.render.RenderGraphType
-import cn.jzl.graph.render.RenderingPipeline
-import cn.jzl.graph.render.RenderingPipelineNode
+import cn.jzl.graph.render.*
 import cn.jzl.graph.render.field.CameraType
 import cn.jzl.graph.render.field.RenderingPipelineType
 import cn.jzl.graph.shader.ModelShaderLoader
 import cn.jzl.graph.shader.core.GraphShader
-import cn.jzl.graph.shader.core.ShaderContext
 import cn.jzl.graph.shader.core.ShaderRendererConfiguration
 import cn.jzl.graph.shader.renderer.strategy.ModelRenderingStrategy
 import cn.jzl.graph.shader.renderer.strategy.Order
@@ -77,7 +72,9 @@ class ShaderRendererPipelineNodeProducer : TripleInputPipelineNodeProducer<Rende
             val renderPipeline = blackboard[third.fromGraphNode, third.fromOutput, RenderingPipelineType]
             if (enabled) {
                 val camera = blackboard[second.fromGraphNode, second.fromOutput, CameraType]
-                renderingStrategy.processModels(renderPipeline, shaderConfiguration, sequenceOf(shader), camera, strategyCallback)
+                renderPipeline.command {
+                    renderingStrategy.processModels(renderPipeline, shaderConfiguration, sequenceOf(shader), camera, strategyCallback)
+                }
             }
             blackboard[graphNode, output.output, output.outputType] = renderPipeline
         }

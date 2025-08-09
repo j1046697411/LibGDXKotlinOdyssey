@@ -10,6 +10,7 @@ import cn.jzl.graph.common.rendering.PipelineRegistry
 import cn.jzl.graph.common.rendering.register
 import cn.jzl.graph.shader.builder.core.EndModelShaderNodeProducer
 import cn.jzl.graph.shader.builder.math.*
+import cn.jzl.graph.shader.builder.property.DefaultGraphShaderPropertyProducer
 import cn.jzl.graph.shader.builder.property.Property
 import cn.jzl.graph.shader.builder.util.*
 import cn.jzl.graph.shader.core.ModelShaderGraphType
@@ -22,6 +23,7 @@ fun shaderPipelineModule() = module(TypeToken.Any, "shaderPipelineModule") {
     this bind singleton { new(::ShaderPipelinePlugin) }
     this bind singleton { new(::DefaultShaderFieldTypeResolver) }
     this bind singleton { new(::DefaultModelShaderLoader) }
+    this bind singleton { new(::DefaultGraphShaderPropertyProducer) }
 }
 
 class ShaderPipelinePlugin : PipelinePlugin {

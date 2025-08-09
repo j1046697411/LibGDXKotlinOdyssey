@@ -12,8 +12,11 @@ import cn.jzl.graph.impl.DefaultGraphConnection
 import cn.jzl.graph.impl.DefaultGraphNode
 import cn.jzl.graph.render.PipelineRendererLoader
 import cn.jzl.graph.render.RenderOutput
+import cn.jzl.graph.render.field.Vector3Type
+import cn.jzl.graph.render.field.Vector4Type
 import cn.jzl.graph.render.renderPipelineModule
 import cn.jzl.graph.shader.ModelShaderLoader
+import cn.jzl.graph.shader.builder.property.PropertyLocation
 import cn.jzl.graph.shader.core.GraphShader
 import cn.jzl.graph.shader.core.RenderableModel
 import cn.jzl.graph.shader.core.ShaderRendererConfiguration
@@ -23,11 +26,7 @@ import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
-import com.badlogic.gdx.graphics.Camera
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.GL20
-import com.badlogic.gdx.graphics.Mesh
-import com.badlogic.gdx.graphics.VertexAttribute
+import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.graphics.profiling.GLErrorListener
 import com.badlogic.gdx.graphics.profiling.GLProfiler
@@ -79,7 +78,7 @@ class RenderScreen : KtxScreen {
         val graph = DefaultGraphWithProperties("Render_Pipeline")
         graph.addGraphNode(DefaultGraphNode("Start", "PipelineStart"))
         graph.addGraphNode(DefaultGraphNode("end", "end"))
-        graph.addGraphNode(DefaultGraphNode("Color", "constant", hashMapOf("constant" to Color.WHITE)))
+        graph.addGraphNode(DefaultGraphNode("Color", "constant", hashMapOf("constant" to Color.BLACK)))
         graph.addGraphNode(DefaultGraphNode("camera", "constant", hashMapOf("constant" to screenViewport.camera)))
 
         graph.addGraphNode(
@@ -102,18 +101,32 @@ class RenderScreen : KtxScreen {
         val graph = DefaultGraphWithProperties("Model_Shader")
         graph.addGraphNode(DefaultGraphNode("end", "ShaderEnd"))
 
-        graph.addGraphNode(DefaultGraphNode("position", "Constant", hashMapOf("constant" to Vector3(100f, 100f, 100f))))
-        graph.addGraphNode(DefaultGraphNode("color", "Constant", hashMapOf("constant" to Color.WHITE)))
+        // 使用Float property节点代替VertexAttribute节点
+        graph.addGraphNode(
+            DefaultGraphNode(
+                id = "position",
+                type = "Property",
+                payloads = mapOf("fieldType" to Vector3Type, "propertyLocation" to PropertyLocation.Attribute, "propertyName" to "position"),
+            )
+        )
+        graph.addGraphNode(
+            DefaultGraphNode(
+                id = "color",
+                type = "Property",
+                payloads = mapOf("fieldType" to Vector4Type, "propertyLocation" to PropertyLocation.Attribute, "propertyName" to "color"),
+            )
+        )
 
-        graph.addGraphConnection(DefaultGraphConnection("position", "output", "end", "position"))
         graph.addGraphConnection(DefaultGraphConnection("color", "output", "end", "color"))
-
+        graph.addGraphConnection(DefaultGraphConnection("position", "output", "end", "position"))
         graph
     }
 
     private val pipelineRenderer by lazy {
         val configuration = DefaultGraphPipelineConfiguration(timeProvider)
         val shaderRendererConfiguration = SimpleShaderRendererConfiguration(DefaultPropertyContainer())
+        // 添加三角形模型到渲染配置
+        shaderRendererConfiguration += TestRenderableModel()
         configuration.setConfiguration(ShaderRendererConfiguration::class, shaderRendererConfiguration)
         pipelineRendererLoader.loadPipelineRenderer(graph, configuration, "end")
     }
@@ -134,12 +147,15 @@ class RenderScreen : KtxScreen {
                 debugInfo = visLabel("Hello World")
             }
         }
+        screenViewport.setScreenSize(Gdx.graphics.width, Gdx.graphics.height)
+        screenViewport.apply(true)
     }
 
     override fun render(delta: Float) {
         if (!profiler.isEnabled) {
             profiler.enable()
         }
+        screenViewport.apply(true)
         timeProvider.update(delta.toDouble().toDuration(DurationUnit.SECONDS))
         pipelineRenderer.render(RenderOutput)
         if (profiler.isEnabled) {
@@ -168,17 +184,24 @@ class RenderScreen : KtxScreen {
 
 class TestRenderableModel : RenderableModel {
 
-    private val mesh = Mesh(true,4, 6, VertexAttribute.Position())
-    private val vertices = floatArrayOf(
-        0f, 0f, 0f, 1f, 0f, 0f, 0f,
-        100f, 0f, 0f, 0f, 1f, 0f, 0f,
-        100f, 100f, 0f, 0f, 0f, 1f, 0f,
-        0f, 100f, 0f, 1f, 1f, 1f, 0f
+    private val mesh = Mesh(
+        true,
+        3,
+        3,
+        VertexAttribute(VertexAttributes.Usage.Position, 3, "a_property_position"),
+        VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 4, "a_property_color")
     )
-    private val indices = shortArrayOf(0, 1, 2, 2, 3, 0)
+    private val vertices = floatArrayOf(
+        // 调整顶点坐标到标准化设备坐标范围
+        -0.5f, -0.5f, 0f, 1f, 0f, 0f, 1f,  // 左下红色
+        0.5f, -0.5f, 0f, 0f, 1f, 0f, 1f,  // 右下绿色
+        0f,   0.5f, 0f, 0f, 0f, 1f, 1f   // 顶部蓝色
+    )
+
     init {
         mesh.setVertices(vertices)
-        mesh.setIndices(indices)
+        mesh.setIndices(shortArrayOf(0, 1, 2))
+        mesh.setAutoBind(true)
     }
 
 
@@ -190,6 +213,12 @@ class TestRenderableModel : RenderableModel {
     }
 
     override fun render(camera: Camera, shaderProgram: ShaderProgram, propertyToLocationMapping: (String) -> Int) {
-        mesh.render(shaderProgram, GL20.GL_TRIANGLES)
+        mesh.bind(shaderProgram)
+        Gdx.gl.glDrawElements(GL20.GL_TRIANGLES, 6, GL20.GL_UNSIGNED_SHORT, 0)
+        mesh.unbind(shaderProgram)
+    }
+
+    companion object {
+        private val log = logger<RenderScreen>()
     }
 }

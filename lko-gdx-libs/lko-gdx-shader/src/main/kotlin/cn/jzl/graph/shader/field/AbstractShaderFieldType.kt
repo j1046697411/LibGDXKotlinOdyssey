@@ -21,7 +21,7 @@ abstract class AbstractShaderFieldType<FO : FieldOutput>: ShaderFieldType<FO> {
         val commonShaderBuilder = if (fragmentShader) fragmentShaderBuilder else vertexShaderBuilder
         val uniformName = when (propertySource.propertyLocation) {
             PropertyLocation.Uniform -> {
-                val name = "u_property_${propertySource.propertyIndex}"
+                val name = "u_property_${propertySource.propertyName}"
                 commonShaderBuilder.addUniformVariable(
                     name,
                     fieldType,
@@ -32,7 +32,7 @@ abstract class AbstractShaderFieldType<FO : FieldOutput>: ShaderFieldType<FO> {
             }
 
             PropertyLocation.GlobalUniform -> {
-                val name = "u_property_${propertySource.propertyIndex}"
+                val name = "u_property_${propertySource.propertyName}"
                 commonShaderBuilder.addUniformVariable(
                     name,
                     fieldType,
@@ -43,7 +43,7 @@ abstract class AbstractShaderFieldType<FO : FieldOutput>: ShaderFieldType<FO> {
             }
 
             PropertyLocation.Attribute -> {
-                val name = "a_property_${propertySource.propertyIndex}"
+                val name = "a_property_${propertySource.propertyName}"
                 vertexShaderBuilder.addAttribute(
                     name,
                     numberOfComponents,
@@ -51,7 +51,7 @@ abstract class AbstractShaderFieldType<FO : FieldOutput>: ShaderFieldType<FO> {
                     "${realFieldType.fieldType} property - ${propertySource.propertyName}"
                 )
                 if (fragmentShader) {
-                    val variableName = "v_property_${propertySource.propertyIndex}"
+                    val variableName = "v_property_${propertySource.propertyName}"
                     vertexShaderBuilder.addVariable(variableName, fieldType, true)
                     fragmentShaderBuilder.addVariable(variableName, fieldType, true)
                     vertexShaderBuilder.addMainLine("$variableName = $name;")

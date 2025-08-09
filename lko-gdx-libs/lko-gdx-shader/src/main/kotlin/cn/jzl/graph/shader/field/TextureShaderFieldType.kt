@@ -36,8 +36,8 @@ internal object TextureShaderFieldType : ShaderFieldType<TextureFieldOutput> {
         val commonShaderBuilder = if (fragmentShader) fragmentShaderBuilder else vertexShaderBuilder
         return when (propertySource.propertyLocation) {
             PropertyLocation.Uniform -> {
-                val textureVariableName = "u_texture_${propertySource.propertyIndex}"
-                val uvVariableName = "v_uv_${propertySource.propertyIndex}"
+                val textureVariableName = "u_texture_${propertySource.propertyName}"
+                val uvVariableName = "v_uv_${propertySource.propertyName}"
                 val propertyKey = realFieldType.createPropertyKey(propertySource.propertyName)
                 val uv = Vector2(1f, 1f)
                 commonShaderBuilder.addUniformVariable(
@@ -60,8 +60,8 @@ internal object TextureShaderFieldType : ShaderFieldType<TextureFieldOutput> {
             }
 
             PropertyLocation.GlobalUniform -> {
-                val textureVariableName = "u_texture_${propertySource.propertyIndex}"
-                val uvVariableName = "v_uv_${propertySource.propertyIndex}"
+                val textureVariableName = "u_texture_${propertySource.propertyName}"
+                val uvVariableName = "v_uv_${propertySource.propertyName}"
                 val propertyKey = realFieldType.createPropertyKey(propertySource.propertyName)
                 val uv = Vector2(1f, 1f)
                 commonShaderBuilder.addUniformVariable(

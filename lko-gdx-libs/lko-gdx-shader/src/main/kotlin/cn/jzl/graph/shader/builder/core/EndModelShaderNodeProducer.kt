@@ -108,7 +108,6 @@ class EndModelShaderNodeProducer :
                     .let {
                         vertexShaderBuilder.addMainLine("// ${this.configuration.type} Graph node")
                         vertexShaderBuilder.addMainLine("gl_Position = vec4(${it.representation}, 1.0);")
-                        vertexShaderBuilder.addVariable("v_position", it.fieldType.fieldType, true)
                     }
             }
         }
