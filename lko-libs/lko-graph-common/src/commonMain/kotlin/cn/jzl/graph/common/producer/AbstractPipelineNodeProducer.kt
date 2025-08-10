@@ -9,6 +9,8 @@ import cn.jzl.graph.common.GraphType
 import cn.jzl.graph.common.PipelineNode
 import cn.jzl.graph.common.PipelineNodeInput
 import cn.jzl.graph.common.PipelineNodeProducer
+import cn.jzl.graph.common.config.DefaultMenuNodeConfiguration
+import cn.jzl.graph.common.config.MenuNodeConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.field.DefaultAcceptedTypePredicate
 import cn.jzl.graph.common.field.DefaultOutputTypeFunction
@@ -18,10 +20,12 @@ import cn.jzl.graph.impl.*
 
 abstract class AbstractPipelineNodeProducer<PN : PipelineNode, GT : GraphType<in PN>>(
     name: String,
-    type: String
+    type: String,
+    menuLocation: String,
 ) : PipelineNodeProducer<PN, GT> {
-    private val menuNodeConfiguration = DefaultNodeConfiguration(name, type)
-    final override val configuration: NodeConfiguration get() = menuNodeConfiguration
+    private val menuNodeConfiguration = DefaultMenuNodeConfiguration(name, type, menuLocation)
+
+    final override val configuration: MenuNodeConfiguration get() = menuNodeConfiguration
 
     override fun getOutputTypes(
         world: World,

@@ -23,8 +23,4 @@ fun pipelineModule(): DIModule<Any> = module(generic<Any>()) {
     this bind singleton { new(::DefaultGraphTypeRegistry)  }
     this bind singleton(TAG_PIPELINE_REGISTRY) { new(::DefaultPipelineRegistry) }
     this bind singleton { new(::DefaultGraphPipelineRecipe) }
-
-    onReady {
-        println("pipelineModule ${di.container.tree.bindings}")
-    }
 }

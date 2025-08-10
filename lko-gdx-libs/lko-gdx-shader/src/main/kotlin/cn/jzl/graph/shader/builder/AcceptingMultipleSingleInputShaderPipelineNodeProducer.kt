@@ -17,8 +17,9 @@ import cn.jzl.graph.shader.field.ShaderFieldTypeResolver
 
 abstract class AcceptingMultipleSingleInputShaderPipelineNodeProducer(
     name: String,
-    type: String
-) : AcceptingMultipleSingleInputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>(name, type) {
+    type: String,
+    menuLocation: String
+) : AcceptingMultipleSingleInputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>(name, type, menuLocation) {
 
     override val inputs = createNodeInput("input", "Input", required = true, acceptingMultiple = true)
     override val output = createNodeOutput("output", "Result", required = true)

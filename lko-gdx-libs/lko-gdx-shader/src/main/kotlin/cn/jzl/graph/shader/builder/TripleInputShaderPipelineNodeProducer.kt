@@ -17,8 +17,9 @@ import cn.jzl.graph.shader.field.ShaderFieldTypeResolver
 
 abstract class TripleInputShaderPipelineNodeProducer(
     name: String,
-    type: String
-) : TripleInputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>(name, type) {
+    type: String,
+    menuLocation: String
+) : TripleInputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>(name, type, menuLocation) {
 
     override val first = createNodeInput("a", "A", required = true)
     override val second = createNodeInput("b", "B", required = true)

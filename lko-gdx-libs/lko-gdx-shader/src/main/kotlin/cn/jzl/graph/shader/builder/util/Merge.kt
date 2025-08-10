@@ -18,7 +18,7 @@ import cn.jzl.graph.shader.field.ShaderFieldType
 import cn.jzl.graph.shader.field.ShaderFieldTypeResolver
 import cn.jzl.graph.shader.builder.GraphShaderPipelineNode
 
-class Merge : AbstractPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>("Merge", "Merge") {
+class Merge : AbstractPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>("Merge", "Merge", "Util/Merge") {
     private val x = createNodeInput("x", "X")
     private val y = createNodeInput("y", "Y")
     private val z = createNodeInput("z", "Z")

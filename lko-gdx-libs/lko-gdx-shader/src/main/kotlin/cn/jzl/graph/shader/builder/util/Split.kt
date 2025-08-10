@@ -20,7 +20,7 @@ import cn.jzl.graph.shader.field.ShaderFieldType
 import cn.jzl.graph.shader.field.ShaderFieldTypeResolver
 import cn.jzl.graph.shader.builder.GraphShaderPipelineNode
 
-class Split : AbstractPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>("Split", "Split") {
+class Split : AbstractPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>("Split", "Split", "Util/Split") {
     private val input = createNodeInput("input", "input", required = true)
     private val x = createNodeOutput("x", "X")
     private val y = createNodeOutput("y", "Y")

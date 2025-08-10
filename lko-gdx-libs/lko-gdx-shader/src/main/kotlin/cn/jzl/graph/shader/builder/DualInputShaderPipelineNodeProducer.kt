@@ -18,8 +18,9 @@ import cn.jzl.graph.shader.field.ShaderFieldTypeResolver
 
 abstract class DualInputShaderPipelineNodeProducer(
     name: String,
-    type: String
-) : DualInputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>(name, type) {
+    type: String,
+    menuLocation: String
+) : DualInputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>(name, type, menuLocation) {
 
     override val first: NamedGraphNodeInput = createNodeInput("a", "A", required = true)
     override val second = createNodeInput("b", "B", required = true)

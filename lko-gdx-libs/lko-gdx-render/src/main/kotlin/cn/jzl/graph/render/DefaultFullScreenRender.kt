@@ -1,6 +1,5 @@
 package cn.jzl.graph.render
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Mesh
 import com.badlogic.gdx.graphics.VertexAttribute
@@ -18,12 +17,11 @@ internal class DefaultFullScreenRender : FullScreenRender {
             1f, 1f, 0f
         ))
         mesh.setIndices(shortArrayOf(0, 2, 1, 2, 3, 1))
+        mesh.setAutoBind(true)
         mesh
     }
 
     override fun renderFullScreen(shaderProgram: ShaderProgram) {
-        mesh.bind(shaderProgram)
-        Gdx.gl.glDrawElements(GL20.GL_TRIANGLES, 6, GL20.GL_UNSIGNED_SHORT, 0)
-        mesh.unbind(shaderProgram)
+        mesh.render(shaderProgram, GL20.GL_TRIANGLES)
     }
 }

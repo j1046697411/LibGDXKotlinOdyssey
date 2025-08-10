@@ -15,7 +15,8 @@ import cn.jzl.graph.common.rendering.set
 abstract class TripleInputGeneralPipelineNodeProducer(
     name: String,
     type: String,
-) : TripleInputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>(name, type) {
+    menuLocation: String,
+) : TripleInputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>(name, type, menuLocation) {
 
     override fun createTripleInputNode(
         world: World,

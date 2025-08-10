@@ -3,7 +3,7 @@ package cn.jzl.graph.common
 import cn.jzl.graph.GraphNode
 import kotlin.reflect.KClass
 
-class DefaultPipelineNodeProducerRegistry : PipelineNodeProducerRegistry, PipelineNodeProducerResolver {
+class DefaultPipelineNodeProducerRegistry : PipelineNodeProducerRegistry, PipelineNodeProducerResolver, PipelineNodeProducerContainer {
     private val producers = hashMapOf<KClass<*>, MutableMap<String, PipelineNodeProducer<*, *>>>()
 
     override fun <PN : PipelineNode, GT : GraphType<in PN>> register(
@@ -12,7 +12,6 @@ class DefaultPipelineNodeProducerRegistry : PipelineNodeProducerRegistry, Pipeli
     ) {
         val producers = this.producers.getOrPut(type) { hashMapOf() }
         producers[producer.configuration.type] = producer
-        println("Register producer: ${producer.configuration.type} for type: ${type.simpleName}")
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -26,5 +25,12 @@ class DefaultPipelineNodeProducerRegistry : PipelineNodeProducerRegistry, Pipeli
             .firstOrNull()
         checkNotNull(producer) { "Cannot find producer for graph node: $graphNode" }
         return producer as PipelineNodeProducer<PN, GT>
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <PN : PipelineNode, GT : GraphType<PN>> getProducers(graphType: GT): Sequence<PipelineNodeProducer<PN, GT>> {
+        return producers.asSequence()
+            .filter { it.key.isInstance(graphType) }
+            .flatMap { (_, producers )-> producers.values.asSequence() } as Sequence<PipelineNodeProducer<PN, GT>>
     }
 }

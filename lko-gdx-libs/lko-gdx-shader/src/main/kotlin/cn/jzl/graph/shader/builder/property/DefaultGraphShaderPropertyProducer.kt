@@ -5,9 +5,12 @@ import cn.jzl.ecs.World
 import cn.jzl.graph.GraphNode
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.field.FieldType
+import cn.jzl.graph.render.field.TextureType
 import cn.jzl.graph.shader.field.FieldOutput
 import cn.jzl.graph.shader.field.ShaderFieldType
 import cn.jzl.graph.shader.field.ShaderFieldTypeResolver
+import cn.jzl.graph.shader.field.TextureFieldOutput
+import com.badlogic.gdx.graphics.Texture
 
 class DefaultGraphShaderPropertyProducer : GraphShaderPropertyProducer {
 
@@ -16,6 +19,17 @@ class DefaultGraphShaderPropertyProducer : GraphShaderPropertyProducer {
         val fieldType = graphNode.payloads.getValue("fieldType") as FieldType<*>
         val propertyLocation = graphNode.payloads.getValue("propertyLocation") as PropertyLocation
         val propertyName = graphNode.payloads.getValue("propertyName") as String
+        if (fieldType == TextureType) {
+            val shaderFieldType = shaderFieldTypeResolver.resolve<TextureFieldOutput>(fieldType)
+            return DefaultTextureShaderPropertySource(
+                shaderFieldType,
+                propertyName,
+                propertyLocation,
+                null,
+                Texture.TextureFilter.Linear,
+                Texture.TextureFilter.Linear
+            )
+        }
         val shaderFieldType = shaderFieldTypeResolver.resolve<FieldOutput>(fieldType)
         return DescriptorShaderPropertySource(
             shaderFieldType,

@@ -15,7 +15,8 @@ import cn.jzl.graph.common.rendering.set
 abstract class DualInputGeneralPipelineNodeProducer(
     name: String,
     type: String,
-) : DualInputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>(name, type) {
+    menuLocation: String,
+) : DualInputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>(name, type, menuLocation) {
     override fun createDualInputNode(
         world: World,
         graph: GraphWithProperties,

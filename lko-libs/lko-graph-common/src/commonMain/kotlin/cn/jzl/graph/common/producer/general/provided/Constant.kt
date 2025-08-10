@@ -12,7 +12,7 @@ import cn.jzl.graph.common.producer.SingleOutputPipelineNodeProducer
 import cn.jzl.graph.common.producer.general.GeneralGraphType
 import cn.jzl.graph.common.producer.general.GeneralPipelineNode
 
-class Constant : SingleOutputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>("constant", "constant") {
+class Constant : SingleOutputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>("constant", "constant", "Provided/Constant") {
 
     override val output = createNodeOutput("output", "output")
 

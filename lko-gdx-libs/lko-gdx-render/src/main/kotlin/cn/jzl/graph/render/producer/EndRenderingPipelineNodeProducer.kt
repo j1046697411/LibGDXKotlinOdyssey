@@ -14,7 +14,7 @@ import cn.jzl.graph.render.field.RenderingPipelineType
 import cn.jzl.graph.render.node.EndRenderingPipelineNode
 
 class EndRenderingPipelineNodeProducer :
-    AbstractPipelineNodeProducer<EndRenderingPipelineNode, RenderGraphType>("end", "end") {
+    AbstractPipelineNodeProducer<EndRenderingPipelineNode, RenderGraphType>("end", "end", "Render/EndRendering") {
 
     private val input = createNodeInput("input", "RenderingPipeline", required = true)
 

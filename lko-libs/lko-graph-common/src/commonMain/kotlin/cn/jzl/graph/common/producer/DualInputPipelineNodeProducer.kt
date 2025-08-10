@@ -12,8 +12,9 @@ import cn.jzl.graph.impl.NamedGraphNodeInput
 
 abstract class DualInputPipelineNodeProducer<PN : PipelineNode, GT : GraphType<in PN>>(
     name: String,
-    type: String
-) : SingleOutputPipelineNodeProducer<PN, GT>(name, type) {
+    type: String,
+    menuLocation: String,
+) : SingleOutputPipelineNodeProducer<PN, GT>(name, type, menuLocation) {
 
     protected abstract val first: NamedGraphNodeInput
     protected abstract val second: NamedGraphNodeInput

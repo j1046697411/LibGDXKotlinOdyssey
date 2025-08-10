@@ -9,7 +9,7 @@ import cn.jzl.graph.shader.core.CommonShaderBuilder
 import cn.jzl.graph.shader.field.FieldOutput
 import cn.jzl.graph.shader.builder.TripleInputShaderPipelineNodeProducer
 
-class Remap : TripleInputShaderPipelineNodeProducer("Remap", "Remap") {
+class Remap : TripleInputShaderPipelineNodeProducer("Remap", "Remap", "Util/Remap") {
     override val first = createNodeInput(
         fieldId = "input",
         fieldName = "Input",

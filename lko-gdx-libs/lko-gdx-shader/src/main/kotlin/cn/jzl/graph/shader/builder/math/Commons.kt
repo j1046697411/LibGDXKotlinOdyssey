@@ -7,28 +7,28 @@ import cn.jzl.graph.shader.builder.DualInputShaderPipelineNodeProducer
 import cn.jzl.graph.shader.builder.SingleInputShaderPipelineNodeProducer
 import cn.jzl.graph.shader.builder.TripleInputShaderPipelineNodeProducer
 
-class Abs : SingleInputShaderPipelineNodeProducer("Abs", "Abs") {
+class Abs : SingleInputShaderPipelineNodeProducer("Abs", "Abs", "Commons/Abs") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
         inputFieldOutput: FieldOutput
     ): String = "abs(${inputFieldOutput.representation})"
 }
 
-class Ceiling : SingleInputShaderPipelineNodeProducer("Ceiling", "Ceiling") {
+class Ceiling : SingleInputShaderPipelineNodeProducer("Ceiling", "Ceiling", "Commons/Ceiling") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
         inputFieldOutput: FieldOutput
     ): String = "ceil(${inputFieldOutput.representation})"
 }
 
-class Floor : SingleInputShaderPipelineNodeProducer("Floor", "Floor") {
+class Floor : SingleInputShaderPipelineNodeProducer("Floor", "Floor", "Commons/Floor") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
         inputFieldOutput: FieldOutput
     ): String = "floor(${inputFieldOutput.representation})"
 }
 
-class Clamp : TripleInputShaderPipelineNodeProducer("Clamp", "Clamp") {
+class Clamp : TripleInputShaderPipelineNodeProducer("Clamp", "Clamp", "Commons/Clamp") {
 
     override val first = createNodeInput("input", "Input", required = true)
     override val second = createNodeInput("min", "Min", required = true)
@@ -42,14 +42,14 @@ class Clamp : TripleInputShaderPipelineNodeProducer("Clamp", "Clamp") {
     ): String = "clamp(${firstFieldOutput.representation}, ${secondFieldOutput.representation}, ${thirdFieldOutput.representation})"
 }
 
-class Fractional : SingleInputShaderPipelineNodeProducer("Fractional", "Fractional") {
+class Fractional : SingleInputShaderPipelineNodeProducer("Fractional", "Fractional", "Commons/Fractional") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
         inputFieldOutput: FieldOutput
     ): String = "fract(${inputFieldOutput.representation})"
 }
 
-class Lerp : TripleInputShaderPipelineNodeProducer("Lerp", "Lerp") {
+class Lerp : TripleInputShaderPipelineNodeProducer("Lerp", "Lerp", "Commons/Lerp") {
     override val first = createNodeInput("a", "A", required = true)
     override val second = createNodeInput("b", "B", required = true)
     override val third = createNodeInput("t", "T", required = true)
@@ -62,21 +62,21 @@ class Lerp : TripleInputShaderPipelineNodeProducer("Lerp", "Lerp") {
     ): String = "mix(${firstFieldOutput.representation}, ${secondFieldOutput.representation}, ${thirdFieldOutput.representation})"
 }
 
-class Maximum : AcceptingMultipleSingleInputShaderPipelineNodeProducer("Max", "Max") {
+class Maximum : AcceptingMultipleSingleInputShaderPipelineNodeProducer("Max", "Max", "Commons/Maximum") {
     override fun buildFragmentNodeSingleInputs(
         commonShaderBuilder: CommonShaderBuilder,
         inputs: Sequence<FieldOutput>
     ): String = inputs.map { it.representation }.reduce { acc, output -> "max($acc, $output)" }
 }
 
-class Minimum : AcceptingMultipleSingleInputShaderPipelineNodeProducer("Min", "Min") {
+class Minimum : AcceptingMultipleSingleInputShaderPipelineNodeProducer("Min", "Min", "Commons/Minimum") {
     override fun buildFragmentNodeSingleInputs(
         commonShaderBuilder: CommonShaderBuilder,
         inputs: Sequence<FieldOutput>
     ): String = inputs.map { it.representation }.reduce { acc, output -> "min($acc, $output)" }
 }
 
-class Modulo : DualInputShaderPipelineNodeProducer("Modulo", "Modulo") {
+class Modulo : DualInputShaderPipelineNodeProducer("Modulo", "Modulo", "Commons/Modulo") {
 
     override fun buildFragmentNodeDualInputs(
         commonShaderBuilder: CommonShaderBuilder,
@@ -85,7 +85,7 @@ class Modulo : DualInputShaderPipelineNodeProducer("Modulo", "Modulo") {
     ): String = "mod(${firstFieldOutput.representation}, ${secondFieldOutput.representation})"
 }
 
-class Saturate : SingleInputShaderPipelineNodeProducer("Saturate", "Saturate") {
+class Saturate : SingleInputShaderPipelineNodeProducer("Saturate", "Saturate", "Commons/Saturate") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
         inputFieldOutput: FieldOutput
@@ -93,14 +93,14 @@ class Saturate : SingleInputShaderPipelineNodeProducer("Saturate", "Saturate") {
 }
 
 
-class Sign : SingleInputShaderPipelineNodeProducer("Sign", "Sign") {
+class Sign : SingleInputShaderPipelineNodeProducer("Sign", "Sign", "Commons/Sign") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
         inputFieldOutput: FieldOutput
     ): String = "sign(${inputFieldOutput.representation})"
 }
 
-class SmoothStep : TripleInputShaderPipelineNodeProducer("SmoothStep", "SmoothStep") {
+class SmoothStep : TripleInputShaderPipelineNodeProducer("SmoothStep", "SmoothStep", "Commons/SmoothStep") {
     override val first = createNodeInput("edge0", "Edge0", required = true)
     override val second = createNodeInput("edge1", "Edge1", required = true)
     override val third = createNodeInput("x", "X", required = true)
@@ -113,7 +113,7 @@ class SmoothStep : TripleInputShaderPipelineNodeProducer("SmoothStep", "SmoothSt
     ): String = "smoothstep(${firstFieldOutput.representation}, ${secondFieldOutput.representation}, ${thirdFieldOutput.representation})"
 }
 
-class Step : DualInputShaderPipelineNodeProducer("Step", "Step") {
+class Step : DualInputShaderPipelineNodeProducer("Step", "Step", "Commons/Step") {
 
     override val first = createNodeInput("input", "input", required = true)
     override val second = createNodeInput("edge", "edge", required = true)

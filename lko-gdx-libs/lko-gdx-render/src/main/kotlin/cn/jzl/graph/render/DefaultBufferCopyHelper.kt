@@ -2,13 +2,13 @@ package cn.jzl.graph.render
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 
 internal class DefaultBufferCopyHelper : BufferCopyHelper {
 
     private val shaderProgram by lazy { ShaderProgram(VART_DRAW_TEXTURE, FRAG_DRAW_TEXTURE) }
-
     override fun copy(
         from: FrameBuffer,
         to: FrameBuffer?,
@@ -27,7 +27,6 @@ internal class DefaultBufferCopyHelper : BufferCopyHelper {
         renderContext.setDepthMask(false)
         renderContext.setBlending(false, 0, 0)
         renderContext.setCullFace(GL20.GL_BACK)
-
         shaderProgram.bind()
         shaderProgram.setUniformi("u_sourceTexture", renderContext.bindTexture(from.colorBufferTexture))
         shaderProgram.setUniformf("u_sourcePosition", 0f, 0f)

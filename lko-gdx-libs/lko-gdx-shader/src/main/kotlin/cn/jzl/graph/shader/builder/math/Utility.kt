@@ -6,7 +6,7 @@ import cn.jzl.graph.shader.core.CommonShaderBuilder
 import cn.jzl.graph.shader.field.FieldOutput
 import cn.jzl.graph.shader.builder.TripleInputShaderPipelineNodeProducer
 
-class DistanceFromPlane : TripleInputShaderPipelineNodeProducer("DistanceFromPlane", "DistanceFromPlane") {
+class DistanceFromPlane : TripleInputShaderPipelineNodeProducer("DistanceFromPlane", "DistanceFromPlane", "Utils/DistanceFromPlane") {
 
     override val first: NamedGraphNodeInput = createNodeInput("point", "Point", required = true)
     override val second: NamedGraphNodeInput = createNodeInput("planeNormal", "PlaneNormal", required = true)

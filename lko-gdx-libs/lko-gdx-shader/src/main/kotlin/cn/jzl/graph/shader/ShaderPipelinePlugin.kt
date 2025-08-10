@@ -12,6 +12,7 @@ import cn.jzl.graph.shader.builder.core.EndModelShaderNodeProducer
 import cn.jzl.graph.shader.builder.math.*
 import cn.jzl.graph.shader.builder.property.DefaultGraphShaderPropertyProducer
 import cn.jzl.graph.shader.builder.property.Property
+import cn.jzl.graph.shader.builder.texture.Sampler2D
 import cn.jzl.graph.shader.builder.util.*
 import cn.jzl.graph.shader.core.ModelShaderGraphType
 import cn.jzl.graph.shader.field.DefaultShaderFieldTypeResolver
@@ -93,6 +94,8 @@ class ShaderPipelinePlugin : PipelinePlugin {
         pipelineRegistry.register(RemapValue())
         pipelineRegistry.register(Constant())
         pipelineRegistry.register(Property())
+
+        pipelineRegistry.register(Sampler2D())
 
         pipelineRegistry.register(EndModelShaderNodeProducer())
     }

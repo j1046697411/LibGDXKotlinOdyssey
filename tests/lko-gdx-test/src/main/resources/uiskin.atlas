@@ -1,0 +1,199 @@
+
+uiskin.png
+size: 256, 256
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+Consolas
+  rotate: false
+  xy: 2, 19
+  size: 103, 102
+  orig: 103, 102
+  offset: 0, 0
+  index: -1
+connector-bottom
+  rotate: false
+  xy: 198, 240
+  size: 11, 11
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+connector-bottom-required
+  rotate: false
+  xy: 56, 6
+  size: 11, 11
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+connector-left
+  rotate: false
+  xy: 107, 60
+  size: 11, 11
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+connector-left-required
+  rotate: false
+  xy: 211, 240
+  size: 11, 11
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+connector-right
+  rotate: false
+  xy: 69, 6
+  size: 11, 11
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+connector-right-required
+  rotate: false
+  xy: 107, 47
+  size: 11, 11
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+connector-top
+  rotate: false
+  xy: 224, 240
+  size: 11, 11
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+connector-top-required
+  rotate: false
+  xy: 82, 6
+  size: 11, 11
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+graph-background
+  rotate: false
+  xy: 2, 123
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+graph-icon-delete
+  rotate: false
+  xy: 161, 220
+  size: 14, 14
+  orig: 14, 14
+  offset: 0, 0
+  index: -1
+graph-icon-down
+  rotate: false
+  xy: 182, 237
+  size: 14, 14
+  orig: 14, 14
+  offset: 0, 0
+  index: -1
+graph-icon-edit
+  rotate: false
+  xy: 132, 156
+  size: 14, 14
+  orig: 14, 14
+  offset: 0, 0
+  index: -1
+graph-icon-right
+  rotate: false
+  xy: 40, 3
+  size: 14, 14
+  orig: 14, 14
+  offset: 0, 0
+  index: -1
+graph-icon-up
+  rotate: false
+  xy: 107, 73
+  size: 14, 14
+  orig: 14, 14
+  offset: 0, 0
+  index: -1
+graph-model-shader-icon
+  rotate: false
+  xy: 2, 2
+  size: 19, 15
+  orig: 19, 15
+  offset: 0, 0
+  index: -1
+graph-particle-effect-icon
+  rotate: false
+  xy: 107, 106
+  size: 19, 15
+  orig: 19, 15
+  offset: 0, 0
+  index: -1
+graph-render-pipeline-icon
+  rotate: false
+  xy: 161, 236
+  size: 19, 15
+  orig: 19, 15
+  offset: 0, 0
+  index: -1
+graph-rounded-background
+  rotate: false
+  xy: 23, 2
+  size: 15, 15
+  split: 7, 7, 7, 7
+  orig: 15, 15
+  offset: 0, 0
+  index: -1
+graph-rounded-frame
+  rotate: false
+  xy: 107, 89
+  size: 15, 15
+  split: 7, 7, 7, 7
+  orig: 15, 15
+  offset: 0, 0
+  index: -1
+graph-screen-shader-icon
+  rotate: false
+  xy: 132, 172
+  size: 19, 15
+  orig: 19, 15
+  offset: 0, 0
+  index: -1
+graph-slider-knob
+  rotate: false
+  xy: 161, 201
+  size: 9, 17
+  orig: 9, 17
+  offset: 0, 0
+  index: -1
+graph-slider-knob-over
+  rotate: false
+  xy: 132, 137
+  size: 9, 17
+  orig: 9, 17
+  offset: 0, 0
+  index: -1
+graph-tick
+  rotate: false
+  xy: 161, 190
+  size: 9, 9
+  orig: 9, 9
+  offset: 0, 0
+  index: -1
+graph-white
+  rotate: false
+  xy: 153, 184
+  size: 3, 3
+  orig: 3, 3
+  offset: 0, 0
+  index: -1
+graph-window
+  rotate: false
+  xy: 132, 189
+  size: 27, 30
+  split: 5, 4, 22, 3
+  orig: 27, 30
+  offset: 0, 0
+  index: -1
+graph-window-selected
+  rotate: false
+  xy: 132, 221
+  size: 27, 30
+  split: 5, 4, 22, 3
+  orig: 27, 30
+  offset: 0, 0
+  index: -1

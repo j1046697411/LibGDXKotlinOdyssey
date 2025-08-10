@@ -14,8 +14,9 @@ import cn.jzl.graph.common.rendering.set
 
 abstract class AcceptingMultipleSingleInputGeneralPipelineNodeProducer(
     name: String,
-    type: String
-) : AcceptingMultipleSingleInputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>(name, type) {
+    type: String,
+    menuLocation: String,
+) : AcceptingMultipleSingleInputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>(name, type, menuLocation) {
     override fun createSingleOutputNode(
         world: World,
         graph: GraphWithProperties,

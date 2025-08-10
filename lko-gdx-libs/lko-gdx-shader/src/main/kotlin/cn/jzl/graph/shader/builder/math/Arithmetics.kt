@@ -6,7 +6,7 @@ import cn.jzl.graph.shader.builder.AcceptingMultipleSingleInputShaderPipelineNod
 import cn.jzl.graph.shader.builder.DualInputShaderPipelineNodeProducer
 import cn.jzl.graph.shader.builder.SingleInputShaderPipelineNodeProducer
 
-class Plus : AcceptingMultipleSingleInputShaderPipelineNodeProducer("Plus", "Plus") {
+class Plus : AcceptingMultipleSingleInputShaderPipelineNodeProducer("Plus", "Plus", "Arithmetics/Plus") {
 
     override val inputs = createNodeInput("inputs", "inputs", required = true, acceptingMultiple = true)
     override val output = createNodeOutput("output", "output", required = true)
@@ -18,7 +18,7 @@ class Plus : AcceptingMultipleSingleInputShaderPipelineNodeProducer("Plus", "Plu
 }
 
 
-class Times : AcceptingMultipleSingleInputShaderPipelineNodeProducer("Times", "Times") {
+class Times : AcceptingMultipleSingleInputShaderPipelineNodeProducer("Times", "Times", "Arithmetics/Times") {
 
     override val inputs = createNodeInput("inputs", "inputs", required = true, acceptingMultiple = true)
     override val output = createNodeOutput("output", "output", required = true)
@@ -29,7 +29,7 @@ class Times : AcceptingMultipleSingleInputShaderPipelineNodeProducer("Times", "T
     ): String = inputs.joinToString(" * ") { it.representation }
 }
 
-class Minus : DualInputShaderPipelineNodeProducer("Minus", "Minus") {
+class Minus : DualInputShaderPipelineNodeProducer("Minus", "Minus", "Arithmetics/Minus") {
     override fun buildFragmentNodeDualInputs(
         commonShaderBuilder: CommonShaderBuilder,
         firstFieldOutput: FieldOutput,
@@ -37,7 +37,7 @@ class Minus : DualInputShaderPipelineNodeProducer("Minus", "Minus") {
     ): String = "${firstFieldOutput.representation} - ${secondFieldOutput.representation}"
 }
 
-class Div : DualInputShaderPipelineNodeProducer("Div", "Div") {
+class Div : DualInputShaderPipelineNodeProducer("Div", "Div", "Arithmetics/Div") {
     override fun buildFragmentNodeDualInputs(
         commonShaderBuilder: CommonShaderBuilder,
         firstFieldOutput: FieldOutput,
@@ -45,7 +45,7 @@ class Div : DualInputShaderPipelineNodeProducer("Div", "Div") {
     ): String = "${firstFieldOutput.representation} / ${secondFieldOutput.representation}"
 }
 
-class Rem : DualInputShaderPipelineNodeProducer("Rem", "Rem") {
+class Rem : DualInputShaderPipelineNodeProducer("Rem", "Rem", "Arithmetics/Rem") {
     override fun buildFragmentNodeDualInputs(
         commonShaderBuilder: CommonShaderBuilder,
         firstFieldOutput: FieldOutput,
@@ -53,7 +53,7 @@ class Rem : DualInputShaderPipelineNodeProducer("Rem", "Rem") {
     ): String = "${firstFieldOutput.representation} % ${secondFieldOutput.representation}"
 }
 
-class OneMinus : SingleInputShaderPipelineNodeProducer("OneMinus", "OneMinus") {
+class OneMinus : SingleInputShaderPipelineNodeProducer("OneMinus", "OneMinus", "Arithmetics/OneMinus") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
         inputFieldOutput: FieldOutput
@@ -61,7 +61,7 @@ class OneMinus : SingleInputShaderPipelineNodeProducer("OneMinus", "OneMinus") {
 }
 
 
-class Reciprocal : SingleInputShaderPipelineNodeProducer("Reciprocal", "Reciprocal") {
+class Reciprocal : SingleInputShaderPipelineNodeProducer("Reciprocal", "Reciprocal", "Arithmetics/Reciprocal") {
     override fun buildFragmentNodeSingleInput(
         commonShaderBuilder: CommonShaderBuilder,
         inputFieldOutput: FieldOutput

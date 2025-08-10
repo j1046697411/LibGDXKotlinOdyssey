@@ -17,8 +17,9 @@ import cn.jzl.graph.shader.field.ShaderFieldTypeResolver
 
 abstract class SingleInputShaderPipelineNodeProducer(
     name: String,
-    type: String
-) : SingleInputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>(name, type) {
+    type: String,
+    menuLocation: String
+) : SingleInputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>(name, type, menuLocation) {
 
     override val input = createNodeInput("input", "Input", required = true)
     override val output = createNodeOutput("output", "Output", required = true)

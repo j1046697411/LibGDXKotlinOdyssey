@@ -25,7 +25,7 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.ScreenUtils
 
 class StartRenderingPipelineNodeProducer :
-    DualInputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>("Pipeline Start", "PipelineStart") {
+    DualInputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>("Pipeline Start", "PipelineStart", "Render/StartRendering") {
 
     override val first = createNodeInput("background", "background", ColorType)
     override val second = createNodeInput("size", "size", Vector2Type)

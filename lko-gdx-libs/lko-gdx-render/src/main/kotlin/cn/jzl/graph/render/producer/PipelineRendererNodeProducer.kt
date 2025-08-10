@@ -16,7 +16,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 
 class PipelineRendererNodeProducer :
-    SingleOutputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>("Pipeline Renderer", "PipelineRenderer") {
+    SingleOutputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>("Pipeline Renderer", "PipelineRenderer", "Render/PipelineRenderer") {
 
     private val first = createNodeInput(
         fieldId = "pipeline",

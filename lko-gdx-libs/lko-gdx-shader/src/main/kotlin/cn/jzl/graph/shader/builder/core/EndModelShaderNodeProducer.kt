@@ -20,7 +20,7 @@ import cn.jzl.graph.shader.field.FieldOutput
 import cn.jzl.graph.shader.field.ShaderFieldTypeResolver
 
 class EndModelShaderNodeProducer :
-    AbstractPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>("Shader output", "ShaderEnd") {
+    AbstractPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>("Shader output", "ShaderEnd", "Shader/Shader output") {
     private val position = createNodeInput(
         fieldId = "position",
         fieldName = "position",

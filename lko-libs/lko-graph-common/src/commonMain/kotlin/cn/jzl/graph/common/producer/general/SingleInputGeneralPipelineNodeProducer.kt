@@ -14,8 +14,9 @@ import cn.jzl.graph.common.rendering.set
 
 abstract class SingleInputGeneralPipelineNodeProducer(
     name: String,
-    type: String
-) : SingleInputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>(name, type) {
+    type: String,
+    menuLocation: String,
+) : SingleInputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>(name, type, menuLocation) {
 
     override fun createSingleInputNode(
         world: World,

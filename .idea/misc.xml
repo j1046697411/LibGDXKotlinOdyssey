@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="web" url="file://$PROJECT_DIR$" />
+  </component>
   <component name="LibGDXSkins">
     <file url="file://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.kotcrab.vis/vis-ui/1.5.5/a9066dcfef365fdd933c9bdcc4e26e553c20610b/vis-ui-1.5.5.jar!/com/kotcrab/vis/ui/skin/x2/uiskin.json" />
   </component>

@@ -21,7 +21,7 @@ import cn.jzl.graph.shader.renderer.strategy.Order
 import cn.jzl.graph.shader.renderer.strategy.ShaderSortModelRenderingStrategy
 import com.badlogic.gdx.graphics.Camera
 
-class ShaderRendererPipelineNodeProducer : TripleInputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>("Model Shaders", "GraphShaderRenderer") {
+class ShaderRendererPipelineNodeProducer : TripleInputPipelineNodeProducer<RenderingPipelineNode, RenderGraphType>("Model Shaders", "GraphShaderRenderer", "Renderer/ShaderRenderer") {
     override val first = createNodeInput(
         fieldId = "enabled",
         fieldName = "enabled",
@@ -67,6 +67,7 @@ class ShaderRendererPipelineNodeProducer : TripleInputPipelineNodeProducer<Rende
         val shaderContext = GraphShaderContext(shaderConfiguration, configuration.timeProvider, openGLContext)
         val renderingStrategy = ShaderSortModelRenderingStrategy(Order.FrontToBack)
         val strategyCallback = RenderingStrategyCallback(shaderContext, shaderConfiguration)
+        shaderConfiguration.registerShader(shader)
         return RenderingPipelineNode { blackboard ->
             val enabled = first?.let { blackboard[it.fromGraphNode, it.fromOutput, PrimitiveFieldTypes.BooleanFieldType] } ?: true
             val renderPipeline = blackboard[third.fromGraphNode, third.fromOutput, RenderingPipelineType]

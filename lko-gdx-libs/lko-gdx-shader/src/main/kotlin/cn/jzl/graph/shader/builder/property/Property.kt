@@ -14,7 +14,7 @@ import cn.jzl.graph.shader.builder.GraphShaderPipelineNode
 import cn.jzl.graph.shader.core.ShaderGraphType
 import cn.jzl.graph.shader.field.FieldOutput
 
-class Property : SingleOutputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>("Property", "Property") {
+class Property : SingleOutputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>("Property", "Property", "Property") {
 
     override val output = createNodeOutput("output", "output", PrimitiveFieldTypes.FloatFieldType)
 

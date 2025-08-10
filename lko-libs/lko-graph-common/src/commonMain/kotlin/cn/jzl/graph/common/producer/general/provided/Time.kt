@@ -14,7 +14,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.time.DurationUnit
 
-class Time : AbstractPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>("time", "time") {
+class Time : AbstractPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>("time", "time", "Provided/Time") {
 
     private val time = createNodeOutput(
         fieldId = "time",

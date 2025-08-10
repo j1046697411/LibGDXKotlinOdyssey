@@ -12,8 +12,9 @@ import cn.jzl.graph.impl.NamedGraphNodeOutput
 
 abstract class SingleOutputPipelineNodeProducer<PN : PipelineNode, GT : GraphType<in PN>>(
     name: String,
-    type: String
-) : AbstractPipelineNodeProducer<PN, GT>(name, type) {
+    type: String,
+    menuLocation: String,
+) : AbstractPipelineNodeProducer<PN, GT>(name, type, menuLocation) {
     protected abstract val output: NamedGraphNodeOutput
 
     final override fun createNode(

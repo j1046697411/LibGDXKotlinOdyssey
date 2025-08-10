@@ -12,7 +12,7 @@ import cn.jzl.graph.common.producer.SingleOutputPipelineNodeProducer
 import cn.jzl.graph.common.producer.general.GeneralGraphType
 import cn.jzl.graph.common.producer.general.GeneralPipelineNode
 
-class Property : SingleOutputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>("property", "property") {
+class Property : SingleOutputPipelineNodeProducer<GeneralPipelineNode, GeneralGraphType>("property", "property", "Provided/Property") {
 
     override val output = createNodeOutput(
         fieldId = "output",

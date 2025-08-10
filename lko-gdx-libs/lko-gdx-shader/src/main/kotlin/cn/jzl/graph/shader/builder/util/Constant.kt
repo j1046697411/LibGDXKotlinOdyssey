@@ -17,7 +17,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.math.Vector4
 
-class Constant : SingleOutputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>("Constant", "Constant") {
+class Constant : SingleOutputPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraphType>("Constant", "Constant", "Util/Constant") {
 
     override val output = createNodeOutput("output", "Constant")
 
