@@ -16,6 +16,7 @@ class  GraphNodeWindow(
     init {
         val configuration = graphNodeEditor.configuration
         titleLabel.setAlignment(Align.center)
+        setKeepWithinStage(false)
         sizeBy(max(150f, prefWidth), prefHeight)
         actor(graphNodeEditor.actor).cell(grow = true)
         if (configuration.closeable) {

@@ -83,6 +83,7 @@ class GraphEditor(world: World, override val type: String) : VisTable(), GraphWi
             }
             addActor(this@GraphEditor.container)
         }.cell(grow = true, row = true)
+        container.clip = true
     }
 
 

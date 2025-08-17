@@ -811,6 +811,7 @@ inline fun World.update(deltaTime: Duration): Unit = systemService.update(deltaT
 inline fun World.schedule(noinline scheduleTask: suspend ScheduleScore.() -> Unit): Schedule = scheduleService.schedule(scheduleTask)
 
 inline operator fun World.minusAssign(entity: Entity) = entityService.minusAssign(entity)
+inline fun World.delete(entity: Entity): Unit = entityService.minusAssign(entity)
 
 inline val World.onEntityCreated: Signal<Entity> get() = entityService.onEntityCreated
 inline val World.onEntityChanged: Signal<Entity> get() = entityService.onEntityChanged
@@ -819,6 +820,8 @@ inline val World.onEntityRemoved: Signal<Entity> get() = entityService.onEntityR
 inline fun World.enableDelayedRemoval(vararg componentTypes: ComponentType<*>) {
     delayedRemovalComponentSystem.enableDelayedRemoval(*componentTypes)
 }
+
+val World.entitySize: Int get() = entityService.size
 
 fun world(configuration: DIMainBuilder.() -> Unit): World {
     val di = DI {

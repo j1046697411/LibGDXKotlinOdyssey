@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.composeCompiler)
 }
 
 dependencies {
@@ -8,6 +9,7 @@ dependencies {
     api(projects.lkoGdxRender)
     api(projects.lkoGdxShader)
     api(projects.lkoGdxUi)
+    api(projects.lkoUi)
 
     implementation(libs.gdx.ktx.log)
     implementation(libs.gdx.ktx.collections)
@@ -17,6 +19,8 @@ dependencies {
     implementation(libs.gdx.ktx.scene2d)
     implementation(libs.gdx.ktx.style)
     implementation(libs.gdx.vis)
+
+    implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.gdx.core)
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:1.13.1")

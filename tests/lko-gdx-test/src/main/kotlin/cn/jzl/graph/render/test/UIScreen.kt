@@ -1,82 +1,116 @@
 package cn.jzl.graph.render.test
 
 import cn.jzl.di.instance
-import cn.jzl.di.new
-import cn.jzl.di.singleton
-import cn.jzl.ecs.World
+import cn.jzl.ecs.Entity
+import cn.jzl.ecs.entitySize
+import cn.jzl.ecs.update
 import cn.jzl.ecs.world
-import cn.jzl.graph.GraphNode
-import cn.jzl.graph.common.GraphTypeResolver
-import cn.jzl.graph.common.PipelineNode
-import cn.jzl.graph.common.PipelineNodeProducerContainer
-import cn.jzl.graph.common.PipelineNodeProducerResolver
 import cn.jzl.graph.common.rendering.pipelineModule
-import cn.jzl.graph.impl.DefaultGraphConnection
-import cn.jzl.graph.impl.DefaultGraphNode
-import cn.jzl.graph.impl.DefaultNodeGroup
 import cn.jzl.graph.render.renderPipelineModule
 import cn.jzl.graph.shader.shaderPipelineModule
-import cn.jzl.graph.ui.graph.*
-import com.badlogic.gdx.Application
-import com.badlogic.gdx.Gdx
+import cn.jzl.ui.*
+import cn.jzl.ui.compose.ComposeLayerNode
+import cn.jzl.ui.compose.composeModule
+import cn.jzl.ui.compose.layerNode
+import cn.jzl.ui.compose.ui
+import cn.jzl.ui.ecs.HierarchySystem
+import cn.jzl.ui.flexbox.AlignSelf
+import cn.jzl.ui.flexbox.alignSelf
+import cn.jzl.ui.flexbox.flexBox
+import cn.jzl.ui.modifier.Modifier
+import cn.jzl.ui.style.background
+import cn.jzl.ui.style.per
+import cn.jzl.ui.style.px
+import cn.jzl.ui.style.size
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Stage
-import com.badlogic.gdx.utils.viewport.ScreenViewport
+import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.utils.Align
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import ktx.app.KtxScreen
-import ktx.log.logger
-import ktx.scene2d.actor
 import ktx.scene2d.actors
+import ktx.scene2d.label
 import ktx.scene2d.vis.visTable
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 class UIScreen : KtxScreen {
     private val world = world {
         this.module(shaderPipelineModule())
         module(pipelineModule())
         module(renderPipelineModule())
-        this bind singleton { new(::DefaultGraphNodeEditorFactory) }
+        module(composeModule)
     }
 
-    private val stage by lazy { Stage(ScreenViewport()) }
+    private val hierarchySystem by world.instance<HierarchySystem>()
 
-    private val graphEditor by lazy { GraphEditor(world, "Model_Shader") }
-
-    private val graphTypeResolver by world.instance<GraphTypeResolver>()
-    private val pipelineNodeProducerContainer by world.instance<PipelineNodeProducerContainer>()
+    private val stage = Stage()
+    private lateinit var debugWorldLabel: Label
 
     override fun show() {
         super.show()
         stage.actors {
             visTable {
-                actor(graphEditor).cell(grow = true)
-            }.setSize(stage.width, stage.height)
+                debugWorldLabel = label("Hello World").cell(grow = true, align = Align.topLeft)
+            }.setFillParent(true)
         }
 
-        val graphType = graphTypeResolver.resolve<PipelineNode>(graphEditor.type)
-        pipelineNodeProducerContainer.getProducers(graphType).take(10).forEachIndexed { index, producer ->
-            graphEditor.addGraphNode(DefaultGraphNode("index_$index", producer.configuration.type))
+        val mutationPolicy = object : MeasurePolicy {
+            override fun MeasureScore.measure(
+                self: Measurable,
+                measures: Sequence<Measurable>,
+                constraints: Constraints
+            ): MeasureResult {
+                return layout(IntSize(constraints.maxWidth, constraints.maxHeight), mapOf()) {
+                }
+            }
+
         }
-        Gdx.input.inputProcessor = stage
-        Gdx.app.logLevel = Application.LOG_DEBUG
+        CoroutineScope(Dispatchers.Unconfined).launch {
+            ui(world) {
+                flexBox(Modifier.background(Color.CYAN)) {
+                    layerNode(Modifier.size(20.per, 35.per).background(Color.YELLOW), mutationPolicy) {
+                    }
+                    layerNode(Modifier.size(200.px, 200.px).background(Color.RED), mutationPolicy) {
+                    }
+                    layerNode(Modifier.size(300.px, 300.px).background(Color.BLUE), mutationPolicy) {
+                    }
+                }
+            }
+        }
     }
 
     override fun render(delta: Float) {
         super.render(delta)
+        world.update(delta.toDouble().toDuration(DurationUnit.SECONDS))
+        updateWorld()
         stage.act(delta)
         stage.draw()
     }
 
-    companion object {
-        private val log = logger<UIScreen>()
+    private fun updateWorld() {
+        val debug = buildString {
+            append("Debug World size: ${world.entitySize}").appendLine()
+            with(hierarchySystem) {
+                val rootEntities = rootEntities
+                rootEntities.forEach { rootEntity -> printHierarchy(rootEntity, this@buildString, 0) }
+            }
+        }
+        debugWorldLabel.setText(debug)
     }
-}
 
-class DefaultGraphNodeEditorFactory(world: World) : GraphNodeEditorFactory {
+    private fun HierarchySystem.printHierarchy(entity: Entity, builder: StringBuilder, hierarchy: Int) {
+        printEntity(entity, builder, hierarchy)
+        val children = getChildren(entity)
+        children.forEach { entity -> printHierarchy(entity, builder, hierarchy + 1) }
+    }
 
-    private val pipelineNodeProducerResolver by world.instance<PipelineNodeProducerResolver>()
-    private val graphTypeResolver by world.instance<GraphTypeResolver>()
-
-    override fun createGraphNodeEditor(graphEditor: GraphEditor, graphNode: GraphNode): GraphNodeEditor {
-        val graphType = graphTypeResolver.resolve<PipelineNode>(graphEditor.type)
-        val pipelineRendererNodeProducer = pipelineNodeProducerResolver.resolve(graphType, graphNode)
-        return DefaultGraphNodeEditor(graphEditor, graphNode, EditorNodeConfiguration(true, pipelineRendererNodeProducer.configuration))
+    private fun HierarchySystem.printEntity(entity: Entity, builder: StringBuilder, hierarchy: Int) {
+        val interval = "    ".repeat(hierarchy)
+        builder.append(interval).append("Entity: $entity").appendLine()
+        builder.append(interval).append("components:").appendLine()
+        val composeLayerNode = entity.getOrNull(ComposeLayerNode)
     }
 }
