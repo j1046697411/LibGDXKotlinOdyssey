@@ -18,7 +18,11 @@ kotlin {
 
         commonMain.dependencies {
             api(projects.lkoEcs)
-            api(libs.jetbrains.compose.runtime)
+            api(projects.lkoMath)
+
+            api(libs.compose.runtime)
+            api(libs.compose.foundation.layout)
+
             api(libs.kotlinx.coroutines.core)
         }
         desktopMain.dependencies {

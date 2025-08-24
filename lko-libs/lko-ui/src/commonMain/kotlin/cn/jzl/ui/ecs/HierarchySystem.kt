@@ -6,6 +6,11 @@ class HierarchySystem(world: World) : System(world) {
 
     val rootEntities: Family = world.family { it.all(RootNode) }
 
+    fun createRoot(configuration: EntityCreateContext.(Entity)-> Unit): Entity = world.create {
+        it += RootNode
+        configuration(it)
+    }
+
     fun addHierarchy(parent: Entity, child: Entity) {
         val hierarchy = child.getOrNull(Hierarchy)
         if (hierarchy != null) {
@@ -58,5 +63,14 @@ class HierarchySystem(world: World) : System(world) {
             world.delete(children[index])
         }
         children.remove(from, count)
+    }
+
+    fun clear(entity: Entity) {
+        world.delete(entity)
+        val children = entity.getOrNull(Children) ?: return
+        for (child in children) {
+            clear(child)
+        }
+        children.clear()
     }
 }

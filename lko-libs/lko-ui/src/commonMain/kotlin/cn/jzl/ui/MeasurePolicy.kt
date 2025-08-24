@@ -1,5 +1,7 @@
 package cn.jzl.ui
 
+import cn.jzl.ui.node.Constraints
+
 interface MeasurePolicy {
-    fun MeasureScore.measure(self: Measurable, measures: Sequence<Measurable>, constraints: Constraints): MeasureResult
+    fun MeasureScope.measure(measurables: Sequence<Measurable>, constraints: Constraints): MeasureResult
 }

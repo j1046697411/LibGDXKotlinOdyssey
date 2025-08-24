@@ -5,7 +5,7 @@ package cn.jzl.ui.modifier
 import androidx.compose.runtime.Stable
 
 @Stable
-operator fun Modifier.plus(modifier: Modifier): Modifier = when {
+inline operator fun Modifier.plus(modifier: Modifier): Modifier = when {
     this == Modifier -> modifier
     modifier == Modifier -> this
     else -> CombinedModifier(this, modifier)

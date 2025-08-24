@@ -1,5 +1,6 @@
 package cn.jzl.graph.render.test
 
+import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.NinePatch
@@ -18,6 +19,7 @@ import ktx.style.set
 class LKOGame : KtxGame<KtxScreen>() {
     override fun create() {
         super.create()
+        Gdx.app.logLevel = Application.LOG_DEBUG
         val atlas = TextureAtlas(Gdx.files.internal("uiskin.atlas"))
         VisUI.load(VisUI.SkinScale.X1)
         val skin = VisUI.getSkin()

@@ -1,6 +1,14 @@
 package cn.jzl.graph.render.test
 
+import androidx.compose.runtime.BroadcastFrameClock
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import cn.jzl.di.instance
+import cn.jzl.di.new
+import cn.jzl.di.singleton
 import cn.jzl.ecs.Entity
 import cn.jzl.ecs.entitySize
 import cn.jzl.ecs.update
@@ -8,26 +16,28 @@ import cn.jzl.ecs.world
 import cn.jzl.graph.common.rendering.pipelineModule
 import cn.jzl.graph.render.renderPipelineModule
 import cn.jzl.graph.shader.shaderPipelineModule
-import cn.jzl.ui.*
-import cn.jzl.ui.compose.ComposeLayerNode
-import cn.jzl.ui.compose.composeModule
-import cn.jzl.ui.compose.layerNode
-import cn.jzl.ui.compose.ui
+import cn.jzl.lko.math.IntPoint2
+import cn.jzl.lko.math.IntSize
+import cn.jzl.ui.ComposeUiNodeSystem
+import cn.jzl.ui.Measurable
+import cn.jzl.ui.MeasurePolicy
+import cn.jzl.ui.MeasureResult
+import cn.jzl.ui.MeasureScope
+import cn.jzl.ui.Placeable
 import cn.jzl.ui.ecs.HierarchySystem
-import cn.jzl.ui.flexbox.AlignSelf
-import cn.jzl.ui.flexbox.alignSelf
-import cn.jzl.ui.flexbox.flexBox
 import cn.jzl.ui.modifier.Modifier
-import cn.jzl.ui.style.background
-import cn.jzl.ui.style.per
-import cn.jzl.ui.style.px
-import cn.jzl.ui.style.size
-import com.badlogic.gdx.graphics.Color
+import cn.jzl.ui.node.ComposeUiLayout
+import cn.jzl.ui.node.Constraints
+import cn.jzl.ui.node.size
+import cn.jzl.ui.node.ui
+import cn.jzl.ui.unit.UIUnit
+import cn.jzl.ui.unit.dp
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.Align
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ktx.app.KtxScreen
 import ktx.scene2d.actors
@@ -41,7 +51,9 @@ class UIScreen : KtxScreen {
         this.module(shaderPipelineModule())
         module(pipelineModule())
         module(renderPipelineModule())
-        module(composeModule)
+        this bind singleton { BroadcastFrameClock() }
+        this bind singleton { new(::ComposeUiNodeSystem) }
+        this bind singleton { new(::HierarchySystem) }
     }
 
     private val hierarchySystem by world.instance<HierarchySystem>()
@@ -56,30 +68,33 @@ class UIScreen : KtxScreen {
                 debugWorldLabel = label("Hello World").cell(grow = true, align = Align.topLeft)
             }.setFillParent(true)
         }
-
-        val mutationPolicy = object : MeasurePolicy {
-            override fun MeasureScore.measure(
-                self: Measurable,
-                measures: Sequence<Measurable>,
-                constraints: Constraints
-            ): MeasureResult {
-                return layout(IntSize(constraints.maxWidth, constraints.maxHeight), mapOf()) {
+        val test = object : MeasurePolicy {
+            override fun MeasureScope.measure(measurables: Sequence<Measurable>, constraints: Constraints): MeasureResult {
+                return layout(IntSize(constraints.maxWidth, constraints.maxHeight)) {
                 }
             }
-
         }
+
         CoroutineScope(Dispatchers.Unconfined).launch {
             ui(world) {
-                flexBox(Modifier.background(Color.CYAN)) {
-                    layerNode(Modifier.size(20.per, 35.per).background(Color.YELLOW), mutationPolicy) {
-                    }
-                    layerNode(Modifier.size(200.px, 200.px).background(Color.RED), mutationPolicy) {
-                    }
-                    layerNode(Modifier.size(300.px, 300.px).background(Color.BLUE), mutationPolicy) {
+                var size by remember { mutableStateOf(0) }
+                ComposeUiLayout(modifier = Modifier.size(size.dp, UIUnit.Auto), measurePolicy = test) {
+                }
+                ComposeUiLayout(modifier = Modifier.size(size.dp), measurePolicy = test) {
+                }
+
+                if (size % 4 >= 2) {
+                    ComposeUiLayout(modifier = Modifier.size(10.dp), measurePolicy = test) {}
+                }
+                LaunchedEffect(Unit) {
+                    while (true) {
+                        size += 1
+                        delay(5000)
                     }
                 }
             }
         }
+
     }
 
     override fun render(delta: Float) {
@@ -111,6 +126,5 @@ class UIScreen : KtxScreen {
         val interval = "    ".repeat(hierarchy)
         builder.append(interval).append("Entity: $entity").appendLine()
         builder.append(interval).append("components:").appendLine()
-        val composeLayerNode = entity.getOrNull(ComposeLayerNode)
     }
 }

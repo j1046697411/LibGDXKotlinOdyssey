@@ -10,11 +10,11 @@ internal data class CombinedModifier(private val outer: Modifier, private val in
         return outer.foldOut(inner.foldOut(initial, operation), operation)
     }
 
-    override fun any(operation: (Modifier.Element) -> Boolean): Boolean {
-        return outer.any(operation) || inner.any(operation)
+    override fun any(predicate: (Modifier.Element) -> Boolean): Boolean {
+        return outer.any(predicate) || inner.any(predicate)
     }
 
-    override fun all(operation: (Modifier.Element) -> Boolean): Boolean {
-        return outer.all(operation) && inner.all(operation)
+    override fun all(predicate: (Modifier.Element) -> Boolean): Boolean {
+        return outer.all(predicate) && inner.all(predicate)
     }
 }

@@ -1,7 +1,9 @@
 package cn.jzl.ui
 
-interface Placeable {
-    var size: IntSize
+import cn.jzl.lko.math.IntPoint2
+import cn.jzl.lko.math.IntSize
 
-    fun placeAt(position: Coordinate)
+interface Placeable {
+    val size: IntSize
+    fun place(position: IntPoint2)
 }

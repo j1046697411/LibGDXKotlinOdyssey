@@ -30,7 +30,8 @@ junit-jupiter = "5.9.3"
 mockk = "1.13.8"
 
 [libraries]
-jetbrains-compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+compose-foundation-layout = {module = "org.jetbrains.compose.foundation:foundation-layout", version.ref="compose-multiplatform"}
 
 gdx-core = { module = "com.badlogicgames.gdx:gdx", version.ref = "gdx" }
 gdx-vis = { module="com.kotcrab.vis:vis-ui", version.ref="gdx-vis" }

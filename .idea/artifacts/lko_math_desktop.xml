@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="lko-math-desktop">
+    <output-path>$PROJECT_DIR$/lko-libs/lko-math/build/libs</output-path>
+    <root id="archive" name="lko-math-desktop.jar">
+      <element id="module-output" name="LibGDXKotlinOdyssey.lko-math.desktopMain" />
+    </root>
+  </artifact>
+</component>
