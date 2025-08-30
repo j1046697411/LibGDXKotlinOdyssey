@@ -10,6 +10,10 @@ value class IntVector2(private val data: Long) {
     val x: Int get() = data.low
     val y: Int get() = data.high
 
+    override fun toString(): String {
+        return "IntVector2(x=$x,y=$y)"
+    }
+
     companion object {
 
         operator fun invoke(x: Int, y: Int): IntVector2 = IntVector2(Long.Companion.fromLowHigh(x, y))
