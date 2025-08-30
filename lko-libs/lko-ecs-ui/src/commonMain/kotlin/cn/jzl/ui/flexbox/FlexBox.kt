@@ -245,23 +245,25 @@ data class FlexBoxMeasurePolicy(
 
     private fun MeasureScope.determinePositions(flexLines: List<FlexLine>, axisSize: AxisSize) {
         if (flexLines.isEmpty()) return
+        fun FlexItem.calculateCrossOffset(axisSize: AxisSize) : Int {
+            val alignItems = flexItemNode?.alignSelf?.alignItems ?: alignItems
+            return when (alignItems) {
+                AlignItems.Start -> 0
+                AlignItems.Center -> (axisSize.crossSize - this.axisSize.crossSize) / 2
+                AlignItems.End -> axisSize.crossSize - this.axisSize.crossSize
+                AlignItems.Stretch -> {
+                    if (shouldStretch(this)) {
+                        this.axisSize = AxisSize(this.axisSize.mainSize, axisSize.crossSize)
+                    }
+                    0
+                }
+                AlignItems.Baseline -> 0
+            }
+        }
         if (flexLines.size == 1) {
             val flexLine = flexLines.component1()
             determineMainAxisPositions(flexLine, axisSize) { mainOffset ->
-                val alignItems = flexItemNode?.alignSelf?.alignItems ?: alignItems
-                val crossOffset = when (alignItems) {
-                    AlignItems.Start -> 0
-                    AlignItems.Center -> (axisSize.crossSize - this.axisSize.crossSize) / 2
-                    AlignItems.End -> axisSize.crossSize - this.axisSize.crossSize
-                    AlignItems.Stretch -> {
-                        if (shouldStretch(this)) {
-                            this.axisSize = AxisSize(this.axisSize.mainSize, axisSize.crossSize)
-                        }
-                        0
-                    }
-                    AlignItems.Baseline -> 0
-                }
-                axisOffset = AxisOffset(mainOffset, crossOffset)
+                axisOffset = AxisOffset(mainOffset, calculateCrossOffset(axisSize))
             }
         } else {
             val totalCrossSize = flexLines.fold(0) { acc, flexLine -> acc + flexLine.axisSize.crossSize }
@@ -283,20 +285,7 @@ data class FlexBoxMeasurePolicy(
                     flexLine.axisSize = flexLine.axisSize.copy(crossSize = stretch + flexLine.axisSize.crossSize)
                 }
                 determineMainAxisPositions(flexLine, axisSize) { mainOffset ->
-                    val alignItems = this.flexItemNode?.alignSelf?.alignItems ?: alignItems
-                    val crossOffset = when (alignItems) {
-                        AlignItems.End -> flexLine.axisSize.crossSize - this.axisSize.crossSize
-                        AlignItems.Center -> (flexLine.axisSize.crossSize - this.axisSize.crossSize) / 2
-                        AlignItems.Stretch -> {
-                            if (shouldStretch(this)) {
-                                this.axisSize = AxisSize(this.axisSize.mainSize, flexLine.axisSize.crossSize)
-                            }
-                            0
-                        }
-
-                        else -> 0
-                    }
-                    this.axisOffset = AxisOffset(mainOffset, acc + crossOffset)
+                    this.axisOffset = AxisOffset(mainOffset, acc + calculateCrossOffset(flexLine.axisSize))
                 }
                 acc + space + flexLine.axisSize.crossSize
             }
