@@ -68,7 +68,7 @@ class ComposeUiNodeSystem(world: World) : System(world), Updatable, EntityHierar
     }
 
     private fun render(entity: Entity) {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
         renderNode(entity, IntPoint2.Zero)
         shapeRenderer.end()
     }

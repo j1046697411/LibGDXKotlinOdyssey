@@ -15,6 +15,8 @@ import cn.jzl.ecs.world
 import cn.jzl.graph.common.rendering.pipelineModule
 import cn.jzl.graph.render.renderPipelineModule
 import cn.jzl.graph.shader.shaderPipelineModule
+import cn.jzl.ui.Alignment
+import cn.jzl.ui.Box
 import cn.jzl.ui.Spacer
 import cn.jzl.ui.ecs.HierarchySystem
 import cn.jzl.ui.flexbox.*
@@ -25,7 +27,6 @@ import cn.jzl.ui.node.color
 import cn.jzl.ui.node.ui
 import cn.jzl.ui.size
 import cn.jzl.ui.unit.dp
-import cn.jzl.ui.width
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -101,18 +102,11 @@ class UIScreen : KtxScreen {
         Gdx.input.inputProcessor = stage
         CoroutineScope(Dispatchers.Unconfined).launch {
             ui(world) {
-                FlexBox(
-                    flexDirection = flexDirection.value,
-                    flexWrap =flexWrap.value,
-                    alignItems = alignItems.value,
-                    justifyContent = justifyContent.value,
-                    alignContent = alignContent.value,
-                    modifier = Modifier.size(500.dp, 500.dp).color(Color.SKY)
-                ) {
+                Box(alignment = Alignment.Center) {
                     Spacer(Modifier.size(100.dp, 100.dp).color(Color.MAGENTA))
-                    Spacer(Modifier.width(300.dp).color(Color.RED))
+                    Spacer(Modifier.size(300.dp).color(Color.RED))
                     Spacer(Modifier.size(300.dp, 200.dp).color(Color.GREEN))
-                    Spacer(Modifier.width(100.dp).color(Color.BLUE))
+                    Spacer(Modifier.size(100.dp, 150.dp).alignment(Alignment.BottomEnd).matchParentSize(true).color(Color.BLUE))
                 }
                 LaunchedEffect(1) {
                     while (true) {
