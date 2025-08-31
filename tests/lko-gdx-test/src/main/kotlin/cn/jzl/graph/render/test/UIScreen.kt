@@ -25,6 +25,7 @@ import cn.jzl.ui.node.ComposeUiLayoutNode
 import cn.jzl.ui.node.ComposeUiNodeSystem
 import cn.jzl.ui.node.color
 import cn.jzl.ui.node.ui
+import cn.jzl.ui.padding
 import cn.jzl.ui.size
 import cn.jzl.ui.unit.dp
 import com.badlogic.gdx.Gdx
@@ -102,9 +103,9 @@ class UIScreen : KtxScreen {
         Gdx.input.inputProcessor = stage
         CoroutineScope(Dispatchers.Unconfined).launch {
             ui(world) {
-                Box(alignment = Alignment.Center) {
-                    Spacer(Modifier.size(100.dp, 100.dp).color(Color.MAGENTA))
-                    Spacer(Modifier.size(300.dp).color(Color.RED))
+                Box(alignment = Alignment.Center, modifier = Modifier.padding(horizontal = 15.dp)) {
+                    Spacer(Modifier.size(100.dp, 100.dp).padding(20.dp).color(Color.MAGENTA))
+                    Spacer(Modifier.size(300.dp).padding(10.dp).color(Color.RED))
                     Spacer(Modifier.size(300.dp, 200.dp).color(Color.GREEN))
                     Spacer(Modifier.size(100.dp, 150.dp).alignment(Alignment.BottomEnd).matchParentSize(true).color(Color.BLUE))
                 }
