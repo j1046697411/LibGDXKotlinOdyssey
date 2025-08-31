@@ -23,6 +23,7 @@ kotlin {
             api(libs.compose.runtime)
 
             api(libs.kotlinx.coroutines.core)
+            api(libs.bundles.korlibs.all)
         }
         desktopMain.dependencies {
             implementation(libs.gdx.core)

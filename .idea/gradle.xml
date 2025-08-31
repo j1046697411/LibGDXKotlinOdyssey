@@ -19,7 +19,6 @@
             <option value="$PROJECT_DIR$/lko-libs/lko-graph" />
             <option value="$PROJECT_DIR$/lko-libs/lko-graph-common" />
             <option value="$PROJECT_DIR$/lko-libs/lko-math" />
-            <option value="$PROJECT_DIR$/lko-libs/lko-ui" />
             <option value="$PROJECT_DIR$/tests/lko-gdx-test" />
           </set>
         </option>
