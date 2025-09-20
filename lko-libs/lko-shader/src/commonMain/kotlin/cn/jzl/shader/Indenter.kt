@@ -105,13 +105,15 @@ fun Appendable.evaluate(indenter: Indenter, indentEmptyLines: Boolean = false, h
     }
 }
 
-fun Indenter.block(prefix: String = "", suffix: String = "", callback: Indenter.() -> Indenter): Indenter {
+fun Indenter.block(prefix: String = "", suffix: String = "", inline: Boolean = false, callback: Indenter.() -> Indenter): Indenter {
     return let { if (prefix.isNotEmpty()) inline(prefix) else it }
         .line("{")
         .indent()
         .let(callback)
         .unindent()
-        .let { if (suffix.isNotEmpty()) inline("}").line(suffix) else it.line("}") }
+        .inline("}")
+        .let { if (suffix.isNotEmpty()) inline(suffix) else it }
+        .let { if (inline) it else it.emptyLine() }
 }
 
 fun Indenter.inline(prefix: String = "", suffix: String = "", callback: Indenter.() -> Indenter): Indenter {

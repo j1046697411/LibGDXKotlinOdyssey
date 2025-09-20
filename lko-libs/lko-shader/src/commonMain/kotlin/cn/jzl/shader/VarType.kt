@@ -4,11 +4,68 @@ sealed interface VarType {
 
     interface Comparable : VarType
     interface Computable : VarType
+    interface Vector<V, Vec2, Vec3, Vec4> : VarType, Computable {
+        operator fun component1(): V
+        operator fun component2(): Vec2
+        operator fun component3(): Vec3
+        operator fun component4(): Vec4
+    }
 
-    data object Integer : Comparable, Computable
-    data object Float : Comparable, Computable
+    interface Vector2<V, Vec2, Vec3, Vec4> : Vector<V, Vec2, Vec3, Vec4>
+    interface Vector3<V, Vec2, Vec3, Vec4> : Vector<V, Vec2, Vec3, Vec4>
+    interface Vector4<V, Vec2, Vec3, Vec4> : Vector<V, Vec2, Vec3, Vec4>
 
-    data object Boolean : Comparable
+    interface IntegerType : VarType
+    data object Integer : Comparable, Computable, IntegerType
+    abstract class IntegerVector : Vector<Integer, IVec2, IVec3, IVec4>, IntegerType {
+        override fun component1(): Integer = Integer
+        override fun component2(): IVec2 = IVec2
+        override fun component3(): IVec3 = IVec3
+        override fun component4(): IVec4 = IVec4
+    }
+
+    data object IVec2 : IntegerVector(), Vector2<Integer, IVec2, IVec3, IVec4>
+    data object IVec3 : IntegerVector(), Vector3<Integer, IVec2, IVec3, IVec4>
+    data object IVec4 : IntegerVector(), Vector4<Integer, IVec2, IVec3, IVec4>
+
+    interface FloatType : VarType
+    data object Float : Comparable, Computable, FloatType
+    abstract class FloatVector : Vector<Float, Vec2, Vec3, Vec4>, FloatType {
+        override fun component1(): Float = Float
+        override fun component2(): Vec2 = Vec2
+        override fun component3(): Vec3 = Vec3
+        override fun component4(): Vec4 = Vec4
+    }
+
+    data object Vec2 : FloatVector(), Vector2<Float, Vec2, Vec3, Vec4>
+    data object Vec3 : FloatVector(), Vector3<Float, Vec2, Vec3, Vec4>
+    data object Vec4 : FloatVector(), Vector4<Float, Vec2, Vec3, Vec4>
+
+    interface BooleanType : VarType
+    data object Boolean : Comparable, BooleanType
+    abstract class BooleanVector : Vector<Boolean, BVec2, BVec3, BVec4>, BooleanType {
+        override fun component1(): Boolean = Boolean
+        override fun component2(): BVec2 = BVec2
+        override fun component3(): BVec3 = BVec3
+        override fun component4(): BVec4 = BVec4
+    }
+
+    data object BVec2 : BooleanVector(), Vector2<Boolean, BVec2, BVec3, BVec4>
+    data object BVec3 : BooleanVector(), Vector3<Boolean, BVec2, BVec3, BVec4>
+    data object BVec4 : BooleanVector(), Vector4<Boolean, BVec2, BVec3, BVec4>
+
+    interface Matrix : VarType
+
+    data object Mat2 : Matrix
+    data object Mat3 : Matrix
+    data object Mat4 : Matrix
+
+    interface Sampler : VarType
+    data object Sampler1D : Sampler
+    data object Sampler2D : Sampler
+    data object Sampler3D : Sampler
+    data object SamplerCube : Sampler
+
 
     data object Void : VarType
 }

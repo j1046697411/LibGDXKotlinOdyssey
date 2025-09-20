@@ -34,10 +34,17 @@ open class Visitor<R> {
             is Statement.ElseIf -> visit(statement, out)
             is Statement.Else -> visit(statement, out)
             is Statement.For -> visit(statement, out)
+            is Statement.While -> visit(statement, out)
+            is Statement.Break -> visit(statement, out)
+            is Statement.Continue -> visit(statement, out)
+            is Statement.Discard -> visit(statement, out)
             else -> out
         }
     }
 
+    open fun visit(breakStatement: Statement.Break, out: R): R = out
+    open fun visit(continueStatement: Statement.Continue, out: R): R = out
+    open fun visit(discardStatement: Statement.Discard, out: R): R = out
     open fun visit(returnValue: Statement.Return<*>, out: R): R = visit(returnValue.value, out)
     open fun visit(assignment: Statement.Assignment<*>, out: R): R = visit(assignment.value, visit(assignment.variable, out))
     open fun visit(definition: Statement.Definition<*, *>, out: R): R = visit(definition.variable, definition.value?.let { visit(it, out) } ?: out)
@@ -46,6 +53,7 @@ open class Visitor<R> {
     open fun visit(elseIfStatement: Statement.ElseIf, out: R): R = visit(elseIfStatement.body, visit(elseIfStatement.condition, out))
     open fun visit(elseStatement: Statement.Else, out: R): R = visit(elseStatement.body, out)
     open fun visit(forStatement: Statement.For, out: R): R = visit(forStatement.body, visit(forStatement.condition, visit(forStatement.init, visit(forStatement.update, out))))
+    open fun visit(whileStatement: Statement.While, out: R): R = visit(whileStatement.body, visit(whileStatement.condition, out))
 
     open fun visit(operand: Operand<*>, out: R): R {
         return when (operand) {

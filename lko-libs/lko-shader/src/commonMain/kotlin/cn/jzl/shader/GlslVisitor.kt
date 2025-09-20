@@ -1,20 +1,36 @@
 package cn.jzl.shader
 
-import cn.jzl.shader.Operand
-import cn.jzl.shader.Statement
-import cn.jzl.shader.Struct
-import cn.jzl.shader.StructDeclaration
-import cn.jzl.shader.VarType
-import cn.jzl.shader.Visitor
-
 class GlslVisitor : Visitor<Indenter>() {
 
     override fun visit(varType: VarType, out: Indenter): Indenter {
         val typeName = when (varType) {
             is VarType.Void -> "void"
+
             is VarType.Integer -> "int"
+            is VarType.IVec2 -> "ivec2"
+            is VarType.IVec3 -> "ivec3"
+            is VarType.IVec4 -> "ivec4"
+
             is VarType.Float -> "float"
+            is VarType.Vec2 -> "vec2"
+            is VarType.Vec3 -> "vec3"
+            is VarType.Vec4 -> "vec4"
             is Struct<*> -> varType.structName
+
+            is VarType.Boolean -> "bool"
+            is VarType.BVec2 -> "bvec2"
+            is VarType.BVec3 -> "bvec3"
+            is VarType.BVec4 -> "bvec4"
+
+            is VarType.Mat2 -> "mat2"
+            is VarType.Mat3 -> "mat3"
+            is VarType.Mat4 -> "mat4"
+
+            is VarType.Sampler1D -> "sampler1D"
+            is VarType.Sampler2D -> "sampler2D"
+            is VarType.Sampler3D -> "sampler3D"
+            is VarType.SamplerCube -> "samplerCube"
+
             else -> throw IllegalArgumentException("Unknown var type: $varType")
         }
         return out.inline(typeName)
@@ -37,8 +53,8 @@ class GlslVisitor : Visitor<Indenter>() {
     }
 
     override fun visit(function: Operand.Function<*>, out: Indenter): Indenter {
-        return out.inline(function.name).inline("(", ") ") {
-            function.args.fold(this) { acc, operand -> visit(operand, acc) }
+        return out.inline(function.name).inline("(", ")") {
+            function.args.foldIndexed(this) { index, acc, operand -> visit(operand, if (index == 0) acc else acc.inline(", ")) }
         }
     }
 
@@ -49,8 +65,8 @@ class GlslVisitor : Visitor<Indenter>() {
     }
 
     override fun visit(returnValue: Statement.Return<*>, out: Indenter): Indenter {
-        return out.inline("return ")
-            .let { visit(returnValue.value, out) }
+        return out.inline("return")
+            .let { visit(returnValue.value, if (returnValue.value == Operand.Void) it else it.inline(" ")) }
             .line(";")
     }
 
@@ -63,45 +79,51 @@ class GlslVisitor : Visitor<Indenter>() {
             .inline(" ")
             .let { visit(definition.variable, it) }
             .let { definition.value?.let { value -> visit(value, it.inline(" = ")) } ?: out }
-            .let { if (definition !is Statement.ArgDefinition) it.line(";") else it }
+            .let { if (definition.inline) it else it.line(";") }
     }
 
     override fun visit(assignment: Statement.Assignment<*>, out: Indenter): Indenter {
-        return visit(assignment.value, visit(assignment.variable, out).inline(" = "))
+        return visit(assignment.variable, out)
+            .inline(" = ")
+            .let { visit(assignment.value, it) }
+            .let { if (assignment.inline) it else it.line(";") }
     }
 
     override fun visit(codeBlock: Statement.CodeBlock, out: Indenter): Indenter {
-        return out.block { codeBlock.statements.fold(this) { acc, statement -> visit(statement, acc) } }
+        return out.block(inline = codeBlock.inline) { codeBlock.statements.fold(this) { acc, statement -> visit(statement, acc) } }
     }
 
     override fun visit(ifStatement: Statement.If, out: Indenter): Indenter {
-        return out.inline("if ").inline("(", ")") {
-            visit(ifStatement.condition, this)
-        }.let { visit(ifStatement.body, it) }
+        return visit(ifStatement.body, out.inline("if (", ") ") { visit(ifStatement.condition, this) })
     }
 
     override fun visit(elseIfStatement: Statement.ElseIf, out: Indenter): Indenter {
-        return out.inline(" else if (", ") ") {
-            visit(elseIfStatement.condition, this)
-        }.let { visit(elseIfStatement.body, it) }
+        return visit(elseIfStatement.body, out.inline(" else if (", ") ") { visit(elseIfStatement.condition, this) })
     }
 
     override fun visit(elseStatement: Statement.Else, out: Indenter): Indenter {
-        return out.inline("else ") { visit(elseStatement.body, this) }
+        return out.inline(" else ") { visit(elseStatement.body, this) }
     }
 
     override fun visit(forStatement: Statement.For, out: Indenter): Indenter {
-        return out.inline("for").inline("(", ")") {
-            visit(forStatement.init, this)
-                .inline("; ")
-                .let { visit(forStatement.condition, it) }
-                .inline("; ")
-                .let { visit(forStatement.update, it) }
-        }.inline(" ") { visit(forStatement.body, this) }
+        return out.inline("for")
+            .inline("(", ")") {
+                visit(forStatement.init, this)
+                    .inline("; ")
+                    .let { visit(forStatement.condition, it) }
+                    .inline("; ")
+                    .let { visit(forStatement.update, it) }
+            }.inline(" ") { visit(forStatement.body, this) }
+    }
+
+    override fun visit(whileStatement: Statement.While, out: Indenter): Indenter {
+        return out.inline("while ")
+            .inline("(", ") ") { visit(whileStatement.condition, this) }
+            .let { visit(whileStatement.body, it) }
     }
 
     override fun visit(structDeclaration: StructDeclaration<*>, out: Indenter): Indenter {
-        return out.block("struct ${structDeclaration.struct.structName} ") {
+        return out.block("struct ${structDeclaration.struct.structName} ", ";") {
             structDeclaration.struct.fold(this) { acc, arg -> visit(arg, acc) }
         }
     }
@@ -116,5 +138,18 @@ class GlslVisitor : Visitor<Indenter>() {
 
                 }
             }.let { visit(functionDeclaration.body, it) }
+            .emptyLine()
+    }
+
+    override fun visit(breakStatement: Statement.Break, out: Indenter): Indenter {
+        return out.line("break;")
+    }
+
+    override fun visit(continueStatement: Statement.Continue, out: Indenter): Indenter {
+        return out.line("continue;")
+    }
+
+    override fun visit(discardStatement: Statement.Discard, out: Indenter): Indenter {
+        return out.line("discard;")
     }
 }

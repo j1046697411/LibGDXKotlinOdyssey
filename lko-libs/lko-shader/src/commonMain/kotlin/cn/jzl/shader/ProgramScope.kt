@@ -1,12 +1,5 @@
 package cn.jzl.shader
 
-import cn.jzl.shader.Property
-import cn.jzl.shader.Statement
-import cn.jzl.shader.Struct
-import cn.jzl.shader.StructConstructor
-import cn.jzl.shader.StructDeclaration
-import cn.jzl.shader.VarType
-import cn.jzl.shader.VariableProperty
 import kotlin.reflect.KProperty
 
 interface ProgramScope {
@@ -15,78 +8,36 @@ interface ProgramScope {
 
     fun fragmentShader(block: FragmentShaderScope.() -> Unit)
 
-    interface StatementScope {
-        fun <S : Statement> statement(statement: S): S
-    }
 
-    interface ExpressionScope {
-
-        val Float.lit: Operand.Literal<Float, VarType.Float> get() = Operand.Literal.FloatLiteral(this)
-        val Int.lit: Operand.Literal<Int, VarType.Integer> get() = Operand.Literal.IntLiteral(this)
-        val Boolean.lit: Operand.Literal<Boolean, VarType.Boolean> get() = Operand.Literal.BooleanLiteral(this)
-
-        infix fun <T : VarType.Comparable> Operand<T>.eq(other: Operand<T>): Operand<VarType.Boolean> {
-            return Operand.Operator.BinaryOperator(this, "==", other, VarType.Boolean)
+    interface LoopScope : CodeBlockScope {
+        fun breakStatement() {
+            statement(Statement.Break)
         }
 
-        infix fun <T : VarType.Comparable> Operand<T>.ne(other: Operand<T>): Operand<VarType.Boolean> {
-            return Operand.Operator.BinaryOperator(this, "!=", other, VarType.Boolean)
-        }
-
-        infix fun <T : VarType.Comparable> Operand<T>.lt(other: Operand<T>): Operand<VarType.Boolean> {
-            return Operand.Operator.BinaryOperator(this, "<", other, VarType.Boolean)
-        }
-
-        infix fun <T : VarType.Comparable> Operand<T>.gt(other: Operand<T>): Operand<VarType.Boolean> {
-            return Operand.Operator.BinaryOperator(this, ">", other, VarType.Boolean)
-        }
-
-        infix fun <T : VarType.Comparable> Operand<T>.le(other: Operand<T>): Operand<VarType.Boolean> {
-            return Operand.Operator.BinaryOperator(this, "<=", other, VarType.Boolean)
-        }
-
-        infix fun <T : VarType.Comparable> Operand<T>.ge(other: Operand<T>): Operand<VarType.Boolean> {
-            return Operand.Operator.BinaryOperator(this, ">=", other, VarType.Boolean)
-        }
-
-        infix operator fun <T : VarType.Computable> Operand<T>.plus(other: Operand<T>): Operand<T> {
-            return Operand.Operator.BinaryOperator(this, "+", other, type)
-        }
-
-        infix operator fun <T : VarType.Computable> Operand<T>.minus(other: Operand<T>): Operand<T> {
-            return Operand.Operator.BinaryOperator(this, "-", other, type)
-        }
-
-        infix operator fun <T : VarType.Computable> Operand<T>.times(other: Operand<T>): Operand<T> {
-            return Operand.Operator.BinaryOperator(this, "*", other, type)
-        }
-
-        infix operator fun <T : VarType.Computable> Operand<T>.div(other: Operand<T>): Operand<T> {
-            return Operand.Operator.BinaryOperator(this, "/", other, type)
-        }
-
-        infix operator fun <T : VarType.Computable> Operand<T>.rem(other: Operand<T>): Operand<T> {
-            return Operand.Operator.BinaryOperator(this, "%", other, type)
+        fun continueStatement() {
+            statement(Statement.Continue)
         }
     }
 
-    interface ForScope : CodeBlockScope {
+    interface ForScope : CodeBlockScope, LoopScope {
         val loopVar: Operand.Variable<VarType.Integer>
     }
 
-    interface CodeBlockScope : StatementScope, ExpressionScope {
+    interface CodeBlockScope : StatementScope, ExpressionScope, PrimitiveScope, VectorScope {
 
         fun codeBlock(block: CodeBlockScope.() -> Unit): Statement.CodeBlock
 
-        fun ifStatement(condition: Operand<*>, block: CodeBlockScope.() -> Unit): Statement.If {
+        fun ifStatement(condition: Operand<VarType.Boolean>, block: CodeBlockScope.() -> Unit): Statement.If {
             return statement(Statement.If(condition, codeBlock(block)))
         }
 
-        fun Statement.BeforeElse.elseIfStatement(condition: Operand<*>, block: CodeBlockScope.() -> Unit): Statement.ElseIf {
+        fun Statement.BeforeElse.elseIfStatement(condition: Operand<VarType.Boolean>, block: CodeBlockScope.() -> Unit): Statement.ElseIf {
+            inline = true
             return statement(Statement.ElseIf(condition, codeBlock(block)))
         }
 
         infix fun Statement.BeforeElse.elseStatement(block: CodeBlockScope.() -> Unit): Statement.Else {
+            inline = true
             return statement(Statement.Else(codeBlock(block)))
         }
 
@@ -97,16 +48,17 @@ interface ProgramScope {
             block: ForScope.() -> Unit
         ): Statement.For
 
-
-        operator fun <T : VarType> T.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>> {
-            val temporaryVariable = Operand.TemporaryVariable(property.name, this)
-            statement(Statement.VariableDefinition(temporaryVariable, null))
-            return VariableProperty(this@CodeBlockScope, temporaryVariable)
+        fun whileStatement(condition: Operand<VarType.Boolean>, block: LoopScope.() -> Unit): Statement.While {
+            val codeBlock = codeBlock {
+                val loopScope = object : LoopScope, CodeBlockScope by this {}
+                loopScope.block()
+            }
+            return statement(Statement.While(condition, codeBlock))
         }
 
-        operator fun <T : VarType> Operand<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>> {
+        override fun <T : VarType> Operand<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>> {
             val temporaryVariable = Operand.TemporaryVariable(property.name, type)
-            statement(Statement.VariableDefinition(temporaryVariable, this))
+            statement(Statement.VariableDefinition(temporaryVariable, this, false))
             return VariableProperty(this@CodeBlockScope, temporaryVariable)
         }
 
@@ -115,22 +67,47 @@ interface ProgramScope {
         operator fun <S : Struct<S>> StructConstructor<S>.invoke(vararg properties: Operand<*>): StructDeclaration<S>
 
         operator fun <S : Struct<S>> StructDeclaration<S>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<S, S>
+
+        operator fun <T : VarType> FunctionDeclaration<T>.invoke(vararg arguments: Operand<*>): Operand<T> {
+            return Operand.SystemFunction(name, returnType, arguments.toList())
+        }
     }
+
 
     interface FunctionScope<R : VarType> : CodeBlockScope {
 
-        fun <T : VarType> arg(type: T): ArgConstructor<T> = ArgConstructor(type)
+        val <T : VarType> T.arg: ArgDeclaration<T> get() = ArgDeclaration(this)
 
         fun returnValue(returnValue: Operand<R>): Statement.Return<R>
 
-        operator fun <T : VarType> ArgConstructor<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>>
+        operator fun <T : VarType> ArgDeclaration<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>>
     }
+
 
     interface ShaderScope : CodeBlockScope {
         fun <R : VarType> func(name: String, block: FunctionScope<R>.() -> Unit): FunctionDeclaration<R>
     }
 
-    interface VertexShaderScope : ShaderScope
 
-    interface FragmentShaderScope : ShaderScope
+    interface VertexShaderScope : ShaderScope {
+        val glVertexID: Operand<VarType.Integer>
+        val glInstanceID: Operand<VarType.Integer>
+
+        var glPosition: Operand<VarType.Vec4>
+        var glPointSize: Operand<VarType.Float>
+    }
+
+
+    interface FragmentShaderScope : ShaderScope {
+        val glFragCoord: Operand<VarType.Vec4>
+        val glFrontFacing: Operand<VarType.Boolean>
+        val glPointCoord: Operand<VarType.Vec2>
+
+        var glFragColor: Operand<VarType.Vec4>
+        val glFragDepth: Operand<VarType.Float>
+
+        fun discardStatement() {
+            statement(Statement.Discard)
+        }
+    }
 }

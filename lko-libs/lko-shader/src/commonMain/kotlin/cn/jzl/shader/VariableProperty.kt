@@ -1,11 +1,9 @@
 package cn.jzl.shader
 
-import cn.jzl.shader.Statement
-import cn.jzl.shader.VarType
 import kotlin.reflect.KProperty
 
 data class VariableProperty<T : VarType, O : Operand<T>>(
-    private val statementScope: ProgramScope.StatementScope,
+    private val statementScope: StatementScope,
     private val variable: O
 ) : Property<T, O> {
 

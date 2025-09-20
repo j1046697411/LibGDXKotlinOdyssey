@@ -1,7 +1,5 @@
 package cn.jzl.shader
 
-import cn.jzl.shader.StructDeclaration
-
 interface Program {
 
     val vertexShader: VertexShader

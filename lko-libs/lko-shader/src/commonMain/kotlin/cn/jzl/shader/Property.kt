@@ -1,6 +1,5 @@
 package cn.jzl.shader
 
-import cn.jzl.shader.VarType
 import kotlin.reflect.KProperty
 
 interface Property<V : VarType, O> {

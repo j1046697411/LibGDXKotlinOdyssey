@@ -1,7 +1,5 @@
 package cn.jzl.shader
 
-import cn.jzl.shader.VarType
-
 interface Operand<T : VarType> {
     val type: T
 

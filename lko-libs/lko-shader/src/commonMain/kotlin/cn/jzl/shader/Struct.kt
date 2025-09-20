@@ -3,20 +3,20 @@ package cn.jzl.shader
 import kotlin.reflect.KProperty
 
 abstract class Struct<S : Struct<S>>(
-    private val statementScope: ProgramScope.StatementScope,
+    private val statementScope: StatementScope,
     final override val name: String
-) : VarType, Sequence<Struct.StructProperty<*>>, Operand.Variable<S> {
+) : VarType, Sequence<Struct.StructProperty<*>>, Operand.Variable<S>, VarTypeAccessor {
 
-    private val properties = mutableMapOf<KProperty<*>, StructProperty<*>>()
+    private val properties = mutableMapOf<KProperty<*>, Struct.StructProperty<*>>()
 
     @Suppress("UNCHECKED_CAST")
     final override val type: S get() = this as S
-    final val structName: String = this::class.simpleName ?: "Undefined"
+    val structName: String = this::class.simpleName ?: "Undefined"
 
     @Suppress("UNCHECKED_CAST")
     operator fun <T : VarType> T.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>> {
         return properties.getOrPut(property) {
-            StructProperty(this@Struct, property.name, type)
+            StructProperty(this@Struct, property.name, this)
         } as Property<T, Operand<T>>
     }
 
@@ -31,6 +31,7 @@ abstract class Struct<S : Struct<S>>(
         override val variable: Operand<T> by lazy { Operand.TemporaryVariable(name, type) }
 
         override val value: Operand<T>? = null
+        override val inline: Boolean = false
 
         val swizzle: Operand.Swizzle<T> by lazy { Operand.Swizzle(struct, name, type) }
 

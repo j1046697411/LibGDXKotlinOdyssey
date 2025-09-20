@@ -1,11 +1,5 @@
 package cn.jzl.shader
 
-import cn.jzl.shader.Statement
-import cn.jzl.shader.Struct
-import cn.jzl.shader.StructConstructor
-import cn.jzl.shader.StructDeclaration
-import cn.jzl.shader.VarType
-import cn.jzl.shader.VariableProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
@@ -60,9 +54,9 @@ class SimpleProgram : Program, ProgramScope {
             block: ProgramScope.ForScope.() -> Unit
         ): Statement.For {
             val loopVar = Operand.TemporaryVariable("loopVar${statements.size}", VarType.Integer)
-            val init = Statement.VariableDefinition(loopVar, min)
+            val init = Statement.VariableDefinition(loopVar, min, true)
             val condition = loopVar le max
-            val update = Statement.Assignment(loopVar, loopVar + step)
+            val update = Statement.Assignment(loopVar, loopVar + step, true)
             val body = codeBlock {
                 val forScope = object : ProgramScope.ForScope, ProgramScope.CodeBlockScope by this {
                     override val loopVar: Operand.Variable<VarType.Integer> by VariableProperty(this, loopVar)
@@ -74,13 +68,13 @@ class SimpleProgram : Program, ProgramScope {
 
         @Suppress("UNCHECKED_CAST")
         override fun <R : VarType> func(name: String, block: ProgramScope.FunctionScope<R>.() -> Unit): FunctionDeclaration<R> {
-            val args = arrayListOf<Statement.ArgDefinition<*>>()
+            val args = arrayListOf<Statement.VariableDefinition<*>>()
             var returnType: R? = null
             val body = codeBlock {
                 val functionScope = object : ProgramScope.FunctionScope<R>, ProgramScope.CodeBlockScope by this {
-                    override fun <T : VarType> ArgConstructor<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>> {
+                    override fun <T : VarType> ArgDeclaration<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>> {
                         val arg = Arg(property.name, type)
-                        args.add(Statement.ArgDefinition(arg, null))
+                        args.add(Statement.VariableDefinition(arg, null, true))
                         return VariableProperty(this@Shader, arg)
                     }
 
@@ -118,20 +112,36 @@ class SimpleProgram : Program, ProgramScope {
             return createStructProperty(this, defaultProperties, property)
         }
 
+        @Suppress("CAST_NEVER_SUCCEEDS", "UNCHECKED_CAST")
         private fun <S : Struct<S>> createStructProperty(
             structDeclaration: StructDeclaration<S>,
             properties: List<Operand<*>>,
             property: KProperty<*>
         ): Property<S, S> {
             val struct = structDeclaration.constructor.factory(this, property.name)
-            val initValue = Operand.SystemFunction(struct.structName, structDeclaration.struct, properties)
-            statement(Statement.VariableDefinition(struct, initValue))
+            statement(Statement.VariableDefinition(struct, null, false))
+            struct.zip(properties.asSequence()) { field, value ->
+                val variable = field.swizzle as Operand<VarType>
+                Statement.Assignment(variable, value as Operand<VarType>)
+            }.forEach { statement(it) }
             return VariableProperty(this, struct)
         }
 
         override fun <S : Statement> statement(statement: S): S = statement.apply { statements.add(this) }
     }
 
-    private class VertexShader : Shader(), Program.VertexShader, ProgramScope.VertexShaderScope
-    private class FragmentShader : Shader(), Program.FragmentShader, ProgramScope.FragmentShaderScope
+    private class VertexShader : Shader(), Program.VertexShader, ProgramScope.VertexShaderScope {
+        override val glVertexID: Operand<VarType.Integer> = Operand.TemporaryVariable("gl_VertexID", VarType.Integer)
+        override val glInstanceID: Operand<VarType.Integer> = Operand.TemporaryVariable("gl_InstanceID", VarType.Integer)
+        override var glPosition: Operand<VarType.Vec4> by VariableProperty(this, Operand.TemporaryVariable("gl_Position", VarType.Vec4))
+        override var glPointSize: Operand<VarType.Float> by VariableProperty(this, Operand.TemporaryVariable("gl_PointSize", VarType.Float))
+    }
+
+    private class FragmentShader : Shader(), Program.FragmentShader, ProgramScope.FragmentShaderScope {
+        override val glFragCoord: Operand<VarType.Vec4> = Operand.TemporaryVariable("gl_FragCoord", VarType.Vec4)
+        override val glFrontFacing: Operand<VarType.Boolean> = Operand.TemporaryVariable("gl_FrontFacing", VarType.Boolean)
+        override val glPointCoord: Operand<VarType.Vec2> = Operand.TemporaryVariable("gl_PointCoord", VarType.Vec2)
+        override var glFragColor: Operand<VarType.Vec4> by VariableProperty(this, Operand.TemporaryVariable("gl_FragColor", VarType.Vec4))
+        override val glFragDepth: Operand<VarType.Float> = Operand.TemporaryVariable("gl_FragDepth", VarType.Float)
+    }
 }
