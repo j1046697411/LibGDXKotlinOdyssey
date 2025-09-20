@@ -6,8 +6,11 @@ sealed interface Statement {
         val inline: Boolean
     }
 
-    interface Definition<T : VarType, O : Operand<T>> : InlineStatement {
+    interface Definition<T : VarType, O : Operand<T>> : Statement {
         val variable: Operand<T>
+    }
+
+    interface InlineDefinition<T : VarType, O : Operand<T>> : Definition<T, O>, InlineStatement {
         val value: Operand<T>?
         override val inline: Boolean
     }
@@ -20,7 +23,7 @@ sealed interface Statement {
         override val variable: Operand.Variable<T>,
         override val value: Operand<T>?,
         override val inline: Boolean = false
-    ) : Definition<T, Operand<T>>
+    ) : InlineDefinition<T, Operand<T>>
 
     data class CodeBlock(val statements: List<Statement>, override var inline: Boolean = false) : InlineStatement
 

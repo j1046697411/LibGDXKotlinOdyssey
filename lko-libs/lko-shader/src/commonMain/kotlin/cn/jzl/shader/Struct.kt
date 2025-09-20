@@ -29,10 +29,6 @@ abstract class Struct<S : Struct<S>>(
     ) : Property<T, Operand<T>>, Statement.Definition<T, Operand<T>> {
 
         override val variable: Operand<T> by lazy { Operand.TemporaryVariable(name, type) }
-
-        override val value: Operand<T>? = null
-        override val inline: Boolean = false
-
         val swizzle: Operand.Swizzle<T> by lazy { Operand.Swizzle(struct, name, type) }
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): Operand<T> = swizzle

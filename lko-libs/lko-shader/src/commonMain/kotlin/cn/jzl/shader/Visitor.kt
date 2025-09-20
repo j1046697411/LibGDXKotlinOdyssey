@@ -3,6 +3,8 @@ package cn.jzl.shader
 open class Visitor<R> {
 
     open fun visit(varType: VarType, out: R): R = out
+    open fun visit(typeModifier: TypeModifier, out: R): R = out
+    open fun visit(precision: Precision, out: R): R = out
 
     open fun visit(program: Program, out: R): R {
         return visit(program.fragmentShader, visit(program.vertexShader, out))
@@ -10,7 +12,8 @@ open class Visitor<R> {
 
     open fun visit(vertexShader: Program.VertexShader, out: R): R {
         val structOut = vertexShader.structs.fold(out) { acc, declaration -> visit(declaration, acc) }
-        return vertexShader.functions.fold(structOut) { acc, declaration -> visit(declaration, acc) }
+        val variableOut = vertexShader.variableDefinitions.fold(structOut) { acc, definition -> visit(definition, acc) }
+        return vertexShader.functions.fold(variableOut) { acc, declaration -> visit(declaration, acc) }
     }
 
     open fun visit(fragmentShader: Program.FragmentShader, out: R): R {
@@ -47,7 +50,19 @@ open class Visitor<R> {
     open fun visit(discardStatement: Statement.Discard, out: R): R = out
     open fun visit(returnValue: Statement.Return<*>, out: R): R = visit(returnValue.value, out)
     open fun visit(assignment: Statement.Assignment<*>, out: R): R = visit(assignment.value, visit(assignment.variable, out))
-    open fun visit(definition: Statement.Definition<*, *>, out: R): R = visit(definition.variable, definition.value?.let { visit(it, out) } ?: out)
+    open fun visit(definition: Statement.Definition<*, *>, out: R): R {
+        return when (definition) {
+            is Statement.InlineDefinition<*, *> -> visit(definition, out)
+            is PrecisionDefinition<*> -> visit(definition, visit(definition.typeModifier, visit(definition.precision, out)))
+            is Struct.StructProperty<*> -> visit(definition, out)
+            else -> out
+        }
+    }
+
+    open fun visit(structProperty: Struct.StructProperty<*>, out: R): R = out
+    open fun visit(inlineDefinition: Statement.InlineDefinition<*, *>, out: R): R = visit(inlineDefinition.variable, inlineDefinition.value?.let { visit(it, out) } ?: out)
+    open fun visit(precisionDefinition: PrecisionDefinition<*>, out: R): R = visit(precisionDefinition.variable, out)
+
     open fun visit(codeBlock: Statement.CodeBlock, out: R): R = codeBlock.statements.fold(out) { acc, statement -> visit(statement, acc) }
     open fun visit(ifStatement: Statement.If, out: R): R = visit(ifStatement.body, visit(ifStatement.condition, out))
     open fun visit(elseIfStatement: Statement.ElseIf, out: R): R = visit(elseIfStatement.body, visit(elseIfStatement.condition, out))

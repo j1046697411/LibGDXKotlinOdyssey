@@ -24,8 +24,10 @@ class SimpleProgram : Program, ProgramScope {
         private val statements = mutableListOf<Statement>()
         private val structDeclarations = mutableMapOf<KClass<*>, StructDeclaration<*>>()
         private val functionDeclarations = mutableListOf<FunctionDeclaration<*>>()
+        private val precisionDefinitions = mutableMapOf<String, PrecisionDefinition<*>>()
 
         override val structs: Sequence<StructDeclaration<*>> = structDeclarations.values.asSequence()
+        override val variableDefinitions: Sequence<PrecisionDefinition<*>> = precisionDefinitions.values.asSequence().sortedBy { it.typeModifier.ordinal }
         override val functions: Sequence<FunctionDeclaration<*>> = sequence {
             yieldAll(functionDeclarations)
             yield(
@@ -36,6 +38,13 @@ class SimpleProgram : Program, ProgramScope {
                     VarType.Void
                 )
             )
+        }
+
+        override fun <T : VarType> PrecisionDeclaration<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>> {
+            val temporaryVariable = Operand.TemporaryVariable(name, type)
+            val precisionDefinition = PrecisionDefinition(typeModifier, temporaryVariable, precision, location, initialValue)
+            precisionDefinitions[name] = precisionDefinition
+            return VariableProperty(this@Shader, temporaryVariable)
         }
 
         override fun codeBlock(block: ProgramScope.CodeBlockScope.() -> Unit): Statement.CodeBlock {

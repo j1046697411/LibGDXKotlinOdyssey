@@ -2,6 +2,27 @@ package cn.jzl.shader
 
 class GlslVisitor : Visitor<Indenter>() {
 
+    override fun visit(typeModifier: TypeModifier, out: Indenter): Indenter {
+        return when (typeModifier) {
+            TypeModifier.Define -> out.inline("#define")
+            TypeModifier.Const -> out.inline("const")
+            TypeModifier.Uniform -> out.inline("uniform")
+            TypeModifier.Varying -> out.inline("varying")
+            TypeModifier.Attribute -> out.inline("attribute")
+            TypeModifier.In -> out.inline("in")
+            TypeModifier.Out -> out.inline("out")
+        }
+    }
+
+    override fun visit(precision: Precision, out: Indenter): Indenter {
+        return when (precision) {
+            Precision.Default -> out
+            Precision.Low -> out.inline("precision lowp")
+            Precision.Medium -> out.inline("precision mediump")
+            Precision.High -> out.inline("precision highp")
+        }
+    }
+
     override fun visit(varType: VarType, out: Indenter): Indenter {
         val typeName = when (varType) {
             is VarType.Void -> "void"
@@ -74,12 +95,41 @@ class GlslVisitor : Visitor<Indenter>() {
         return visit(swizzle.left, out).inline(".").inline(swizzle.swizzle)
     }
 
-    override fun visit(definition: Statement.Definition<*, *>, out: Indenter): Indenter {
-        return visit(definition.variable.type, out)
+    override fun visit(structProperty: Struct.StructProperty<*>, out: Indenter): Indenter {
+        return visit(structProperty.variable.type, out)
             .inline(" ")
-            .let { visit(definition.variable, it) }
-            .let { definition.value?.let { value -> visit(value, it.inline(" = ")) } ?: out }
-            .let { if (definition.inline) it else it.line(";") }
+            .let { visit(structProperty.variable, it) }
+            .line(";")
+    }
+
+    override fun visit(inlineDefinition: Statement.InlineDefinition<*, *>, out: Indenter): Indenter {
+        return visit(inlineDefinition.variable.type, out)
+            .inline(" ")
+            .let { visit(inlineDefinition.variable, it) }
+            .let { inlineDefinition.value?.let { value -> visit(value, it.inline(" = ")) } ?: out }
+            .let { if (inlineDefinition.inline) it else it.line(";") }
+    }
+
+    override fun visit(precisionDefinition: PrecisionDefinition<*>, out: Indenter): Indenter {
+        return if (precisionDefinition.typeModifier == TypeModifier.Define) {
+            visit(precisionDefinition.typeModifier, out)
+                .inline(" ")
+                .let { visit(precisionDefinition.variable, it) }
+                .inline(" ")
+                .let { precisionDefinition.initialValue?.let { initialValue -> visit(initialValue, it) } ?: out }
+                .emptyLine()
+        } else {
+            out
+                .let { if (precisionDefinition.location < 0) it else it.inline("layout(location = ${precisionDefinition.location}) ") }
+                .let { if (precisionDefinition.precision != Precision.Default) visit(precisionDefinition.precision, it).inline(" ") else it }
+                .let { visit(precisionDefinition.typeModifier, it) }
+                .inline(" ")
+                .let { visit(precisionDefinition.variable.type, it) }
+                .inline(" ")
+                .let { visit(precisionDefinition.variable, it) }
+                .let { precisionDefinition.initialValue?.let { initialValue -> visit(initialValue, it.inline(" = ")) } ?: out }
+                .line(";")
+        }
     }
 
     override fun visit(assignment: Statement.Assignment<*>, out: Indenter): Indenter {

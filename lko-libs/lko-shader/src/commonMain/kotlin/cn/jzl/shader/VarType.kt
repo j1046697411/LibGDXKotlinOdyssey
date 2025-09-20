@@ -2,7 +2,10 @@ package cn.jzl.shader
 
 sealed interface VarType {
 
-    interface Comparable : VarType
+    interface Comparable<R : BooleanType> : VarType {
+        val resultType: R
+    }
+
     interface Computable : VarType
     interface Vector<V, Vec2, Vec3, Vec4> : VarType, Computable {
         operator fun component1(): V
@@ -15,8 +18,13 @@ sealed interface VarType {
     interface Vector3<V, Vec2, Vec3, Vec4> : Vector<V, Vec2, Vec3, Vec4>
     interface Vector4<V, Vec2, Vec3, Vec4> : Vector<V, Vec2, Vec3, Vec4>
 
-    interface IntegerType : VarType
-    data object Integer : Comparable, Computable, IntegerType
+    interface NumberType : VarType
+
+    interface IntegerType : VarType, NumberType
+    data object Integer : Comparable<Boolean>, Computable, IntegerType {
+        override val resultType: Boolean = Boolean
+    }
+
     abstract class IntegerVector : Vector<Integer, IVec2, IVec3, IVec4>, IntegerType {
         override fun component1(): Integer = Integer
         override fun component2(): IVec2 = IVec2
@@ -24,12 +32,23 @@ sealed interface VarType {
         override fun component4(): IVec4 = IVec4
     }
 
-    data object IVec2 : IntegerVector(), Vector2<Integer, IVec2, IVec3, IVec4>
-    data object IVec3 : IntegerVector(), Vector3<Integer, IVec2, IVec3, IVec4>
-    data object IVec4 : IntegerVector(), Vector4<Integer, IVec2, IVec3, IVec4>
+    data object IVec2 : IntegerVector(), Vector2<Integer, IVec2, IVec3, IVec4>, Comparable<BVec2> {
+        override val resultType: BVec2 = BVec2
+    }
 
-    interface FloatType : VarType
-    data object Float : Comparable, Computable, FloatType
+    data object IVec3 : IntegerVector(), Vector3<Integer, IVec2, IVec3, IVec4>, Comparable<BVec3> {
+        override val resultType: BVec3 = BVec3
+    }
+
+    data object IVec4 : IntegerVector(), Vector4<Integer, IVec2, IVec3, IVec4>, Comparable<BVec4> {
+        override val resultType: BVec4 = BVec4
+    }
+
+    interface FloatType : VarType, NumberType
+    data object Float : Comparable<Boolean>, Computable, FloatType {
+        override val resultType: Boolean = Boolean
+    }
+
     abstract class FloatVector : Vector<Float, Vec2, Vec3, Vec4>, FloatType {
         override fun component1(): Float = Float
         override fun component2(): Vec2 = Vec2
@@ -37,12 +56,23 @@ sealed interface VarType {
         override fun component4(): Vec4 = Vec4
     }
 
-    data object Vec2 : FloatVector(), Vector2<Float, Vec2, Vec3, Vec4>
-    data object Vec3 : FloatVector(), Vector3<Float, Vec2, Vec3, Vec4>
-    data object Vec4 : FloatVector(), Vector4<Float, Vec2, Vec3, Vec4>
+    data object Vec2 : FloatVector(), Vector2<Float, Vec2, Vec3, Vec4>, Comparable<BVec2> {
+        override val resultType: BVec2 = BVec2
+    }
+
+    data object Vec3 : FloatVector(), Vector3<Float, Vec2, Vec3, Vec4>, Comparable<BVec3> {
+        override val resultType: BVec3 = BVec3
+    }
+
+    data object Vec4 : FloatVector(), Vector4<Float, Vec2, Vec3, Vec4>, Comparable<BVec4> {
+        override val resultType: BVec4 = BVec4
+    }
 
     interface BooleanType : VarType
-    data object Boolean : Comparable, BooleanType
+    data object Boolean : Comparable<Boolean>, BooleanType {
+        override val resultType: Boolean = Boolean
+    }
+
     abstract class BooleanVector : Vector<Boolean, BVec2, BVec3, BVec4>, BooleanType {
         override fun component1(): Boolean = Boolean
         override fun component2(): BVec2 = BVec2
@@ -50,9 +80,17 @@ sealed interface VarType {
         override fun component4(): BVec4 = BVec4
     }
 
-    data object BVec2 : BooleanVector(), Vector2<Boolean, BVec2, BVec3, BVec4>
-    data object BVec3 : BooleanVector(), Vector3<Boolean, BVec2, BVec3, BVec4>
-    data object BVec4 : BooleanVector(), Vector4<Boolean, BVec2, BVec3, BVec4>
+    data object BVec2 : BooleanVector(), Vector2<Boolean, BVec2, BVec3, BVec4>, Comparable<BVec2> {
+        override val resultType: BVec2 = BVec2
+    }
+
+    data object BVec3 : BooleanVector(), Vector3<Boolean, BVec2, BVec3, BVec4>, Comparable<BVec3> {
+        override val resultType: BVec3 = BVec3
+    }
+
+    data object BVec4 : BooleanVector(), Vector4<Boolean, BVec2, BVec3, BVec4>, Comparable<BVec4> {
+        override val resultType: BVec4 = BVec4
+    }
 
     interface Matrix : VarType
 

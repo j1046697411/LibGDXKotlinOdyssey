@@ -1,5 +1,7 @@
 package cn.jzl.shader
 
+import kotlin.math.E
+import kotlin.math.PI
 import kotlin.reflect.KClass
 import kotlin.test.Test
 
@@ -13,26 +15,34 @@ class User(statementScope: StatementScope, name: String) : Struct<User>(statemen
     }
 }
 
+fun ProgramScope.ShaderScope.test(username: Operand<VarType.Integer>, password: Operand<VarType.Vec2>): Operand<VarType.Vec2> {
+    return func("test") {
+        val username by int.arg
+        val password by vec2.arg
+        returnValue(password)
+    }(username, password)
+}
+
 class ShaderTest {
 
     @Test
     fun test() {
         val program = SimpleProgram()
         program.vertexShader {
-            val test = func("test") {
-                val username by int.arg
-                val password by vec2.arg
+            val pi by vec4(PI.toFloat()).define("PI")
+            val e by E.toFloat().lit.constant("E")
+            val pos by vec4.attribute("pos", precision = Precision.High, location = 0)
+            val pos1 by vec4.varying("pos1")
 
-                returnValue(password)
-            }
+            val test by pos le pos1
+
             val username by int(10)
             val password by vec2(20f, 20f)
             val user by User(username, password)
-
-            val xx = user.password
+            val xx by test(username, password)
             val temp = xx + password
 
-            ifStatement(true.lit) {
+            ifStatement(test.any()) {
             }.elseIfStatement(false.lit) {
 
             } elseStatement {

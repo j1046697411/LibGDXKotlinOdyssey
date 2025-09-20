@@ -136,12 +136,4 @@ interface PrimitiveScope : VarTypeAccessor {
         check(args.size <= 16) { "mat4 only accept 16 arguments" }
         return Operand.SystemFunction("mat4", mat4, args.map { it.lit })
     }
-
-    fun Operand<out VarType.BooleanVector>.all(): Operand<VarType.Boolean> {
-        return Operand.SystemFunction("all", bool, listOf(this))
-    }
-
-    fun Operand<out VarType.BooleanVector>.any(): Operand<VarType.Boolean> {
-        return Operand.SystemFunction("any", bool, listOf(this))
-    }
 }

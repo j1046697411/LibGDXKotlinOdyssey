@@ -8,6 +8,7 @@ interface Program {
     interface Shader {
         val structs: Sequence<StructDeclaration<*>>
         val functions: Sequence<FunctionDeclaration<*>>
+        val variableDefinitions: Sequence<PrecisionDefinition<*>>
     }
 
     interface VertexShader : Shader

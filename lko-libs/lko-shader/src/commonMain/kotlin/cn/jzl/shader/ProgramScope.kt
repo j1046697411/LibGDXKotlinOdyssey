@@ -85,7 +85,26 @@ interface ProgramScope {
 
 
     interface ShaderScope : CodeBlockScope {
+
+        fun <T : VarType> Operand<T>.define(name: String, precision: Precision = Precision.Default, location: Int = -1): PrecisionDeclaration<T> {
+            return PrecisionDeclaration(name, type, TypeModifier.Define, precision, location, this)
+        }
+
+        fun <T : VarType> Operand<T>.constant(name: String, precision: Precision = Precision.Default, location: Int = -1): PrecisionDeclaration<T> {
+            return PrecisionDeclaration(name, type, TypeModifier.Const, precision, location, this)
+        }
+
+        fun <T : VarType> T.varying(name: String, precision: Precision = Precision.Default, location: Int = -1): PrecisionDeclaration<T> {
+            return PrecisionDeclaration(name, this, TypeModifier.Varying, precision, location)
+        }
+
+        fun <T : VarType> T.uniform(name: String, precision: Precision = Precision.Default, location: Int = -1): PrecisionDeclaration<T> {
+            return PrecisionDeclaration(name, this, TypeModifier.Uniform, precision, location)
+        }
+
         fun <R : VarType> func(name: String, block: FunctionScope<R>.() -> Unit): FunctionDeclaration<R>
+
+        operator fun <T : VarType> PrecisionDeclaration<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>>
     }
 
 
@@ -95,6 +114,10 @@ interface ProgramScope {
 
         var glPosition: Operand<VarType.Vec4>
         var glPointSize: Operand<VarType.Float>
+
+        fun <T : VarType> T.attribute(name: String, precision: Precision = Precision.Default, location: Int = -1): PrecisionDeclaration<T> {
+            return PrecisionDeclaration(name, this, TypeModifier.Attribute, precision, location)
+        }
     }
 
 
