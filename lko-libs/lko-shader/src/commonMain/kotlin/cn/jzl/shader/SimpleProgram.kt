@@ -26,6 +26,8 @@ class SimpleProgram : Program, ProgramScope {
         private val functionDeclarations = mutableListOf<FunctionDeclaration<*>>()
         private val precisionDefinitions = mutableMapOf<String, PrecisionDefinition<*>>()
 
+        private val instances = mutableMapOf<PrecisionDeclaration<*>, Operand<*>>()
+
         override val structs: Sequence<StructDeclaration<*>> = structDeclarations.values.asSequence()
         override val variableDefinitions: Sequence<PrecisionDefinition<*>> = precisionDefinitions.values.asSequence().sortedBy { it.typeModifier.ordinal }
         override val functions: Sequence<FunctionDeclaration<*>> = sequence {
@@ -39,6 +41,13 @@ class SimpleProgram : Program, ProgramScope {
                 )
             )
         }
+
+        @Suppress("UNCHECKED_CAST")
+        override val <T : VarType> PrecisionDeclaration<T>.instance: Operand<T>
+            get() = instances.getOrPut(this) {
+                val value by this
+                value
+            } as Operand<T>
 
         override fun <T : VarType> PrecisionDeclaration<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>> {
             val temporaryVariable = Operand.TemporaryVariable(name, type)

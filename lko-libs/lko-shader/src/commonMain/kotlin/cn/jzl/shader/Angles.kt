@@ -7,22 +7,18 @@ class ConstantProperty<T : VarType>(
     private val provider: ExpressionScope.() -> PrecisionDeclaration<T>
 ) : ReadOnlyProperty<ExpressionScope, Operand<T>> {
 
-    private val values = mutableMapOf<ExpressionScope, Operand<T>>()
+    private var precisionDeclaration: PrecisionDeclaration<T>? = null
 
     override fun getValue(thisRef: ExpressionScope, property: KProperty<*>): Operand<T> {
-        return values.getOrPut(thisRef) {
-            with(thisRef) {
-                val value by provider(thisRef)
-                value
-            }
-        }
+        val precisionDeclaration = this.precisionDeclaration ?: provider(thisRef).also { this.precisionDeclaration = it }
+        return with(thisRef) { precisionDeclaration.instance }
     }
 }
 
 fun <T : VarType> constantProperty(provider: ExpressionScope.() -> PrecisionDeclaration<T>): ConstantProperty<T> = ConstantProperty(provider)
 
 val ExpressionScope.PI: Operand<VarType.Float> by constantProperty { kotlin.math.PI.toFloat().lit.define("PI") }
-val ExpressionScope.E : Operand<VarType.Float> by constantProperty { kotlin.math.E.toFloat().lit.define("E") }
+val ExpressionScope.E: Operand<VarType.Float> by constantProperty { kotlin.math.E.toFloat().lit.define("E") }
 
 fun <T : VarType.FloatType> ExpressionScope.sin(angle: Operand<T>): Operand<T> {
     return Operand.SystemFunction(this, "sin", angle.type, listOf(angle))

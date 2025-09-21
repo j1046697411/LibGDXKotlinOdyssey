@@ -4,12 +4,14 @@ import kotlin.reflect.KProperty
 
 interface ExpressionScope : VarTypeAccessor, PrimitiveScope, VectorScope {
 
-    fun <T : VarType> Operand<T>.define(name: String, precision: Precision = Precision.Default, location: Int = -1): PrecisionDeclaration<T> {
-        return PrecisionDeclaration(name, type, TypeModifier.Define, precision, location, this)
+    val <T : VarType> PrecisionDeclaration<T>.instance: Operand<T>
+
+    fun <T : VarType> Operand<T>.define(name: String, precision: Precision = Precision.Default): PrecisionDeclaration<T> {
+        return PrecisionDeclaration(name, type, TypeModifier.Define, precision, -1, this)
     }
 
-    fun <T : VarType> Operand<T>.constant(name: String, precision: Precision = Precision.Default, location: Int = -1): PrecisionDeclaration<T> {
-        return PrecisionDeclaration(name, type, TypeModifier.Const, precision, location, this)
+    fun <T : VarType> Operand<T>.constant(name: String, precision: Precision = Precision.Default): PrecisionDeclaration<T> {
+        return PrecisionDeclaration(name, type, TypeModifier.Const, precision, -1, this)
     }
 
     operator fun <T : VarType> PrecisionDeclaration<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>>

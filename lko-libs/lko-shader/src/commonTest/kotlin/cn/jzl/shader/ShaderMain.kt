@@ -1,7 +1,5 @@
 package cn.jzl.shader
 
-import kotlin.math.E
-import kotlin.math.PI
 import kotlin.reflect.KClass
 import kotlin.test.Test
 
@@ -29,8 +27,8 @@ class ShaderTest {
     fun test() {
         val program = SimpleProgram()
         program.vertexShader {
-            val pi by vec4(PI.toFloat()).define("PI")
-            val e by E.toFloat().lit.constant("E")
+            val pi by vec4(PI)
+            val e by vec4(E)
             val pos by vec4.attribute("pos", precision = Precision.High, location = 0)
             val pos1 by vec4.varying("pos1")
 
