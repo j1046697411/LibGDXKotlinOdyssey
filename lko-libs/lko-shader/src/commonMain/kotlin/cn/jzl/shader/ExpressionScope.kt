@@ -1,6 +1,18 @@
 package cn.jzl.shader
 
+import kotlin.reflect.KProperty
+
 interface ExpressionScope : VarTypeAccessor, PrimitiveScope, VectorScope {
+
+    fun <T : VarType> Operand<T>.define(name: String, precision: Precision = Precision.Default, location: Int = -1): PrecisionDeclaration<T> {
+        return PrecisionDeclaration(name, type, TypeModifier.Define, precision, location, this)
+    }
+
+    fun <T : VarType> Operand<T>.constant(name: String, precision: Precision = Precision.Default, location: Int = -1): PrecisionDeclaration<T> {
+        return PrecisionDeclaration(name, type, TypeModifier.Const, precision, location, this)
+    }
+
+    operator fun <T : VarType> PrecisionDeclaration<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>>
 
     infix fun <R : VarType.BooleanType, T : VarType.Comparable<R>> Operand<T>.eq(other: Operand<T>): Operand<R> {
         return Operand.Operator.BinaryOperator(this, "==", other, type.resultType)

@@ -36,7 +36,7 @@ sealed interface VarType {
 
     interface NumberType : VarType
 
-    interface IntegerType : VarType, NumberType
+    interface IntegerType : VarType, NumberType, Computable
     data object Integer : Comparable<Boolean>, Computable, IntegerType {
         override val resultType: Boolean = Boolean
     }
@@ -60,7 +60,7 @@ sealed interface VarType {
         override val resultType: BVec4 = BVec4
     }
 
-    interface FloatType : VarType, NumberType
+    interface FloatType : VarType, NumberType, Computable
     data object Float : Comparable<Boolean>, Computable, FloatType {
         override val resultType: Boolean = Boolean
     }
