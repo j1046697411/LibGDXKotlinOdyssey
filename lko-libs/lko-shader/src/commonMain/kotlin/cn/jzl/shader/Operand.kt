@@ -27,7 +27,13 @@ interface Operand<T : VarType> {
         val args: List<Operand<*>>
     }
 
+    data class CompositeConstructor<T : VarType.Composite>(
+        override val type: T,
+        val args: List<Operand<*>>
+    ) : Operand<T>
+
     data class SystemFunction<T : VarType>(
+        val scope: VarTypeAccessor,
         override val name: String,
         override val type: T,
         override val args: List<Operand<*>>

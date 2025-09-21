@@ -78,6 +78,7 @@ open class Visitor<R> {
             is Operand.Literal<*, *> -> visit(operand, out)
             is Operand.Operator<*> -> visit(operand, out)
             is Operand.Function<*> -> visit(operand, out)
+            is Operand.CompositeConstructor<*> -> visit(operand, out)
             else -> out
         }
     }
@@ -110,4 +111,5 @@ open class Visitor<R> {
 
     open fun visit(function: Operand.Function<*>, out: R): R = function.args.fold(out) { acc, argument -> visit(argument, acc) }
     open fun visit(swizzle: Operand.Swizzle<*>, out: R): R = visit(swizzle.left, out)
+    open fun visit(compositeConstructor: Operand.CompositeConstructor<*>, out: R): R = compositeConstructor.args.fold(out) { acc, argument -> visit(argument, acc) }
 }

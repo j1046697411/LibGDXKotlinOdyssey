@@ -69,7 +69,7 @@ interface ProgramScope {
         operator fun <S : Struct<S>> StructDeclaration<S>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<S, S>
 
         operator fun <T : VarType> FunctionDeclaration<T>.invoke(vararg arguments: Operand<*>): Operand<T> {
-            return Operand.SystemFunction(name, returnType, arguments.toList())
+            return Operand.SystemFunction(this@CodeBlockScope, name, returnType, arguments.toList())
         }
     }
 

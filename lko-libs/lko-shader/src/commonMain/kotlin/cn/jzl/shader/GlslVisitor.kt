@@ -191,6 +191,11 @@ class GlslVisitor : Visitor<Indenter>() {
             .emptyLine()
     }
 
+    override fun visit(compositeConstructor: Operand.CompositeConstructor<*>, out: Indenter): Indenter {
+        return visit(compositeConstructor.type, out)
+            .inline("(", ")") { compositeConstructor.args.foldIndexed(this) { index, acc, argument -> visit(argument, if (index == 0) acc else acc.inline(", ")) } }
+    }
+
     override fun visit(breakStatement: Statement.Break, out: Indenter): Indenter {
         return out.line("break;")
     }
