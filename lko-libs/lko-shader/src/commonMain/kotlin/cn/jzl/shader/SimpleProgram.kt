@@ -23,7 +23,7 @@ class SimpleProgram : Program, ProgramScope {
 
         private val statements = mutableListOf<Statement>()
         private val structDeclarations = mutableMapOf<KClass<*>, StructDeclaration<*>>()
-        private val functionDeclarations = mutableListOf<FunctionDeclaration<*>>()
+        private val functionDeclarations = mutableMapOf<FunctionSignature, FunctionDeclaration<*>>()
         private val precisionDefinitions = mutableMapOf<String, PrecisionDefinition<*>>()
 
         private val instances = mutableMapOf<PrecisionDeclaration<*>, Operand<*>>()
@@ -31,7 +31,7 @@ class SimpleProgram : Program, ProgramScope {
         override val structs: Sequence<StructDeclaration<*>> = structDeclarations.values.asSequence()
         override val variableDefinitions: Sequence<PrecisionDefinition<*>> = precisionDefinitions.values.asSequence().sortedBy { it.typeModifier.ordinal }
         override val functions: Sequence<FunctionDeclaration<*>> = sequence {
-            yieldAll(functionDeclarations)
+            yieldAll(functionDeclarations.values)
             yield(
                 FunctionDeclaration(
                     "main",
@@ -96,6 +96,17 @@ class SimpleProgram : Program, ProgramScope {
                         return VariableProperty(this@Shader, arg)
                     }
 
+                    override fun <S : Struct<S>> ArgStruct<S>.provideDelegate(
+                        thisRef: Any?,
+                        property: KProperty<*>
+                    ): Property<S, S> {
+                        val structDeclaration = structDeclarations.getValue(type::class) as StructDeclaration<S>
+                        val struct = structDeclaration.constructor.factory(this@codeBlock, property.name)
+                        args.add(Statement.VariableDefinition(struct, null, true))
+                        return VariableProperty(this@Shader, struct)
+                    }
+
+
                     override fun returnValue(returnValue: Operand<R>): Statement.Return<R> {
                         returnType = returnValue.type
                         return statement(Statement.Return(returnValue))
@@ -103,9 +114,10 @@ class SimpleProgram : Program, ProgramScope {
                 }
                 functionScope.block()
             }
-            val functionDeclaration = FunctionDeclaration(name, args, body, returnType ?: VarType.Void as R)
-            functionDeclarations.add(functionDeclaration)
-            return functionDeclaration
+            val functionSignature = FunctionSignature(name, args.map { it.variable.type })
+            return functionDeclarations.getOrPut(functionSignature) {
+                FunctionDeclaration(name, args, body, returnType ?: VarType.Void as R)
+            } as FunctionDeclaration<R>
         }
 
         @Suppress("UNCHECKED_CAST")

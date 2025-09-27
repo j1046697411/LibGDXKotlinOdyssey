@@ -80,9 +80,11 @@ class GlslVisitor : Visitor<Indenter>() {
     }
 
     override fun visit(binaryOperator: Operand.Operator.BinaryOperator<*>, out: Indenter): Indenter {
-        return visit(binaryOperator.left, out)
-            .inline(" ${binaryOperator.symbol} ")
-            .let { visit(binaryOperator.right, it) }
+        return out.inline("(", ")") {
+            visit(binaryOperator.left, this)
+                .inline(" ${binaryOperator.symbol} ")
+                .let { visit(binaryOperator.right, it) }
+        }
     }
 
     override fun visit(returnValue: Statement.Return<*>, out: Indenter): Indenter {

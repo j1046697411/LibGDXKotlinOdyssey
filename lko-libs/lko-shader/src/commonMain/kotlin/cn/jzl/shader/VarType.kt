@@ -10,12 +10,9 @@ sealed interface VarType {
         val elementCount: Int
     }
 
-    interface FloatComposite : Composite
-    interface IntegerComposite : Composite
-    interface BooleanComposite : Composite
-
     interface Computable : VarType
-    interface Vector<V, Vec2, Vec3, Vec4> : VarType, Computable, Composite {
+
+    interface Vector<V, Vec2, Vec3, Vec4> : VarType, Composite {
         operator fun component1(): V
         operator fun component2(): Vec2
         operator fun component3(): Vec3
@@ -34,14 +31,15 @@ sealed interface VarType {
         override val elementCount: Int get() = 4
     }
 
-    interface NumberType : VarType
+    interface NumberType : VarType, Composite, Computable
 
     interface IntegerType : VarType, NumberType, Computable
     data object Integer : Comparable<Boolean>, Computable, IntegerType {
         override val resultType: Boolean = Boolean
+        override val elementCount: Int = 1
     }
 
-    abstract class IntegerVector : Vector<Integer, IVec2, IVec3, IVec4>, IntegerType, IntegerComposite {
+    abstract class IntegerVector : Vector<Integer, IVec2, IVec3, IVec4>, IntegerType {
         override fun component1(): Integer = Integer
         override fun component2(): IVec2 = IVec2
         override fun component3(): IVec3 = IVec3
@@ -60,12 +58,14 @@ sealed interface VarType {
         override val resultType: BVec4 = BVec4
     }
 
-    interface FloatType : VarType, NumberType, Computable
-    data object Float : Comparable<Boolean>, Computable, FloatType {
+    interface FloatComposite : Composite
+    interface FloatType : VarType, NumberType, FloatComposite
+    data object Float : Comparable<Boolean>, FloatType {
         override val resultType: Boolean = Boolean
+        override val elementCount: Int = 1
     }
 
-    abstract class FloatVector : Vector<Float, Vec2, Vec3, Vec4>, FloatType, FloatComposite {
+    abstract class FloatVector : Vector<Float, Vec2, Vec3, Vec4>, FloatType {
         override fun component1(): Float = Float
         override fun component2(): Vec2 = Vec2
         override fun component3(): Vec3 = Vec3
@@ -84,12 +84,13 @@ sealed interface VarType {
         override val resultType: BVec4 = BVec4
     }
 
-    interface BooleanType : VarType
+    interface BooleanType : VarType, Composite
     data object Boolean : Comparable<Boolean>, BooleanType {
         override val resultType: Boolean = Boolean
+        override val elementCount: Int = 1
     }
 
-    abstract class BooleanVector : Vector<Boolean, BVec2, BVec3, BVec4>, BooleanType, BooleanComposite {
+    abstract class BooleanVector : Vector<Boolean, BVec2, BVec3, BVec4>, BooleanType {
         override fun component1(): Boolean = Boolean
         override fun component2(): BVec2 = BVec2
         override fun component3(): BVec3 = BVec3

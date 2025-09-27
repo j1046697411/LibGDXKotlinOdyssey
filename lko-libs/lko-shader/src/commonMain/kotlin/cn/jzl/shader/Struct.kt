@@ -22,6 +22,18 @@ abstract class Struct<S : Struct<S>>(
 
     final override fun iterator(): Iterator<StructProperty<*>> = properties.values.iterator()
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Struct<*>
+        return structName == other.structName
+    }
+
+    override fun hashCode(): Int {
+        return structName.hashCode()
+    }
+
     class StructProperty<T : VarType>(
         private val struct: Struct<*>,
         private val name: String,

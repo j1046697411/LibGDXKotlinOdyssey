@@ -67,20 +67,18 @@ interface ProgramScope {
         operator fun <S : Struct<S>> StructConstructor<S>.invoke(vararg properties: Operand<*>): StructDeclaration<S>
 
         operator fun <S : Struct<S>> StructDeclaration<S>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<S, S>
-
-        operator fun <T : VarType> FunctionDeclaration<T>.invoke(vararg arguments: Operand<*>): Operand<T> {
-            return Operand.SystemFunction(this@CodeBlockScope, name, returnType, arguments.toList())
-        }
     }
 
 
     interface FunctionScope<R : VarType> : CodeBlockScope {
 
         val <T : VarType> T.arg: ArgDeclaration<T> get() = ArgDeclaration(this)
+        val <S : Struct<S>> S.arg: ArgStruct<S> get() = ArgStruct(this)
 
         fun returnValue(returnValue: Operand<R>): Statement.Return<R>
 
         operator fun <T : VarType> ArgDeclaration<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>>
+        operator fun <S : Struct<S>> ArgStruct<S>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<S, S>
     }
 
 
@@ -93,8 +91,6 @@ interface ProgramScope {
         fun <T : VarType> T.uniform(name: String, precision: Precision = Precision.Default, location: Int = -1): PrecisionDeclaration<T> {
             return PrecisionDeclaration(name, this, TypeModifier.Uniform, precision, location)
         }
-
-        fun <R : VarType> func(name: String, block: FunctionScope<R>.() -> Unit): FunctionDeclaration<R>
     }
 
 

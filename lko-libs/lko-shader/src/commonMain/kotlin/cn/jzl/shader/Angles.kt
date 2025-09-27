@@ -80,88 +80,39 @@ fun <T : VarType.FloatType> ExpressionScope.acosh(x: Operand<T>): Operand<T> {
 fun <T : VarType.FloatType> ExpressionScope.atanh(x: Operand<T>): Operand<T> {
     return Operand.SystemFunction(this, "atanh", x.type, listOf(x))
 }
-//
-//// 角度归一化函数，将角度限制在[0, 2π)范围内
-//fun <T : VarType.FloatType> ExpressionScope.normalizeAngle(angle: Operand<T>): Operand<T> {
-//    // 创建2π常量
-//    val twoPi = float(6.2831855f)
-//
-//    // 计算模运算
-//    val modResult = angle % twoPi as Operand<T>
-//
-//    // 处理负数情况
-//    return if (modResult < float(0f)) {
-//        modResult + twoPi as Operand<T>
-//    } else {
-//        modResult
-//    }
-//}
-//
-//// 计算两点之间的角度
-//fun ExpressionScope.angleBetween(from: Operand<VarType.Vec2>, to: Operand<VarType.Vec2>): Operand<VarType.Float> {
-//    val deltaX = to.x - from.x
-//    val deltaY = to.y - from.y
-//    return atan(deltaY, deltaX)
-//}
-//
-//// 计算向量的方向角
-//fun ExpressionScope.directionAngle(vec: Operand<VarType.Vec2>): Operand<VarType.Float> {
-//    return atan(vec.y, vec.x)
-//}
-//
-//// 角度差值函数（最短路径）
-//fun <T : VarType.FloatType> ExpressionScope.angleDifference(a: Operand<T>, b: Operand<T>): Operand<T> {
-//    // 创建π常量
-//    val pi = float(3.1415927f)
-//
-//    // 计算角度差
-//    var diff = b - a
-//
-//    // 确保差值在[-π, π]范围内
-//    while (diff > pi) {
-//        diff -= float(2f) * pi
-//    }
-//
-//    while (diff < -pi) {
-//        diff += float(2f) * pi
-//    }
-//
-//    return diff as Operand<T>
-//}
-//
-//// 角度线性插值
-//fun <T : VarType.FloatType> ExpressionScope.angleLerp(a: Operand<T>, b: Operand<T>, t: Operand<T>): Operand<T> {
-//    // 计算最短路径的角度差
-//    val diff = angleDifference(a, b)
-//
-//    // 线性插值
-//    return a + diff * t
-//}
-//
-//// 计算向量与X轴的夹角
-//fun ExpressionScope.angleWithXAxis(vec: Operand<VarType.Vec2>): Operand<VarType.Float> {
-//    return atan(vec.y, vec.x)
-//}
-//
-//// 计算向量与Y轴的夹角
-//fun ExpressionScope.angleWithYAxis(vec: Operand<VarType.Vec2>): Operand<VarType.Float> {
-//    return atan(vec.x, vec.y)
-//}
-//
-//// 根据角度创建方向向量
-//fun ExpressionScope.directionVector(angle: Operand<VarType.Float>): Operand<VarType.Vec2> {
-//    return vec2(cos(angle), sin(angle))
-//}
-//
-//// 2D旋转矩阵
-//fun ExpressionScope.rotationMatrix2D(angle: Operand<VarType.Float>): Operand<VarType.Mat2> {
-//    val c = cos(angle)
-//    val s = sin(angle)
-//    return mat2(
-//        c, -s,
-//        s, c
-//    )
-//}
+
+// 角度归一化函数，将角度限制在[0, 2π)范围内
+fun <T : VarType.FloatType> ExpressionScope.normalizeAngle(angle: Operand<T>): Operand<T> = func("normalizeAngle", angle) {
+    val angle by angle.type.arg
+    val pi2 by angle.type(PI * 2f)
+    val zero by angle.type(0f)
+    val one by angle.type(1f)
+    val modResult by angle % pi2
+    returnValue((step(zero, modResult) - one) * pi2 + modResult)
+}
+
+// 计算两点之间的角度
+fun ExpressionScope.angleBetween(from: Operand<VarType.Vec2>, to: Operand<VarType.Vec2>): Operand<VarType.Float> = atan(to.y - from.y, to.x - from.x)
+
+// 计算向量的方向角
+fun ExpressionScope.directionAngle(vec: Operand<VarType.Vec2>): Operand<VarType.Float> = atan(vec.y, vec.x)
+
+// 计算向量与X轴的夹角
+fun ExpressionScope.angleWithXAxis(vec: Operand<VarType.Vec2>): Operand<VarType.Float> = atan(vec.y, vec.x)
+
+// 计算向量与Y轴的夹角
+fun ExpressionScope.angleWithYAxis(vec: Operand<VarType.Vec2>): Operand<VarType.Float> = atan(vec.x, vec.y)
+
+// 根据角度创建方向向量
+fun ExpressionScope.directionVector(angle: Operand<VarType.Float>): Operand<VarType.Vec2> = vec2(cos(angle), sin(angle))
+
+// 2D旋转矩阵
+fun ExpressionScope.rotationMatrix2D(angle: Operand<VarType.Float>): Operand<VarType.Mat2> = func("rotationMatrix2D", angle) {
+    val angle by float.arg
+    val c by cos(angle)
+    val s by sin(angle)
+    returnValue(mat2(c, -s, s, c))
+}
 //
 //// 3D绕Z轴旋转矩阵
 //fun ExpressionScope.rotationMatrixZ(angle: Operand<VarType.Float>): Operand<VarType.Mat4> {

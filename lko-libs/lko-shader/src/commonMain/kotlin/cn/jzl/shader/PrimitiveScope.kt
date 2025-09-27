@@ -24,19 +24,19 @@ interface PrimitiveScope : VarTypeAccessor {
         return Operand.CompositeConstructor(this, args.map { it.lit })
     }
 
-    operator fun <T : VarType.IntegerComposite> T.invoke(vararg args: Operand<VarType.Integer>): Operand<T> {
+    operator fun <T : VarType.IntegerType> T.invoke(vararg args: Operand<VarType.Integer>): Operand<T> {
         return Operand.CompositeConstructor(this, args.toList())
     }
 
-    operator fun <T : VarType.IntegerComposite> T.invoke(vararg args: Int): Operand<T> {
+    operator fun <T : VarType.IntegerType> T.invoke(vararg args: Int): Operand<T> {
         return Operand.CompositeConstructor(this, args.map { it.lit })
     }
 
-    operator fun <T : VarType.BooleanComposite> T.invoke(vararg args: Operand<VarType.Boolean>): Operand<T> {
+    operator fun <T : VarType.BooleanType> T.invoke(vararg args: Operand<VarType.Boolean>): Operand<T> {
         return Operand.CompositeConstructor(this, args.toList())
     }
 
-    operator fun <T : VarType.BooleanComposite> T.invoke(vararg args: Boolean): Operand<T> {
+    operator fun <T : VarType.BooleanType> T.invoke(vararg args: Boolean): Operand<T> {
         return Operand.CompositeConstructor(this, args.map { it.lit })
     }
 }

@@ -6,3 +6,4 @@ data class FunctionDeclaration<T : VarType>(
     val body: Statement.CodeBlock,
     val returnType: T
 )
+
