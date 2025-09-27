@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="lko-graph-shader-desktop">
+    <output-path>$PROJECT_DIR$/lko-graph-libs/lko-graph-shader/build/libs</output-path>
+    <root id="archive" name="lko-graph-shader-desktop.jar">
+      <element id="module-output" name="LibGDXKotlinOdyssey.lko-graph-shader.desktopMain" />
+    </root>
+  </artifact>
+</component>

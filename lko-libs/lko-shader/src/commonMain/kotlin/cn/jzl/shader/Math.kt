@@ -1,5 +1,13 @@
 package cn.jzl.shader
 
+fun <T : VarType.NumberType> ExpressionScope.oneMinus(value: Operand<T>): Operand<T> {
+    return Operand.Operator.BinaryOperator(1f.lit, "-", value, value.type)
+}
+
+fun <T : VarType.NumberType> ExpressionScope.reciprocal(value: Operand<T>): Operand<T> {
+    return Operand.Operator.BinaryOperator(1f.lit, "/", value, value.type)
+}
+
 fun <T : VarType.FloatType> ExpressionScope.pow(x: Operand<T>, y: Operand<T>): Operand<T> {
     return Operand.SystemFunction(this, "pow", x.type, listOf(x, y))
 }
