@@ -94,7 +94,11 @@ interface ExpressionScope : VarTypeAccessor, PrimitiveScope, VectorScope {
     }
 
     infix operator fun <T : VarType.Computable> Operand<T>.rem(other: Operand<T>): Operand<T> {
-        return Operand.Operator.BinaryOperator(this, "%", other, type)
+        return if (type == VarType.Integer || type == VarType.Float) {
+            Operand.Operator.BinaryOperator(this, "%", other, type)
+        } else {
+            Operand.SystemFunction(this@ExpressionScope, "mod", type, listOf(this, other))
+        }
     }
 
     infix operator fun <T : VarType.FloatType> Operand<T>.plus(other: Float): Operand<T> {

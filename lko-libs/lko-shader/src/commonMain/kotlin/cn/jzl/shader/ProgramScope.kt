@@ -56,13 +56,17 @@ interface ProgramScope {
             return statement(Statement.While(condition, codeBlock))
         }
 
-        override fun <T : VarType> Operand<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>> {
-            val temporaryVariable = Operand.TemporaryVariable(property.name, type)
+        override fun <T : VarType> Operand<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>> = property(property.name)
+
+        fun <T : VarType> Operand<T>.property(name: String): Property<T, Operand<T>> {
+            val temporaryVariable = Operand.TemporaryVariable(name, type)
             statement(Statement.VariableDefinition(temporaryVariable, this, false))
             return VariableProperty(this@CodeBlockScope, temporaryVariable)
         }
 
-        operator fun <S : Struct<S>> S.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<S, S>
+        fun <S : Struct<S>> S.property(name: String): Property<S, S>
+
+        operator fun <S : Struct<S>> S.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<S, S> = property(property.name)
 
         operator fun <S : Struct<S>> StructConstructor<S>.invoke(vararg properties: Operand<*>): StructDeclaration<S>
 

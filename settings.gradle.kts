@@ -47,6 +47,7 @@ dependencyResolutionManagement {
 }
 
 addPluginLibs(File(rootDir, "lko-libs"))
+addPluginLibs(File(rootDir, "lko-graph-libs"))
 addPluginLibs(File(rootDir, "lko-gdx-libs"))
 addPluginLibs(File(rootDir, "tests"))
 

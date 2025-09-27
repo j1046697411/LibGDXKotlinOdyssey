@@ -11,7 +11,6 @@ interface PrimitiveScope : VarTypeAccessor {
 
     operator fun <T : VarType> Operand<T>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<T, Operand<T>>
 
-    operator fun <T : VarType> T.invoke(operand: Operand<T>): Operand<T> = operand
     operator fun VarType.Float.invoke(value: Float): Operand<VarType.Float> = value.lit
     operator fun VarType.Integer.invoke(value: Int): Operand<VarType.Integer> = value.lit
     operator fun VarType.Boolean.invoke(value: Boolean): Operand<VarType.Boolean> = value.lit

@@ -121,9 +121,9 @@ class SimpleProgram : Program, ProgramScope {
         }
 
         @Suppress("UNCHECKED_CAST")
-        override fun <S : Struct<S>> S.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<S, S> {
+        override fun <S : Struct<S>> S.property(name: String): Property<S, S> {
             val structDeclaration = structDeclarations.getValue(this::class) as StructDeclaration<S>
-            return createStructProperty(structDeclaration, map { it.swizzle }.toList(), property)
+            return createStructProperty(structDeclaration, map { it.swizzle }.toList(), name)
         }
 
         @Suppress("UNCHECKED_CAST")
@@ -139,16 +139,16 @@ class SimpleProgram : Program, ProgramScope {
         }
 
         override fun <S : Struct<S>> StructDeclaration<S>.provideDelegate(thisRef: Any?, property: KProperty<*>): Property<S, S> {
-            return createStructProperty(this, defaultProperties, property)
+            return createStructProperty(this, defaultProperties, property.name)
         }
 
         @Suppress("CAST_NEVER_SUCCEEDS", "UNCHECKED_CAST")
         private fun <S : Struct<S>> createStructProperty(
             structDeclaration: StructDeclaration<S>,
             properties: List<Operand<*>>,
-            property: KProperty<*>
+            name: String
         ): Property<S, S> {
-            val struct = structDeclaration.constructor.factory(this, property.name)
+            val struct = structDeclaration.constructor.factory(this, name)
             statement(Statement.VariableDefinition(struct, null, false))
             struct.zip(properties.asSequence()) { field, value ->
                 val variable = field.swizzle as Operand<VarType>
