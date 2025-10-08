@@ -8,6 +8,10 @@ kotlin {
         val commonMain by getting
         val desktopMain by getting
 
+        commonMain.dependencies {
+            api(projects.lkoDatastructure)
+        }
+
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }

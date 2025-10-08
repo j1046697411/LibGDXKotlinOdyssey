@@ -1,4 +1,4 @@
-package cn.jzl.graph.shader.builder
+package cn.jzl.graph.shader.builder.util
 
 import cn.jzl.ecs.World
 import cn.jzl.graph.GraphNode
@@ -8,8 +8,8 @@ import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.producer.AbstractPipelineNodeProducer
 import cn.jzl.graph.common.rendering.PipelineBlackboard
-import cn.jzl.graph.shader.field.GraphShaderPipelineNode
-import cn.jzl.graph.shader.field.ShaderGraphType
+import cn.jzl.graph.shader.GraphShaderPipelineNode
+import cn.jzl.graph.shader.ShaderGraphType
 import cn.jzl.graph.shader.field.operand
 import cn.jzl.graph.shader.field.output
 import cn.jzl.shader.ProgramScope
@@ -63,10 +63,10 @@ object Merge : AbstractPipelineNodeProducer<GraphShaderPipelineNode, ShaderGraph
         v3Output: PipelineNodeOutput?,
         colorOutput: PipelineNodeOutput?,
     ) {
-        val x = xInput?.let { graphType.operand(blackboard, it) } ?: 1f.lit
-        val y = yInput?.let { graphType.operand(blackboard, it) } ?: 1f.lit
-        val z = zInput?.let { graphType.operand(blackboard, it) } ?: 1f.lit
-        val w = wInput?.let { graphType.operand(blackboard, it) } ?: 1f.lit
+        val x = xInput?.let { graphType.operand(blackboard, it) } ?: 0f.lit
+        val y = yInput?.let { graphType.operand(blackboard, it) } ?: 0f.lit
+        val z = zInput?.let { graphType.operand(blackboard, it) } ?: 0f.lit
+        val w = wInput?.let { graphType.operand(blackboard, it) } ?: 0f.lit
         if (v2Output != null) {
             graphType.output(graphNode, blackboard, v2Output, vec2(x, y))
         }

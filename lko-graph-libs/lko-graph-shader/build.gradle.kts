@@ -18,6 +18,10 @@ kotlin {
             api(projects.lkoGraphCommon)
         }
 
+        desktopMain.dependencies {
+            implementation(libs.gdx.core)
+        }
+
         commonTest.dependencies {
             implementation(libs.kotlin.test.junit)
             implementation(libs.junit.jupiter.api)

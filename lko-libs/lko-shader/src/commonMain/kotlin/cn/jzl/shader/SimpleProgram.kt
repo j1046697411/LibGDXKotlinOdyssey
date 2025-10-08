@@ -19,7 +19,7 @@ class SimpleProgram : Program, ProgramScope {
         simpleFragmentShader.block()
     }
 
-    private abstract class Shader : Program.Shader, ProgramScope.ShaderScope {
+    abstract class Shader : Program.Shader, ProgramScope.ShaderScope {
 
         private val statements = mutableListOf<Statement>()
         private val structDeclarations = mutableMapOf<KClass<*>, StructDeclaration<*>>()
@@ -160,14 +160,14 @@ class SimpleProgram : Program, ProgramScope {
         override fun <S : Statement> statement(statement: S): S = statement.apply { statements.add(this) }
     }
 
-    private class VertexShader : Shader(), Program.VertexShader, ProgramScope.VertexShaderScope {
+    open class VertexShader : Shader(), Program.VertexShader, ProgramScope.VertexShaderScope {
         override val glVertexID: Operand<VarType.Integer> = Operand.TemporaryVariable("gl_VertexID", VarType.Integer)
         override val glInstanceID: Operand<VarType.Integer> = Operand.TemporaryVariable("gl_InstanceID", VarType.Integer)
         override var glPosition: Operand<VarType.Vec4> by VariableProperty(this, Operand.TemporaryVariable("gl_Position", VarType.Vec4))
         override var glPointSize: Operand<VarType.Float> by VariableProperty(this, Operand.TemporaryVariable("gl_PointSize", VarType.Float))
     }
 
-    private class FragmentShader : Shader(), Program.FragmentShader, ProgramScope.FragmentShaderScope {
+    open class FragmentShader : Shader(), Program.FragmentShader, ProgramScope.FragmentShaderScope {
         override val glFragCoord: Operand<VarType.Vec4> = Operand.TemporaryVariable("gl_FragCoord", VarType.Vec4)
         override val glFrontFacing: Operand<VarType.Boolean> = Operand.TemporaryVariable("gl_FrontFacing", VarType.Boolean)
         override val glPointCoord: Operand<VarType.Vec2> = Operand.TemporaryVariable("gl_PointCoord", VarType.Vec2)

@@ -2,7 +2,7 @@ package cn.jzl.graph.shader.builder
 
 import cn.jzl.graph.common.PipelineNodeInput
 import cn.jzl.graph.common.rendering.PipelineBlackboard
-import cn.jzl.graph.shader.field.ShaderGraphType
+import cn.jzl.graph.shader.ShaderGraphType
 import cn.jzl.graph.shader.field.operand
 import cn.jzl.shader.*
 

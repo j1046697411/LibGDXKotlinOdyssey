@@ -16,6 +16,7 @@
             <option value="$PROJECT_DIR$/lko-graph-libs/lko-graph" />
             <option value="$PROJECT_DIR$/lko-graph-libs/lko-graph-common" />
             <option value="$PROJECT_DIR$/lko-graph-libs/lko-graph-shader" />
+            <option value="$PROJECT_DIR$/lko-libs/lko-datastructure" />
             <option value="$PROJECT_DIR$/lko-libs/lko-di" />
             <option value="$PROJECT_DIR$/lko-libs/lko-ecs" />
             <option value="$PROJECT_DIR$/lko-libs/lko-ecs-ui" />

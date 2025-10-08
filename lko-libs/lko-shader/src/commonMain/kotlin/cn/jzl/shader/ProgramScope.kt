@@ -97,7 +97,6 @@ interface ProgramScope {
         }
     }
 
-
     interface VertexShaderScope : ShaderScope {
         val glVertexID: Operand<VarType.Integer>
         val glInstanceID: Operand<VarType.Integer>

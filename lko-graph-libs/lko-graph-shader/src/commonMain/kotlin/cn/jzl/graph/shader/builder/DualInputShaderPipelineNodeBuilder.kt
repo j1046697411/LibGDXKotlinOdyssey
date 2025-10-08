@@ -10,9 +10,8 @@ import cn.jzl.graph.common.producer.DualInputPipelineNodeProducer
 import cn.jzl.graph.common.rendering.PipelineBlackboard
 import cn.jzl.graph.impl.NamedGraphNodeInput
 import cn.jzl.graph.impl.NamedGraphNodeOutput
-import cn.jzl.graph.shader.field.GraphShaderPipelineNode
-import cn.jzl.graph.shader.field.ShaderFieldTypeResolver
-import cn.jzl.graph.shader.field.ShaderGraphType
+import cn.jzl.graph.shader.GraphShaderPipelineNode
+import cn.jzl.graph.shader.ShaderGraphType
 import cn.jzl.graph.shader.field.output
 import cn.jzl.shader.Operand
 import cn.jzl.shader.ProgramScope
