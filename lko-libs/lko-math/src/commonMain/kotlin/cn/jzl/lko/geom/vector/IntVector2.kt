@@ -1,6 +1,16 @@
 package cn.jzl.lko.geom.vector
 
-data class IntVector2(override val x: Int, override val y: Int) : IVector2<Int>
+import cn.jzl.lko.util.Interpolable
+import cn.jzl.lko.util.Ratio
+import cn.jzl.lko.util.interpolate
+
+data class IntVector2(override val x: Int, override val y: Int) : IVector2<Int>, Interpolable<IntVector2> {
+    override fun interpolateTo(end: IntVector2, ratio: Ratio): IntVector2 = IntVector2(
+        x = ratio.interpolate(x, end.x),
+        y = ratio.interpolate(y, end.y)
+    )
+
+}
 
 operator fun IntVector2.plus(other: IntVector2): IntVector2 = IntVector2(x + other.x, y + other.y)
 operator fun IntVector2.plus(other: Int): IntVector2 = IntVector2(x + other, y + other)

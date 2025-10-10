@@ -17,7 +17,11 @@ import cn.jzl.lko.geom.topRight
 import cn.jzl.lko.geom.vector.Point2
 import cn.jzl.lko.geom.vector.Vector2
 import cn.jzl.lko.geom.width
+import kotlin.math.PI
+import kotlin.math.cos
 import kotlin.math.min
+import kotlin.math.sin
+import kotlin.math.tan
 
 const val K = 0.5522848f
 const val K2 = 1 - K
@@ -134,3 +138,24 @@ fun VectorBuilder.ellipse(x: Float, y: Float, rx: Float, ry: Float) {
 fun VectorBuilder.ellipse(ellipse: Ellipse) = ellipse(ellipse.center.x, ellipse.center.y, ellipse.radius.width, ellipse.radius.height)
 fun VectorBuilder.circle(circle: Circle): Unit = ellipse(circle.center.x, circle.center.y, circle.radius, circle.radius)
 fun VectorBuilder.circle(x: Float, y: Float, radius: Float) = ellipse(x, y, radius, radius)
+
+fun VectorPath.ellipseArc(x: Float, y: Float, radiusX: Float, radiusY: Float, startAngle: Float, sweepAngle: Float) {
+    var startArc = startAngle * PI.toFloat() / 180
+    var remainingArc = sweepAngle * PI.toFloat() / 180
+    moveTo(Point2(x, y))
+    lineTo(Point2(x + radiusX * cos(startArc), y + radiusY * sin(startArc)))
+    do {
+        val segmentArc = min(PI.toFloat() * 0.5f, remainingArc)
+        val endArc = startArc + segmentArc
+        val k = 4.0f / 3 * tan((endArc - startArc) / 4)
+        val startPoint = Point2(x + radiusX * cos(startArc), y + radiusY * sin(startArc))
+        val endPoint = Point2(x + radiusX * cos(endArc), y + radiusY * sin(endArc))
+        val control1 = Point2(startPoint.x - k * radiusX * sin(startArc), startPoint.y + k * radiusY * cos(startArc))
+        val control2 = Point2(endPoint.x + k * radiusX * sin(endArc), endPoint.y - k * radiusY * cos(endArc))
+        cubicTo(control1, control2, endPoint)
+        startArc = endArc
+        remainingArc -= segmentArc
+    } while (remainingArc > 0)
+    lineTo(Point2(x, y))
+    close()
+}

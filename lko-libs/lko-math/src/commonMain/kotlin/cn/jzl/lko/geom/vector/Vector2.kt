@@ -2,11 +2,16 @@ package cn.jzl.lko.geom.vector
 
 import cn.jzl.lko.geom.IsAlmostEquals
 import cn.jzl.lko.geom.isAlmostEquals
+import cn.jzl.lko.util.Interpolable
+import cn.jzl.lko.util.Ratio
+import cn.jzl.lko.util.interpolate
 import kotlin.math.hypot
 
 typealias Point2 = Vector2
 
-data class Vector2(override val x: Float, override val y: Float) : IVector2<Float>, IsAlmostEquals<Vector2> {
+data class Vector2(override val x: Float, override val y: Float) : IVector2<Float>, IsAlmostEquals<Vector2>, Interpolable<Vector2> {
+
+    override fun interpolateTo(end: Vector2, ratio: Ratio): Vector2 = Vector2(ratio.interpolate(x, end.x), ratio.interpolate(y, end.y))
 
     override fun isAlmostEquals(other: Vector2, epsilon: Float): Boolean {
         return x.isAlmostEquals(other.x, epsilon) && y.isAlmostEquals(other.y, epsilon)

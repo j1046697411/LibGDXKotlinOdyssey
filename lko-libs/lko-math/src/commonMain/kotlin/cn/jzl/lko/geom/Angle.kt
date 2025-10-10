@@ -1,5 +1,6 @@
 package cn.jzl.lko.geom
 
+import cn.jzl.lko.util.Ratio
 import kotlin.math.PI
 import kotlin.math.absoluteValue
 import kotlin.math.cos
