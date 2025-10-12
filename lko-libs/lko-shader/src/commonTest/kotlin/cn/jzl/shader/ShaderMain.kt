@@ -28,9 +28,6 @@ class ShaderTest {
             val user by User(1.lit, vec2(1f.lit))
 
             val testUser by user
-            val angle by normalizeAngle(x)
-            val angle1 by normalizeAngle(test(user))
-            glPosition = normalizeAngle(vec4(100f.lit))
         }
         program.vertexShader {
             val x by 20.lit + 15.lit

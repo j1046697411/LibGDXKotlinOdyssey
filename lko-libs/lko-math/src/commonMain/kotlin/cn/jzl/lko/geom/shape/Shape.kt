@@ -1,23 +1,7 @@
 package cn.jzl.lko.geom.shape
 
-import cn.jzl.lko.geom.Circle
-import cn.jzl.lko.geom.Ellipse
-import cn.jzl.lko.geom.Line
-import cn.jzl.lko.geom.Polygon
-import cn.jzl.lko.geom.Polyline
-import cn.jzl.lko.geom.Rectangle
-import cn.jzl.lko.geom.RoundRectangle
-import cn.jzl.lko.geom.SimpleShape2D
-import cn.jzl.lko.geom.vector.path.VectorBuilder
-import cn.jzl.lko.geom.vector.path.VectorPath
-import cn.jzl.lko.geom.vector.path.buildVectorPath
-import cn.jzl.lko.geom.vector.path.circle
-import cn.jzl.lko.geom.vector.path.ellipse
-import cn.jzl.lko.geom.vector.path.line
-import cn.jzl.lko.geom.vector.path.polygon
-import cn.jzl.lko.geom.vector.path.polyline
-import cn.jzl.lko.geom.vector.path.rectangle
-import cn.jzl.lko.geom.vector.path.roundRectangle
+import cn.jzl.lko.geom.*
+import cn.jzl.lko.geom.vector.path.*
 
 interface Shape : SimpleShape2D {
     fun toVectorPath(): VectorPath

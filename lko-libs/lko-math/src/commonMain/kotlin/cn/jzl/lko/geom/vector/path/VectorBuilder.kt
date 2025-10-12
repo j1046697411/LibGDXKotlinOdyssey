@@ -1,5 +1,6 @@
 package cn.jzl.lko.geom.vector.path
 
+import cn.jzl.lko.geom.Angle
 import cn.jzl.lko.geom.Circle
 import cn.jzl.lko.geom.Ellipse
 import cn.jzl.lko.geom.IPointList
@@ -139,9 +140,9 @@ fun VectorBuilder.ellipse(ellipse: Ellipse) = ellipse(ellipse.center.x, ellipse.
 fun VectorBuilder.circle(circle: Circle): Unit = ellipse(circle.center.x, circle.center.y, circle.radius, circle.radius)
 fun VectorBuilder.circle(x: Float, y: Float, radius: Float) = ellipse(x, y, radius, radius)
 
-fun VectorPath.ellipseArc(x: Float, y: Float, radiusX: Float, radiusY: Float, startAngle: Float, sweepAngle: Float) {
-    var startArc = startAngle * PI.toFloat() / 180
-    var remainingArc = sweepAngle * PI.toFloat() / 180
+fun VectorPath.ellipseArc(x: Float, y: Float, radiusX: Float, radiusY: Float, startAngle: Angle, sweepAngle: Angle) {
+    var startArc = startAngle.radians
+    var remainingArc = sweepAngle.radians
     moveTo(Point2(x, y))
     lineTo(Point2(x + radiusX * cos(startArc), y + radiusY * sin(startArc)))
     do {
@@ -155,7 +156,7 @@ fun VectorPath.ellipseArc(x: Float, y: Float, radiusX: Float, radiusY: Float, st
         cubicTo(control1, control2, endPoint)
         startArc = endArc
         remainingArc -= segmentArc
-    } while (remainingArc > 0)
+    } while (remainingArc > 1e-5f)
     lineTo(Point2(x, y))
     close()
 }
