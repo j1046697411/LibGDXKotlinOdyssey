@@ -8,28 +8,26 @@ class ByteFastList(capacity: Int = 7) : AbstractMutableFastList<Byte>(), ByteMut
     override var size: Int = 0
         private set
 
-    override fun unsafeListEditor(): ListEditor<Byte> {
-        return object : ListEditor<Byte> {
-            override fun unsafeInsertLast(element: Byte) {
-                data[size++] = element
-            }
-
-            override fun unsafeSet(index: Int, element: Byte) {
-                data[index] = element
-            }
-        }
-    }
-
-    override fun ensure(count: Int) {
+    private fun ensure(count: Int) {
         if (count + size > data.size) {
             data = data.copyOf(max(count + size, data.size * 2))
         }
     }
 
-    override fun migrate(index: Int, count: Int, callback: InsertEditor<Byte>.() -> Unit) {
+    override fun safeInsert(index: Int, count: Int, callback: ListEditor<Byte>.() -> Unit) {
+        ensure(count)
         data.copyInto(data, index + count, index, size)
-        unsafeListEditor.apply(callback)
+        var offset = index
+        ListEditor<Byte> { data[offset++] = it }.apply(callback)
+        check(offset == index + count) { "offset $offset != index $index + count $count" }
         size += count
+    }
+
+    override fun safeInsertLast(count: Int, callback: ListEditor<Byte>.() -> Unit) {
+        ensure(count)
+        val offset = size
+        ListEditor<Byte> { data[size++] = it }.apply(callback)
+        check(offset + count == size) { "offset $offset != size $size" }
     }
 
     override fun set(index: Int, element: Byte): Byte {

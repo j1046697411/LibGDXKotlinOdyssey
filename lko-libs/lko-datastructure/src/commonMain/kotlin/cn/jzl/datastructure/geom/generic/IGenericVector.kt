@@ -1,6 +1,7 @@
 package cn.jzl.datastructure.geom.generic
 
 import cn.jzl.datastructure.list.AbstractMutableFastList
+import cn.jzl.datastructure.list.ListEditor
 import cn.jzl.datastructure.list.MutableFastList
 
 interface Dimension {
@@ -40,9 +41,18 @@ abstract class AbstractVectorList<T, V : IGenericVector<T>>(
 
     override val size: Int get() = data.size / dimensions
 
+    protected fun ListEditor<T>.unsafeInsert(vector: V) {
+        require(dimensions == vector.dimensions) { "vector dimensions ${vector.dimensions} is not equal to list dimensions $dimensions" }
+        vector.components.forEach { unsafeInsert(it) }
+    }
+
     private fun index(index: Int, dimension: Int): Int {
-        check(0 <= index && index < size) { "index $index is out of range [0, $size)" }
-        check(0 <= dimension && dimension < this.dimensions) { "dimension $dimension is out of range [0, ${this.dimensions})" }
+        if (index !in 0 until size) {
+            throw IndexOutOfBoundsException("index $index is out of range [0, $size)")
+        }
+        if (dimension !in 0 until dimensions) {
+            throw IndexOutOfBoundsException("dimension $dimension is out of range [0, $dimensions)")
+        }
         return index * this.dimensions + dimension
     }
 

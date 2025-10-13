@@ -8,29 +8,28 @@ class CharFastList(capacity: Int = 7) : AbstractMutableFastList<Char>(), CharMut
     override var size: Int = 0
         private set
 
-    override fun unsafeListEditor(): ListEditor<Char> {
-        return object : ListEditor<Char> {
-            override fun unsafeInsertLast(element: Char) {
-                data[size++] = element
-            }
-
-            override fun unsafeSet(index: Int, element: Char) {
-                data[index] = element
-            }
-        }
-    }
-
-    override fun ensure(count: Int) {
+    private fun ensure(count: Int) {
         if (count + size > data.size) {
             data = data.copyOf(max(count + size, data.size * 2))
         }
     }
 
-    override fun migrate(index: Int, count: Int, callback: InsertEditor<Char>.() -> Unit) {
+    override fun safeInsert(index: Int, count: Int, callback: ListEditor<Char>.() -> Unit) {
+        ensure(count)
         data.copyInto(data, index + count, index, size)
-        unsafeListEditor.apply(callback)
+        var offset = index
+        ListEditor<Char> { data[offset++] = it }.apply(callback)
+        check(offset == index + count) { "offset $offset != index $index + count $count" }
         size += count
     }
+
+    override fun safeInsertLast(count: Int, callback: ListEditor<Char>.() -> Unit) {
+        ensure(count)
+        val offset = size
+        ListEditor<Char> { data[size++] = it }.apply(callback)
+        check(offset + count == size) { "offset $offset + count $count != size $size" }
+    }
+
 
     override fun set(index: Int, element: Char): Char {
         checkIndex(index)

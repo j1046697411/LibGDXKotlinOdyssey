@@ -8,28 +8,26 @@ class FloatFastList(capacity: Int = 7) : AbstractMutableFastList<Float>(), Float
     override var size: Int = 0
         private set
 
-    override fun unsafeListEditor(): ListEditor<Float> {
-        return object : ListEditor<Float> {
-            override fun unsafeInsertLast(element: Float) {
-                data[size++] = element
-            }
-
-            override fun unsafeSet(index: Int, element: Float) {
-                data[index] = element
-            }
-        }
-    }
-
-    override fun migrate(index: Int, count: Int, callback: InsertEditor<Float>.() -> Unit) {
-        data.copyInto(data, index + count, index, size)
-        unsafeListEditor.apply(callback)
-        size += count
-    }
-
-    override fun ensure(count: Int) {
+    private fun ensure(count: Int) {
         if (count + size > data.size) {
             data = data.copyOf(max(count + size, data.size * 2))
         }
+    }
+
+    override fun safeInsert(index: Int, count: Int, callback: ListEditor<Float>.() -> Unit) {
+        ensure(count)
+        data.copyInto(data, index + count, index, size)
+        var offset = index
+        ListEditor<Float> { data[offset++] = it }.apply(callback)
+        check(offset == index + count) { "offset $offset != index $index + count $count" }
+        size += count
+    }
+
+    override fun safeInsertLast(count: Int, callback: ListEditor<Float>.() -> Unit) {
+        ensure(count)
+        val offset = size
+        ListEditor<Float> { data[size++] = it }.apply(callback)
+        check(offset + count == size) { "offset $offset + count $count != size $size" }
     }
 
     override fun set(index: Int, element: Float): Float {

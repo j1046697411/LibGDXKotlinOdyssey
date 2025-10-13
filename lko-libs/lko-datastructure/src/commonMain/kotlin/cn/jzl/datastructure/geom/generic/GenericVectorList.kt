@@ -4,37 +4,33 @@ import cn.jzl.datastructure.list.*
 
 class GenericVectorList<T : Any>(dimensions: Int, data: MutableFastList<T>) : AbstractVectorList<T, IGenericVector<T>>(dimensions, data) {
 
-    override fun ensure(count: Int) {
+    override fun get(index: Int): IMutableGenericVector<T> {
+        checkIndex(index)
+        return VectorListGenericVector(index, this)
     }
-
-    override fun migrate(index: Int, count: Int, callback: InsertEditor<IGenericVector<T>>.() -> Unit) {
-        data.safeInsert(index, count * dimensions) { unsafeListEditor.apply(callback) }
-    }
-
-    override fun get(index: Int): IMutableGenericVector<T> = VectorListGenericVector(index, this)
 
     @Suppress("UNCHECKED_CAST")
     override fun set(index: Int, element: IGenericVector<T>): ArrayGenericVector<T> {
         checkIndex(index)
-        val data = Array<Any>(dimensions) { data[index * dimensions + it] = element[it] }
+        val data = Array<Any>(dimensions) { data.set(index * dimensions + it, element[it]) }
         return ArrayGenericVector(data as Array<T>)
     }
 
     @Suppress("UNCHECKED_CAST")
     override fun removeAt(index: Int): ArrayGenericVector<T> {
-        check(0 <= index && index < size) { "index $index is out of range [0, $size)" }
+        checkIndex(index)
         val data = Array<Any>(dimensions) { data.removeAt(index * dimensions + (dimensions - it - 1)) }
         data.reverse()
         return ArrayGenericVector(data as Array<T>)
     }
 
     override fun insertLast(element: IGenericVector<T>) = data.safeInsertLast(dimensions) {
-        element.components.forEach { unsafeInsertLast(it) }
+        unsafeInsert(element)
     }
 
     override fun insertLast(element1: IGenericVector<T>, element2: IGenericVector<T>) = data.safeInsertLast(dimensions * 2) {
-        element1.components.forEach { unsafeInsertLast(it) }
-        element2.components.forEach { unsafeInsertLast(it) }
+        unsafeInsert(element1)
+        unsafeInsert(element2)
     }
 
     override fun insertLast(
@@ -42,9 +38,9 @@ class GenericVectorList<T : Any>(dimensions: Int, data: MutableFastList<T>) : Ab
         element2: IGenericVector<T>,
         element3: IGenericVector<T>
     ) = data.safeInsertLast(dimensions * 3) {
-        element1.components.forEach { unsafeInsertLast(it) }
-        element2.components.forEach { unsafeInsertLast(it) }
-        element3.components.forEach { unsafeInsertLast(it) }
+        unsafeInsert(element1)
+        unsafeInsert(element2)
+        unsafeInsert(element3)
     }
 
     override fun insertLast(
@@ -53,10 +49,10 @@ class GenericVectorList<T : Any>(dimensions: Int, data: MutableFastList<T>) : Ab
         element3: IGenericVector<T>,
         element4: IGenericVector<T>
     ) = data.safeInsertLast(dimensions * 4) {
-        element1.components.forEach { unsafeInsertLast(it) }
-        element2.components.forEach { unsafeInsertLast(it) }
-        element3.components.forEach { unsafeInsertLast(it) }
-        element4.components.forEach { unsafeInsertLast(it) }
+        unsafeInsert(element1)
+        unsafeInsert(element2)
+        unsafeInsert(element3)
+        unsafeInsert(element4)
     }
 
     override fun insertLast(
@@ -66,11 +62,11 @@ class GenericVectorList<T : Any>(dimensions: Int, data: MutableFastList<T>) : Ab
         element4: IGenericVector<T>,
         element5: IGenericVector<T>
     ) = data.safeInsertLast(dimensions * 5) {
-        element1.components.forEach { unsafeInsertLast(it) }
-        element2.components.forEach { unsafeInsertLast(it) }
-        element3.components.forEach { unsafeInsertLast(it) }
-        element4.components.forEach { unsafeInsertLast(it) }
-        element5.components.forEach { unsafeInsertLast(it) }
+        unsafeInsert(element1)
+        unsafeInsert(element2)
+        unsafeInsert(element3)
+        unsafeInsert(element4)
+        unsafeInsert(element5)
     }
 
     override fun insertLast(
@@ -81,31 +77,39 @@ class GenericVectorList<T : Any>(dimensions: Int, data: MutableFastList<T>) : Ab
         element5: IGenericVector<T>,
         element6: IGenericVector<T>
     ) = data.safeInsertLast(dimensions * 6) {
-        element1.components.forEach { unsafeInsertLast(it) }
-        element2.components.forEach { unsafeInsertLast(it) }
-        element3.components.forEach { unsafeInsertLast(it) }
-        element4.components.forEach { unsafeInsertLast(it) }
-        element5.components.forEach { unsafeInsertLast(it) }
-        element6.components.forEach { unsafeInsertLast(it) }
+        unsafeInsert(element1)
+        unsafeInsert(element2)
+        unsafeInsert(element3)
+        unsafeInsert(element4)
+        unsafeInsert(element5)
+        unsafeInsert(element6)
     }
 
     override fun insertLastAll(elements: Iterable<IGenericVector<T>>) {
         when (elements) {
             is Collection<IGenericVector<T>> -> data.safeInsertLast(dimensions * elements.size) {
-                elements.forEach { vector -> vector.components.forEach { unsafeInsertLast(it) } }
+                elements.forEach { unsafeInsert(it) }
             }
 
             else -> elements.forEach(::insertLast)
         }
     }
 
+    override fun safeInsertLast(count: Int, callback: ListEditor<IGenericVector<T>>.() -> Unit) = data.safeInsertLast(count * dimensions) {
+        ListEditor<IGenericVector<T>> { unsafeInsert(it) }.apply(callback)
+    }
+
+    override fun safeInsert(index: Int, count: Int, callback: ListEditor<IGenericVector<T>>.() -> Unit) = data.safeInsert(index * dimensions, count * dimensions) {
+        ListEditor<IGenericVector<T>> { unsafeInsert(it) }.apply(callback)
+    }
+
     override fun insert(index: Int, element: IGenericVector<T>) = data.safeInsert(index * dimensions, dimensions) {
-        element.components.forEachIndexed { index, component -> unsafeSet(index, component) }
+        unsafeInsert(element)
     }
 
     override fun insert(index: Int, element1: IGenericVector<T>, element2: IGenericVector<T>) = data.safeInsert(index * dimensions, dimensions * 2) {
-        element1.components.forEachIndexed { index, component -> unsafeSet(index, component) }
-        element2.components.forEachIndexed { index, component -> unsafeSet(index + dimensions, component) }
+        unsafeInsert(element1)
+        unsafeInsert(element2)
     }
 
     override fun insert(
@@ -114,9 +118,9 @@ class GenericVectorList<T : Any>(dimensions: Int, data: MutableFastList<T>) : Ab
         element2: IGenericVector<T>,
         element3: IGenericVector<T>
     ) = data.safeInsert(index * dimensions, dimensions * 3) {
-        element1.components.forEachIndexed { index, component -> unsafeSet(index, component) }
-        element2.components.forEachIndexed { index, component -> unsafeSet(index + dimensions, component) }
-        element3.components.forEachIndexed { index, component -> unsafeSet(index + dimensions * 2, component) }
+        unsafeInsert(element1)
+        unsafeInsert(element2)
+        unsafeInsert(element3)
     }
 
     override fun insert(
@@ -126,10 +130,10 @@ class GenericVectorList<T : Any>(dimensions: Int, data: MutableFastList<T>) : Ab
         element3: IGenericVector<T>,
         element4: IGenericVector<T>
     ) = data.safeInsert(index * dimensions, dimensions * 4) {
-        element1.components.forEachIndexed { index, component -> unsafeSet(index, component) }
-        element2.components.forEachIndexed { index, component -> unsafeSet(index + dimensions, component) }
-        element3.components.forEachIndexed { index, component -> unsafeSet(index + dimensions * 2, component) }
-        element4.components.forEachIndexed { index, component -> unsafeSet(index + dimensions * 3, component) }
+        unsafeInsert(element1)
+        unsafeInsert(element2)
+        unsafeInsert(element3)
+        unsafeInsert(element4)
     }
 
     override fun insert(
@@ -140,11 +144,11 @@ class GenericVectorList<T : Any>(dimensions: Int, data: MutableFastList<T>) : Ab
         element4: IGenericVector<T>,
         element5: IGenericVector<T>
     ) = data.safeInsert(index * dimensions, dimensions * 5) {
-        element1.components.forEachIndexed { index, component -> unsafeSet(index, component) }
-        element2.components.forEachIndexed { index, component -> unsafeSet(index + dimensions, component) }
-        element3.components.forEachIndexed { index, component -> unsafeSet(index + dimensions * 2, component) }
-        element4.components.forEachIndexed { index, component -> unsafeSet(index + dimensions * 3, component) }
-        element5.components.forEachIndexed { index, component -> unsafeSet(index + dimensions * 4, component) }
+        unsafeInsert(element1)
+        unsafeInsert(element2)
+        unsafeInsert(element3)
+        unsafeInsert(element4)
+        unsafeInsert(element5)
     }
 
     override fun insert(
@@ -156,35 +160,21 @@ class GenericVectorList<T : Any>(dimensions: Int, data: MutableFastList<T>) : Ab
         element5: IGenericVector<T>,
         element6: IGenericVector<T>
     ) = data.safeInsert(index * dimensions, dimensions * 6) {
-        element1.components.forEachIndexed { index, component -> unsafeSet(index, component) }
-        element2.components.forEachIndexed { index, component -> unsafeSet(index + dimensions, component) }
-        element3.components.forEachIndexed { index, component -> unsafeSet(index + dimensions * 2, component) }
-        element4.components.forEachIndexed { index, component -> unsafeSet(index + dimensions * 3, component) }
-        element5.components.forEachIndexed { index, component -> unsafeSet(index + dimensions * 4, component) }
-        element6.components.forEachIndexed { index, component -> unsafeSet(index + dimensions * 5, component) }
+        unsafeInsert(element1)
+        unsafeInsert(element2)
+        unsafeInsert(element3)
+        unsafeInsert(element4)
+        unsafeInsert(element5)
+        unsafeInsert(element6)
     }
 
     override fun insertAll(index: Int, elements: Iterable<IGenericVector<T>>) {
         when (elements) {
             is Collection<IGenericVector<T>> -> data.safeInsert(index * dimensions, dimensions * elements.size) {
-                elements.forEach { vector -> vector.components.forEachIndexed { index, component -> unsafeSet(index, component) } }
+                elements.forEach { unsafeInsert(it) }
             }
 
-            else -> elements.forEach { insert(index * dimensions, it) }
-        }
-    }
-
-    override fun unsafeListEditor(): ListEditor<IGenericVector<T>> {
-        return object : ListEditor<IGenericVector<T>> {
-            override fun unsafeInsertLast(element: IGenericVector<T>) {
-                element.components.forEach(data.unsafeListEditor::unsafeInsertLast)
-            }
-
-            override fun unsafeSet(index: Int, element: IGenericVector<T>) {
-                element.components.forEachIndexed { componentIndex, component ->
-                    data.unsafeListEditor.unsafeSet(index * dimensions + componentIndex, component)
-                }
-            }
+            else -> elements.forEachIndexed { offset, vector -> insert((index + offset) * dimensions, vector) }
         }
     }
 

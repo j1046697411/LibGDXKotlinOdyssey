@@ -8,28 +8,26 @@ class LongFastList(capacity: Int = 7) : AbstractMutableFastList<Long>(), LongMut
     override var size: Int = 0
         private set
 
-    override fun unsafeListEditor(): ListEditor<Long> {
-        return object : ListEditor<Long> {
-            override fun unsafeInsertLast(element: Long) {
-                data[size++] = element
-            }
-
-            override fun unsafeSet(index: Int, element: Long) {
-                data[index] = element
-            }
-        }
-    }
-
-    override fun migrate(index: Int, count: Int, callback: InsertEditor<Long>.() -> Unit) {
-        data.copyInto(data, index + count, index, size)
-        unsafeListEditor.apply(callback)
-        size += count
-    }
-
-    override fun ensure(count: Int) {
+    private fun ensure(count: Int) {
         if (count + size > data.size) {
             data = data.copyOf(max(count + size, data.size * 2))
         }
+    }
+
+    override fun safeInsert(index: Int, count: Int, callback: ListEditor<Long>.() -> Unit) {
+        ensure(count)
+        data.copyInto(data, index + count, index, size)
+        var offset = index
+        ListEditor<Long> { data[offset++] = it }.apply(callback)
+        check(offset == index + count) { "offset $offset != index $index + count $count" }
+        size += count
+    }
+
+    override fun safeInsertLast(count: Int, callback: ListEditor<Long>.() -> Unit) {
+        ensure(count)
+        val offset = size
+        ListEditor<Long> { data[size++] = it }.apply(callback)
+        check(offset + count == size) { "offset $offset + count $count != size $size" }
     }
 
     override fun set(index: Int, element: Long): Long {
