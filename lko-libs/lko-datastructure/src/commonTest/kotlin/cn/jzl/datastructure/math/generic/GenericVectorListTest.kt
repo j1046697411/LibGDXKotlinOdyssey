@@ -1,7 +1,8 @@
-package cn.jzl.datastructure.geom.generic
+package cn.jzl.datastructure.math.generic
 
+import cn.jzl.datastructure.math.vector.generic.ArrayGenericVector
+import cn.jzl.datastructure.math.vector.generic.GenericVectorList
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse

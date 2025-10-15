@@ -1,6 +1,6 @@
 package cn.jzl.datastructure.array2
 
-import cn.jzl.datastructure.geom.RectangleInt
+import cn.jzl.datastructure.math.geom.RectangleInt
 import cn.jzl.datastructure.list.ObjectFastList
 import kotlin.math.max
 

@@ -1,6 +1,6 @@
 package cn.jzl.datastructure.array2
 
-import cn.jzl.datastructure.geom.RectangleInt
+import cn.jzl.datastructure.math.geom.RectangleInt
 import kotlinx.atomicfu.atomic
 
 inline val IArray2<*>.size: Int get() = width * height

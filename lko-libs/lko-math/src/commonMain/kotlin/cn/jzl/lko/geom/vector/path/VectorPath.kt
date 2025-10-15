@@ -1,8 +1,6 @@
 package cn.jzl.lko.geom.vector.path
 
-import cn.jzl.datastructure.IntArrayList
-import cn.jzl.lko.geom.IPointList
-import cn.jzl.lko.geom.PointList
+import cn.jzl.datastructure.list.IntFastList
 import cn.jzl.lko.geom.vector.Point2
 
 enum class Winding {
@@ -12,7 +10,7 @@ enum class Winding {
 fun buildVectorPath(winding: Winding = Winding.NON_ZERO, block: VectorBuilder.() -> Unit): VectorPath = VectorPath(winding = winding).apply(block)
 
 class VectorPath(
-    private val commands: IntArrayList = IntArrayList(),
+    private val commands: IntFastList = IntFastList(),
     private val points: IPointList = PointList(),
     val winding: Winding = Winding.NON_ZERO
 ) : IVectorPath {

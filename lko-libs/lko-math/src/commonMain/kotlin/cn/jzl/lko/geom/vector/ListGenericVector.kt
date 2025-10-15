@@ -1,7 +1,5 @@
 package cn.jzl.lko.geom.vector
 
-import cn.jzl.lko.geom.IVectorList
-
 internal open class ListGenericVector<T>(
     private val vectorList: IVectorList<T>,
     private val offset: Int

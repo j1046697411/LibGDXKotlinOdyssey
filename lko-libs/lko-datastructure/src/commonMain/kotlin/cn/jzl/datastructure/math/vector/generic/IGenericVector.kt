@@ -1,4 +1,4 @@
-package cn.jzl.datastructure.geom.generic
+package cn.jzl.datastructure.math.vector.generic
 
 import cn.jzl.datastructure.list.AbstractMutableFastList
 import cn.jzl.datastructure.list.ListEditor

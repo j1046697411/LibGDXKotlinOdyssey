@@ -1,6 +1,6 @@
 package cn.jzl.datastructure.array2
 
-import cn.jzl.datastructure.geom.RectangleInt
+import cn.jzl.datastructure.math.geom.RectangleInt
 
 class ByteArray2 @PublishedApi internal constructor(override val width: Int, override val height: Int, val data: ByteArray) : ByteIArray2 {
 

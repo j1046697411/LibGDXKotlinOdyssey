@@ -1,7 +1,5 @@
 package cn.jzl.lko.geom.vector
 
-import cn.jzl.lko.geom.IMutableVectorList
-
 internal class MutableListGenericVector<T>(
     private val vectorList: IMutableVectorList<T>,
     private val offset: Int

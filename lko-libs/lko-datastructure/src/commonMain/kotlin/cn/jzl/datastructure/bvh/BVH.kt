@@ -1,6 +1,6 @@
 package cn.jzl.datastructure.bvh
 
-import cn.jzl.datastructure.MutableFastList
+import cn.jzl.datastructure.list.MutableFastList
 
 interface Dimension {
     val dimension: Int

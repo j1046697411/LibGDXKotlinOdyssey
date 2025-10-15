@@ -1,6 +1,6 @@
 package cn.jzl.datastructure.array2
 
-import cn.jzl.datastructure.geom.RectangleInt
+import cn.jzl.datastructure.math.geom.RectangleInt
 
 class LongArray2 @PublishedApi internal constructor(override val width: Int, override val height: Int, val data: LongArray) : LongIArray2 {
 

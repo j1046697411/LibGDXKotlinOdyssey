@@ -3,7 +3,6 @@ package cn.jzl.lko.geom.vector.path
 import cn.jzl.lko.geom.Angle
 import cn.jzl.lko.geom.Circle
 import cn.jzl.lko.geom.Ellipse
-import cn.jzl.lko.geom.IPointList
 import cn.jzl.lko.geom.Line
 import cn.jzl.lko.geom.Polygon
 import cn.jzl.lko.geom.Polyline

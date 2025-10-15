@@ -1,7 +1,5 @@
 package cn.jzl.lko.geom.vector
 
-import cn.jzl.lko.geom.VectorArrayList
-
 interface IGenericVector<T> : Dimension {
     operator fun get(dimension: Int): T
 }

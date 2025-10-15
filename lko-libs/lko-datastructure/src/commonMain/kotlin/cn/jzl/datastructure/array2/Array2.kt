@@ -1,6 +1,6 @@
 package cn.jzl.datastructure.array2
 
-import cn.jzl.datastructure.geom.RectangleInt
+import cn.jzl.datastructure.math.geom.RectangleInt
 
 data class Array2<T>(override val width: Int, override val height: Int, val data: Array<T>) : IArray2<T> {
     init {
