@@ -1,125 +1,57 @@
 package cn.jzl.datastructure.bvh
 
-import cn.jzl.datastructure.list.MutableFastList
+import cn.jzl.datastructure.list.FloatFastList
+import cn.jzl.datastructure.list.IntFastList
+import cn.jzl.datastructure.list.ListEditor
+import cn.jzl.datastructure.math.vector.generic.Dimension
 
-interface Dimension {
-    val dimension: Int
-}
+/**
+ * 边界体积层次结构(BVH)树实现
+ */
+class BVH<T>(override val dimensions: Int) : Dimension {
 
-@JvmInline
-value class BVHVector(val data: FloatArray) : Dimension {
+    internal val data = FloatFastList(8 * dimensions)
+    private val recycledNodeIds = IntFastList(8)
 
-    override val dimension: Int get() = data.size
+    internal fun dimension(offset: Int, dimension: Int): Float = data[offset * dimensions + dimension]
 
-    operator fun get(index: Int): Float {
-        return data[index]
+    internal fun dimension(offset: Int, dimension: Int, value: Float) {
+        data[offset * dimensions + dimension] = value
     }
 
-    operator fun set(index: Int, value: Float) {
-        data[index] = value
-    }
-}
-
-@JvmInline
-value class BVHRay(val intervals: BVHIntervals) : Dimension {
-
-    override val dimension: Int get() = intervals.dimension
-
-    fun origin(dimension: Int): Float = intervals.a(dimension)
-    fun origin(dimension: Int, value: Float) {
-        intervals.a(dimension, value)
-    }
-
-    fun direction(dimension: Int): Float = intervals.b(dimension)
-    fun direction(dimension: Int, value: Float) {
-        intervals.b(dimension, value)
+    // 优化的矩形创建，避免数组分配
+    internal fun rect(
+        block: ListEditor<Float>.() -> Unit = { (0 until (dimensions * 2)).forEach { _ -> unsafeInsert(0f) } }
+    ): BVHRect<T> {
+        val offset = if (recycledNodeIds.isNotEmpty()) {
+            val offset = recycledNodeIds.removeLast()
+            var index = offset * dimensions
+            ListEditor<Float> { data[index++] = it }.apply(block)
+            offset
+        } else {
+            val offset = data.size / (dimensions * 2)
+            data.safeInsertLast(dimensions * 2, block)
+            offset
+        }
+        return BVHRect(offset)
     }
 
-    val origin: BVHVector get() = BVHVector(FloatArray(dimension) { intervals.a(it) })
-    val direction: BVHVector get() = BVHVector(FloatArray(dimension) { intervals.b(it) })
-}
-
-@JvmInline
-value class BVHRect(val intervals: BVHIntervals) : Dimension {
-
-    override val dimension: Int get() = intervals.dimension
-
-    val min: BVHVector get() = BVHVector(FloatArray(dimension) { intervals.a(it) })
-    val size: BVHVector get() = BVHVector(FloatArray(dimension) { intervals.b(it) })
-    val max: BVHVector get() = BVHVector(FloatArray(dimension) { min(it) + size(it) })
-
-    fun min(dimension: Int): Float = intervals.a(dimension)
-    fun size(dimension: Int): Float = intervals.b(dimension)
-    fun max(dimension: Int): Float = min(dimension) + size(dimension)
-
-    fun min(dimension: Int, value: Float) = intervals.a(dimension, value)
-    fun size(dimension: Int, value: Float) = intervals.b(dimension, value)
-}
-
-data class BVHIntervals(val data: FloatArray, override val dimension: Int) : Dimension {
-
-    fun a(index: Int): Float = data[index * dimension]
-
-    fun a(index: Int, value: Float) {
-        data[index * dimension] = value
+    interface BVHNode<T> {
+        val id: Int
+        val bvh: BVH<T>
+        val rect: BVHRect<T>
     }
 
-    fun b(index: Int): Float = data[index * dimension + 1]
-    fun b(index: Int, value: Float) {
-        data[index * dimension + 1] = value
+    @JvmInline
+    value class BVHRect<T>(val offset: Int) {
+        fun min(bvh: BVH<T>, dimension: Int): Float = bvh.dimension(offset, dimension)
+        fun max(bvh: BVH<T>, dimension: Int): Float = bvh.dimension(offset + 1, dimension)
+        fun size(bvh: BVH<T>, dimension: Int): Float = max(bvh, dimension) - min(bvh, dimension)
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as BVHIntervals
-
-        if (dimension != other.dimension) return false
-        if (!data.contentEquals(other.data)) return false
-
-        return true
+    @JvmInline
+    value class BVHRay<T>(val offset: Int) {
+        fun origin(bvh: BVH<T>, dimension: Int): Float = bvh.dimension(offset, dimension)
+        fun direction(bvh: BVH<T>, dimension: Int): Float = bvh.dimension(offset + 1, dimension)
     }
-
-    override fun hashCode(): Int {
-        var result = dimension
-        result = 31 * result + data.contentHashCode()
-        return result
-    }
-}
-
-class BVH<T>(
-    override val dimension: Int
-) : Dimension, Sequence<BVH.Node<T>> {
-    private val objectToNodes = mutableMapOf<T, Node<T>>()
-    private val root: Node<T> = Node(
-        BVHRect(
-            BVHIntervals(
-                FloatArray(dimension * 2),
-                dimension
-            )
-        ),
-        id = "root",
-    )
-
-    override fun iterator(): Iterator<Node<T>> {
-        TODO("Not yet implemented")
-    }
-
-    fun insertOrUpdate(rect: BVHRect, data: T) {
-        val node = objectToNodes[data]
-        if (node?.rect == rect) return
-        insertSubtree(this.root, node ?: Node(rect, null))
-    }
-
-    private fun insertSubtree(root: Node<T>, node: Node<T>) {
-
-    }
-
-    data class Node<T>(
-        val rect: BVHRect,
-        var id: String?,
-        var nodes: MutableFastList<Node<T>>? = null,
-        var data: T? = null,
-    )
 }
