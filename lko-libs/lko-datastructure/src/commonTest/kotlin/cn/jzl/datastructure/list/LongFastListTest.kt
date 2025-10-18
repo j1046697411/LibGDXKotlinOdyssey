@@ -312,4 +312,57 @@ class LongFastListTest {
 
         assertContentEquals(listOf(1L, 2L, 3L, 4L, 5L), collected)
     }
+
+    // 额外用例：ensureCapacity 与 fill 验证容量填充与区间更新
+    @Test
+    fun ensureCapacity_and_fill_should_work() {
+        val list = LongFastList()
+        list.ensureCapacity(5, 8L)
+        assertEquals(5, list.size)
+        for (i in 0 until 5) assertEquals(8L, list[i])
+        list.fill(2L, 1, 4)
+        assertEquals(8L, list[0])
+        assertEquals(2L, list[1])
+        assertEquals(2L, list[2])
+        assertEquals(2L, list[3])
+        assertEquals(8L, list[4])
+    }
+    
+    // 额外用例：safeInsert 与 safeInsertLast 验证顺序提交与异常
+    @Test
+    fun safeInsert_and_safeInsertLast_should_work() {
+        val list = LongFastList()
+        list.insertLast(1L, 4L)
+        list.safeInsert(1, 2) {
+            unsafeInsert(2L)
+            unsafeInsert(3L)
+        }
+        assertEquals(4, list.size)
+        assertEquals(1L, list[0])
+        assertEquals(2L, list[1])
+        assertEquals(3L, list[2])
+        assertEquals(4L, list[3])
+    
+        assertFailsWith<IllegalStateException> {
+            list.safeInsertLast(1) { /* 计数不匹配 */ }
+        }
+        list.safeInsertLast(2) {
+            unsafeInsert(5L)
+            unsafeInsert(6L)
+        }
+        assertEquals(6, list.size)
+        assertEquals(5L, list[4])
+        assertEquals(6L, list[5])
+    }
+    
+    // 额外用例：insert 多参数重载（4~6 个参数）
+    @Test
+    fun insert_multi_parameters_4_to_6() {
+        val list = LongFastList()
+        list.insertLast(1L, 2L, 3L, 4L)
+        val idx = list.size
+        list.insert(idx, 5L, 6L)
+        assertEquals(6, list.size)
+        for (i in 0 until 6) assertEquals((i + 1).toLong(), list[i])
+    }
 }

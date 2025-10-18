@@ -1,6 +1,6 @@
 package cn.jzl.datastructure.list
 
-interface ShortMutableFastList : MutableFastList<Short> {
+interface ShortMutableFastList : PrimitiveMutableFastList<Short> {
     fun insertLastAll(elements: ShortArray)
     fun insertAll(index: Int, elements: ShortArray)
 }

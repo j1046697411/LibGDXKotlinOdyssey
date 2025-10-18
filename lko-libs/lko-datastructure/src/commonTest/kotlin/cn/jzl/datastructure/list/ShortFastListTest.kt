@@ -152,7 +152,7 @@ class ShortFastListTest {
 
     // 测试通过 insert 在指定位置添加多个元素
     @Test
-    fun testInsertMultipleElementsAtIndex() {
+    fun insert_multiple_at_index_should_place_in_order() {
         val list = ShortFastList()
         list.insertLast(1, 4)
         list.insert(1, 2, 3)
@@ -311,5 +311,100 @@ class ShortFastListTest {
         }
 
         assertContentEquals(listOf(1, 2, 3, 4, 5), collected)
+    }
+
+    // 额外用例：ensureCapacity 与 fill 验证容量填充与区间更新
+    @Test
+    fun ensureCapacity_and_fill_should_work() {
+        val list = ShortFastList()
+        list.ensureCapacity(5, 8)
+        assertEquals(5, list.size)
+        for (i in 0 until 5) assertEquals(8, list[i])
+        list.fill(2, 1, 4)
+        assertEquals(8, list[0])
+        assertEquals(2, list[1])
+        assertEquals(2, list[2])
+        assertEquals(2, list[3])
+        assertEquals(8, list[4])
+    }
+
+    // 额外用例：safeInsert 与 safeInsertLast 验证顺序提交与异常
+    @Test
+    fun safeInsert_and_safeInsertLast_should_work() {
+        val list = ShortFastList()
+        list.insertLast(1, 4)
+        list.safeInsert(1, 2) {
+            unsafeInsert(2)
+            unsafeInsert(3)
+        }
+        assertEquals(4, list.size)
+        assertEquals(1, list[0])
+        assertEquals(2, list[1])
+        assertEquals(3, list[2])
+        assertEquals(4, list[3])
+    
+        assertFailsWith<IllegalStateException> {
+            list.safeInsertLast(1) { /* 计数不匹配 */ }
+        }
+        list.safeInsertLast(2) {
+            unsafeInsert(5)
+            unsafeInsert(6)
+        }
+        assertEquals(6, list.size)
+        assertEquals(5, list[4])
+        assertEquals(6, list[5])
+    }
+
+    // 额外用例：safeInsertLast 计数不匹配时应保留已插入元素（非事务）
+    @Test
+    fun safeInsertLast_mismatch_should_keep_inserted_elements() {
+        val list = ShortFastList()
+        val offset = list.size
+        assertFailsWith<IllegalStateException> {
+            list.safeInsertLast(1) {
+                unsafeInsert(10)
+                unsafeInsert(20)
+            }
+        }
+        assertEquals(offset + 2, list.size)
+        assertEquals(10, list[offset].toInt())
+        assertEquals(20, list[offset + 1].toInt())
+    }
+    
+    // 额外用例：add 在头部/中间/尾部插入并正确移动元素
+    @Test
+    fun add_should_insert_and_shift() {
+        val list = ShortFastList()
+        list.insertLast(1, 3)
+        list.add(1, 2)
+        assertEquals(3, list.size)
+        assertEquals(1, list[0].toInt())
+        assertEquals(2, list[1].toInt())
+        assertEquals(3, list[2].toInt())
+    
+        list.add(0, 0)
+        assertEquals(4, list.size)
+        assertEquals(0, list[0].toInt())
+        assertEquals(1, list[1].toInt())
+        assertEquals(2, list[2].toInt())
+        assertEquals(3, list[3].toInt())
+    
+        list.add(4, 4)
+        assertEquals(5, list.size)
+        for (i in 0 until 5) assertEquals(i, list[i].toInt())
+    }
+
+    // 测试 insert 方法的索引越界检查
+    @Test
+    fun testInsertMultipleElementsAtIndex() {
+        val list = ShortFastList()
+        list.insertLast(1, 4)
+        list.insert(1, 2, 3)
+
+        assertEquals(4, list.size)
+        assertEquals(1, list[0].toInt())
+        assertEquals(2, list[1].toInt())
+        assertEquals(3, list[2].toInt())
+        assertEquals(4, list[3].toInt())
     }
 }

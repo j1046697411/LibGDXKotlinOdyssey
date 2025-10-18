@@ -312,4 +312,111 @@ class ByteFastListTest {
 
         assertContentEquals(listOf<Byte>(1, 2, 3, 4, 5), collected)
     }
+
+    // 额外用例：ensureCapacity 填充并扩容；再次调用较小容量不改变内容
+    @Test
+    fun ensureCapacity_should_fill_and_resize() {
+        val list = ByteFastList()
+        list.ensureCapacity(4, 7)
+        assertEquals(4, list.size)
+        for (i in 0 until 4) assertEquals(7.toByte(), list[i])
+    
+        list.ensureCapacity(2, 9) // 较小容量不影响当前内容
+        assertEquals(4, list.size)
+        for (i in 0 until 4) assertEquals(7.toByte(), list[i])
+    }
+    
+    // 额外用例：fill 在指定范围更新元素
+    @Test
+    fun fill_should_update_range() {
+        val list = ByteFastList()
+        list.ensureCapacity(5, 0)
+        list.fill(1, 1, 4)
+        assertEquals(0.toByte(), list[0])
+        assertEquals(1.toByte(), list[1])
+        assertEquals(1.toByte(), list[2])
+        assertEquals(1.toByte(), list[3])
+        assertEquals(0.toByte(), list[4])
+    }
+    
+    // 额外用例：safeInsert 顺序提交；safeInsertLast 计数不匹配会抛异常但不回滚已插入元素
+    @Test
+    fun safeInsert_and_safeInsertLast_behavior() {
+        val list = ByteFastList()
+        list.insertLast(1, 4)
+        list.safeInsert(1, 2) {
+            unsafeInsert(2)
+            unsafeInsert(3)
+        }
+        assertEquals(4, list.size)
+        assertEquals(1.toByte(), list[0])
+        assertEquals(2.toByte(), list[1])
+        assertEquals(3.toByte(), list[2])
+        assertEquals(4.toByte(), list[3])
+    
+        assertFailsWith<IllegalStateException> {
+            list.safeInsertLast(2) { unsafeInsert(9) } // 仅插入了一个元素，计数不匹配
+        }
+        list.safeInsertLast(2) {
+            unsafeInsert(5)
+            unsafeInsert(6)
+        }
+        // 非事务：之前插入的 9 保留， subsequent insert 5、6 追加
+        assertEquals(7, list.size)
+        assertEquals(9.toByte(), list[4])
+        assertEquals(5.toByte(), list[5])
+        assertEquals(6.toByte(), list[6])
+    }
+    
+    // 额外用例：insert 多参数重载（4~6 个参数）在指定索引插入
+    @Test
+    fun insert_multi_parameters_4_to_6() {
+        val list = ByteFastList()
+        list.insertLast(1, 2, 3, 4)
+        list.insert(4, 5, 6)
+        for (i in 0 until 6) assertEquals((i + 1).toByte(), list[i])
+    }
+    
+    // 额外用例：add 在头部/中间/尾部插入并正确移动元素
+    @Test
+    fun add_should_insert_and_shift() {
+        val list = ByteFastList()
+        list.insertLast(1, 3)
+        list.add(1, 2)
+        assertEquals(3, list.size)
+        assertEquals(1, list[0].toInt())
+        assertEquals(2, list[1].toInt())
+        assertEquals(3, list[2].toInt())
+    
+        list.add(0, 0)
+        assertEquals(4, list.size)
+        assertEquals(0, list[0].toInt())
+        assertEquals(1, list[1].toInt())
+        assertEquals(2, list[2].toInt())
+        assertEquals(3, list[3].toInt())
+    
+        list.add(4, 4)
+        assertEquals(5, list.size)
+        for (i in 0 until 5) assertEquals(i, list[i].toInt())
+    }
+    
+    // 额外用例：insertLastAll/insertAll 处理非 Collection 的 Iterable
+    @Test
+    fun insertAll_iterable_non_collection_should_work() {
+        val list = ByteFastList()
+        val src = object : Iterable<Byte> {
+            override fun iterator(): Iterator<Byte> = listOf<Byte>(1, 2, 3).iterator()
+        }
+        list.insertLastAll(src)
+        assertEquals(3, list.size)
+        assertEquals(1, list[0].toInt())
+        assertEquals(2, list[1].toInt())
+        assertEquals(3, list[2].toInt())
+    
+        val srcEmpty = object : Iterable<Byte> {
+            override fun iterator(): Iterator<Byte> = emptyList<Byte>().iterator()
+        }
+        list.insertAll(1, srcEmpty)
+        assertEquals(3, list.size)
+    }
 }

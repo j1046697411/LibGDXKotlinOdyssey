@@ -325,4 +325,51 @@ class ObjectFastListTest {
         assertEquals(3.14, list[2])
         assertEquals(true, list[3])
     }
+
+    // 额外用例：safeInsert 的提交与顺序
+    @Test
+    fun extra_safeInsert_commit_and_order() {
+        val list = ObjectFastList<String>()
+        list.insertLast("A", "D")
+        list.safeInsert(1, 2) {
+            unsafeInsert("B")
+            unsafeInsert("C")
+        }
+        assertEquals(4, list.size)
+        assertEquals("A", list[0])
+        assertEquals("B", list[1])
+        assertEquals("C", list[2])
+        assertEquals("D", list[3])
+    }
+    
+    // 额外用例：safeInsert 的计数不匹配抛异常
+    @Test
+    fun extra_safeInsert_count_mismatch_should_throw() {
+        val list = ObjectFastList<Int>()
+        assertFailsWith<IllegalStateException> {
+            list.safeInsert(0, 2) {
+                unsafeInsert(1)
+            }
+        }
+    }
+    
+    // 额外用例：safeInsertLast 的提交与计数不匹配
+    @Test
+    fun extra_safeInsertLast_commit_and_mismatch() {
+        val list = ObjectFastList<Int>()
+        list.safeInsertLast(2) {
+            unsafeInsert(10)
+            unsafeInsert(20)
+        }
+        assertEquals(2, list.size)
+        assertEquals(10, list[0])
+        assertEquals(20, list[1])
+    
+        assertFailsWith<IllegalStateException> {
+            list.safeInsertLast(1) {
+                unsafeInsert(30)
+                unsafeInsert(40) // 故意多插入触发计数不匹配
+            }
+        }
+    }
 }

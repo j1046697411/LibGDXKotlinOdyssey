@@ -1,8 +1,10 @@
 package cn.jzl.datastructure.math.vector.generic
 
 import cn.jzl.datastructure.list.AbstractMutableFastList
+import cn.jzl.datastructure.list.CompositeMutableFastList
 import cn.jzl.datastructure.list.ListEditor
 import cn.jzl.datastructure.list.MutableFastList
+import cn.jzl.datastructure.list.PrimitiveMutableFastList
 
 interface Dimension {
     val dimensions: Int
@@ -29,17 +31,27 @@ interface IGenericVectorList<T> : Dimension {
     operator fun get(index: Int): IGenericVector<T>
 }
 
-interface IVectorList<T, V : IGenericVector<T>> : IGenericVectorList<T>, MutableFastList<V> {
+interface IVectorList<T, V : IGenericVector<T>> : IGenericVectorList<T>, CompositeMutableFastList<T, V> {
     override fun get(index: Int): V
     override operator fun set(index: Int, element: V): V
+    override fun ensureCapacity(capacity: Int, element: T)
+    override fun fill(element: T, startIndex: Int, endIndex: Int)
 }
 
 abstract class AbstractVectorList<T, V : IGenericVector<T>>(
     override val dimensions: Int,
-    protected val data: MutableFastList<T>,
+    protected val data: PrimitiveMutableFastList<T>,
 ) : AbstractMutableFastList<V>(), IVectorList<T, V> {
 
     override val size: Int get() = data.size / dimensions
+
+    override fun ensureCapacity(capacity: Int, element: T) {
+        data.ensureCapacity(capacity * dimensions, element)
+    }
+
+    override fun fill(element: T, startIndex: Int, endIndex: Int) {
+        data.fill(element, startIndex * dimensions, endIndex * dimensions)
+    }
 
     protected fun ListEditor<T>.unsafeInsert(vector: V) {
         require(dimensions == vector.dimensions) { "vector dimensions ${vector.dimensions} is not equal to list dimensions $dimensions" }

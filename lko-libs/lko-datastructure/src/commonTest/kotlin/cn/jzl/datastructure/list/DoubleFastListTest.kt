@@ -312,4 +312,55 @@ class DoubleFastListTest {
 
         assertContentEquals(listOf(1.0, 2.0, 3.0, 4.0, 5.0), collected)
     }
+
+    // 额外用例：ensureCapacity 与 fill 验证容量与区间填充
+    @Test
+    fun ensureCapacity_and_fill_should_work() {
+        val list = DoubleFastList()
+        list.ensureCapacity(5, 1.0)
+        assertEquals(5, list.size)
+        for (i in 0 until 5) assertEquals(1.0, list[i])
+        list.fill(2.0, 2, 4)
+        assertEquals(1.0, list[0])
+        assertEquals(1.0, list[1])
+        assertEquals(2.0, list[2])
+        assertEquals(2.0, list[3])
+        assertEquals(1.0, list[4])
+    }
+    
+    // 额外用例：safeInsert 与 safeInsertLast 行为
+    @Test
+    fun safeInsert_and_safeInsertLast_behavior() {
+        val list = DoubleFastList()
+        list.insertLast(1.0)
+        list.safeInsert(1, 2) {
+            unsafeInsert(2.0)
+            unsafeInsert(3.0)
+        }
+        assertEquals(3, list.size)
+        assertEquals(1.0, list[0])
+        assertEquals(2.0, list[1])
+        assertEquals(3.0, list[2])
+    
+        assertFailsWith<IllegalStateException> {
+            list.safeInsertLast(1) { /* 不插入触发不匹配 */ }
+        }
+        list.safeInsertLast(2) {
+            unsafeInsert(4.0)
+            unsafeInsert(5.0)
+        }
+        assertEquals(5, list.size)
+        assertEquals(4.0, list[3])
+        assertEquals(5.0, list[4])
+    }
+    
+    // 额外用例：insert 多参数重载（4~6 个参数）
+    @Test
+    fun insert_multi_parameters_4_to_6() {
+        val list = DoubleFastList()
+        list.insertLast(1.0, 2.0, 3.0, 4.0)
+        list.insertLast(5.0, 6.0)
+        assertEquals(6, list.size)
+        for (i in 0 until 6) assertEquals((i + 1).toDouble(), list[i])
+    }
 }

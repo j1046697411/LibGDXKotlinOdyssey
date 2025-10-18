@@ -14,6 +14,19 @@ class ByteFastList(capacity: Int = 7) : AbstractMutableFastList<Byte>(), ByteMut
         }
     }
 
+    override fun ensureCapacity(capacity: Int, element: Byte) {
+        if (size >= capacity) return
+        ensure(capacity - size)
+        data.fill(element, size, capacity)
+        size = capacity
+    }
+
+    override fun fill(element: Byte, startIndex: Int, endIndex: Int) {
+        checkIndex(startIndex)
+        check(startIndex < endIndex && endIndex <= size) { "startIndex $startIndex, endIndex $endIndex, size $size" }
+        data.fill(element, startIndex, endIndex)
+    }
+
     override fun safeInsert(index: Int, count: Int, callback: ListEditor<Byte>.() -> Unit) {
         ensure(count)
         data.copyInto(data, index + count, index, size)

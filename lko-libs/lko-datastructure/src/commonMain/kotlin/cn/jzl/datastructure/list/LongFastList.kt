@@ -14,6 +14,19 @@ class LongFastList(capacity: Int = 7) : AbstractMutableFastList<Long>(), LongMut
         }
     }
 
+    override fun ensureCapacity(capacity: Int, element: Long) {
+        if (size >= capacity) return
+        ensure(capacity - size)
+        data.fill(element, size, capacity)
+        size = capacity
+    }
+
+    override fun fill(element: Long, startIndex: Int, endIndex: Int) {
+        checkIndex(startIndex)
+        check(startIndex < endIndex && endIndex <= size) { "startIndex $startIndex, endIndex $endIndex, size $size" }
+        data.fill(element, startIndex, endIndex)
+    }
+
     override fun safeInsert(index: Int, count: Int, callback: ListEditor<Long>.() -> Unit) {
         ensure(count)
         data.copyInto(data, index + count, index, size)

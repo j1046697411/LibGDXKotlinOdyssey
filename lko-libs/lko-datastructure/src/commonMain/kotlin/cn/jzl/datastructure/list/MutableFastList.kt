@@ -34,3 +34,12 @@ interface MutableFastList<T> : MutableList<T> {
     fun safeInsert(index: Int, count: Int, callback: ListEditor<T>.() -> Unit)
 }
 
+interface PrimitiveMutableFastList<T> : MutableFastList<T> {
+    fun ensureCapacity(capacity: Int, element: T)
+    fun fill(element: T, startIndex: Int = 0, endIndex: Int = size)
+}
+
+interface CompositeMutableFastList<V, T> : MutableFastList<T> {
+    fun ensureCapacity(capacity: Int, element: V)
+    fun fill(element: V, startIndex: Int = 0, endIndex: Int = size)
+}

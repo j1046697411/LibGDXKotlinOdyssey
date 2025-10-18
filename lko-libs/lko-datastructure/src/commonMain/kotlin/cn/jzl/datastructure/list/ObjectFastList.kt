@@ -14,6 +14,19 @@ class ObjectFastList<T>(capacity: Int = 7) : AbstractMutableFastList<T>(), Objec
         }
     }
 
+    override fun ensureCapacity(capacity: Int, element: T) {
+        if (size >= capacity) return
+        ensure(capacity - size)
+        data.fill(element, size, capacity)
+        size = capacity
+    }
+
+    override fun fill(element: T, startIndex: Int, endIndex: Int) {
+        checkIndex(startIndex)
+        check(startIndex < endIndex && endIndex <= size) { "startIndex $startIndex, endIndex $endIndex, size $size" }
+        data.fill(element, startIndex, endIndex)
+    }
+
     override fun safeInsert(index: Int, count: Int, callback: ListEditor<T>.() -> Unit) {
         ensure(count)
         data.copyInto(data, index + count, index, size)
@@ -46,9 +59,6 @@ class ObjectFastList<T>(capacity: Int = 7) : AbstractMutableFastList<T>(), Objec
         size--
         return old
     }
-
-    // add方法已在AbstractMutableFastList中实现
-    // override fun add(index: Int, element: T): Unit = insert(index, element)
 
     override fun insertLast(element: T) {
         ensure(1)

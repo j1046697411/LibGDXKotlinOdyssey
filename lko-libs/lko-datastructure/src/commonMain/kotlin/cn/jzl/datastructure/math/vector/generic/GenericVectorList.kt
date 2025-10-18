@@ -2,7 +2,7 @@ package cn.jzl.datastructure.math.vector.generic
 
 import cn.jzl.datastructure.list.*
 
-class GenericVectorList<T : Any>(dimensions: Int, data: MutableFastList<T>) : AbstractVectorList<T, IGenericVector<T>>(dimensions, data) {
+class GenericVectorList<T : Any>(dimensions: Int, data: PrimitiveMutableFastList<T>) : AbstractVectorList<T, IGenericVector<T>>(dimensions, data) {
 
     override fun get(index: Int): IMutableGenericVector<T> {
         checkIndex(index)

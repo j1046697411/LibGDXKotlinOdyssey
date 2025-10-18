@@ -14,6 +14,19 @@ class CharFastList(capacity: Int = 7) : AbstractMutableFastList<Char>(), CharMut
         }
     }
 
+    override fun ensureCapacity(capacity: Int, element: Char) {
+        if (size >= capacity) return
+        ensure(capacity - size)
+        data.fill(element, size, capacity)
+        size = capacity
+    }
+
+    override fun fill(element: Char, startIndex: Int, endIndex: Int) {
+        checkIndex(startIndex)
+        check(startIndex < endIndex && endIndex <= size) { "startIndex $startIndex, endIndex $endIndex, size $size" }
+        data.fill(element, startIndex, endIndex)
+    }
+
     override fun safeInsert(index: Int, count: Int, callback: ListEditor<Char>.() -> Unit) {
         ensure(count)
         data.copyInto(data, index + count, index, size)

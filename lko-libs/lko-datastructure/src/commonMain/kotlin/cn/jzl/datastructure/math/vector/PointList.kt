@@ -1,10 +1,11 @@
 package cn.jzl.datastructure.math.vector
 
-import cn.jzl.datastructure.math.vector.generic.AbstractVectorList
 import cn.jzl.datastructure.list.FloatFastList
 import cn.jzl.datastructure.list.ListEditor
+import cn.jzl.datastructure.math.vector.generic.AbstractVectorList
 
-class PointList(capacity: Int, override val closed: Boolean) : AbstractVectorList<Float, Point>(2, FloatFastList(capacity)), IPointList {
+class PointList(capacity: Int, override val closed: Boolean) : AbstractVectorList<Float, Point>(2, FloatFastList(capacity * 2)), IPointList {
+
     override fun get(index: Int): Point {
         checkIndex(index)
         return Point(data[index * 2], data[index * 2 + 1])
