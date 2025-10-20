@@ -1,7 +1,7 @@
 package cn.jzl.datastructure.array2
 
-import cn.jzl.datastructure.math.geom.RectangleInt
 import cn.jzl.datastructure.list.ObjectFastList
+import cn.jzl.datastructure.math.geom.RectangleInt
 import kotlin.math.max
 
 fun <T> IStackedArray2<T>.push(x: Int, y: Int, value: T) {
@@ -73,29 +73,3 @@ class StackedArray2<T>(
     }
 }
 
-class SparseChunkedStackedArray2<T> : IStackedArray2<T> {
-    override val range: RectangleInt
-        get() = TODO("Not yet implemented")
-    override val contentVersion: Int
-        get() = TODO("Not yet implemented")
-    override val maxLevel: Int
-        get() = TODO("Not yet implemented")
-    override val default: T
-        get() = TODO("Not yet implemented")
-
-    override fun layer(level: Int): ObservableArray2<T> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getStackLevel(x: Int, y: Int): Int {
-        TODO("Not yet implemented")
-    }
-
-    override fun get(x: Int, y: Int, level: Int): T {
-        TODO("Not yet implemented")
-    }
-
-    override fun set(x: Int, y: Int, level: Int, value: T) {
-        TODO("Not yet implemented")
-    }
-}

@@ -572,9 +572,9 @@ class BVHTest {
         }
         val seqDepth = bvhSeq.computeDepth()
 
-        // 深度上 bulk 构建通常不劣于逐个插入（更平衡）
+        // 深度上 bulk 构建通常不劣于逐个插入（更平衡
         assertTrue(bulkDepth <= seqDepth)
-        // 时间上 bulk 应不慢于逐个插入（宽松断言）
+        // 时间上 bulk 应不慢于逐个插入（宽松断言?
         assertTrue(bulkTime <= seqTime * 2)
     }
 

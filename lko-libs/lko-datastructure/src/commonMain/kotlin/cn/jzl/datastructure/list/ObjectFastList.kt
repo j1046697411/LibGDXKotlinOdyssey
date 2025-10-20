@@ -2,6 +2,12 @@ package cn.jzl.datastructure.list
 
 import kotlin.math.max
 
+/**
+ * 面向对象元素的 FastList 实现。
+ * - 使用 `Array<Any?>` 作为顺序存储，按需扩容为原容量的两倍或刚好满足需要。
+ * - 提供高效的尾部/指定位置批量插入与 `fill`/`ensureCapacity` 能力。
+ * - `safeInsert`/`safeInsertLast` 通过回调顺序写入，避免多次边界检查与复制。
+ */
 class ObjectFastList<T>(capacity: Int = 7) : AbstractMutableFastList<T>(), ObjectMutableFastList<T> {
     private var data: Array<Any?> = arrayOfNulls(capacity)
 

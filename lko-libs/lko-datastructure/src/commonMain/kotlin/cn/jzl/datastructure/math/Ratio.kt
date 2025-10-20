@@ -1,5 +1,8 @@
 package cn.jzl.datastructure.math
 
+import kotlin.jvm.JvmInline
+import kotlin.jvm.JvmName
+
 /**
  * Ratio 表示一个以 `Float` 存储的比例/权重/进度等数值的轻量封装。
  *
@@ -107,6 +110,7 @@ fun Ratio.coerceIn(min: Float, max: Float): Ratio {
     return Ratio(this.value.coerceIn(min, max))
 }
 
+@JvmName("coerceInFloatRange")
 fun Ratio.coerceIn(range: ClosedFloatingPointRange<Float>): Ratio {
     require(range.start <= range.endInclusive) { "Cannot coerce to an empty range: start(${range.start}) > end(${range.endInclusive})." }
     return Ratio(this.value.coerceIn(range))

@@ -1,4 +1,5 @@
 package cn.jzl.datastructure.bvh
+import kotlin.jvm.JvmInline
 
 import cn.jzl.datastructure.math.fromLowHigh
 import cn.jzl.datastructure.math.high

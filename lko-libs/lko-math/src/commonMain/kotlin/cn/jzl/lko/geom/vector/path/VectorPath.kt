@@ -1,7 +1,10 @@
 package cn.jzl.lko.geom.vector.path
 
 import cn.jzl.datastructure.list.IntFastList
+import cn.jzl.datastructure.math.vector.IPointList
+import cn.jzl.datastructure.math.vector.PointList
 import cn.jzl.lko.geom.vector.Point2
+import cn.jzl.lko.geom.vector.Vector2
 
 enum class Winding {
     EVEN_ODD, NON_ZERO
@@ -11,7 +14,7 @@ fun buildVectorPath(winding: Winding = Winding.NON_ZERO, block: VectorBuilder.()
 
 class VectorPath(
     private val commands: IntFastList = IntFastList(),
-    private val points: IPointList = PointList(),
+    private val points: IPointList = PointList(7, false),
     val winding: Winding = Winding.NON_ZERO
 ) : IVectorPath {
 
@@ -73,10 +76,25 @@ class VectorPath(
         while (index < commands.size) {
             val command = commands[index++]
             when (command) {
-                COMMAND_MOVE_TO -> visitor.moveTo(points[pointIndex++])
-                COMMAND_LINE_TO -> visitor.lineTo(points[pointIndex++])
-                COMMAND_QUAD_TO -> visitor.quadTo(points[pointIndex++], points[pointIndex++])
-                COMMAND_CUBIC_TO -> visitor.cubicTo(points[pointIndex++], points[pointIndex++], points[pointIndex++])
+                COMMAND_MOVE_TO -> {
+                    val point = points[pointIndex++]
+                    visitor.moveTo(Vector2(point.x, point.y))
+                }
+                COMMAND_LINE_TO -> {
+                    val point = points[pointIndex++]
+                    visitor.lineTo(Vector2(point.x, point.y))
+                }
+                COMMAND_QUAD_TO -> {
+                    val p1 = points[pointIndex++]
+                    val p2 = points[pointIndex++]
+                    visitor.quadTo(Vector2(p1.x, p1.y), Vector2(p2.x, p2.y))
+                }
+                COMMAND_CUBIC_TO -> {
+                    val p1 = points[pointIndex++]
+                    val p2 = points[pointIndex++]
+                    val p3 = points[pointIndex++]
+                    visitor.cubicTo(Vector2(p1.x, p1.y), Vector2(p2.x, p2.y), Vector2(p3.x, p3.y))
+                }
                 else -> visitor.close()
             }
         }

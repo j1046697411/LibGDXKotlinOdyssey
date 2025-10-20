@@ -3,6 +3,7 @@ plugins { alias(libs.plugins.kotlinMultiplatform) }
 kotlin {
 
     jvm("desktop")
+    js("browser")
 
     sourceSets {
         val commonMain by getting

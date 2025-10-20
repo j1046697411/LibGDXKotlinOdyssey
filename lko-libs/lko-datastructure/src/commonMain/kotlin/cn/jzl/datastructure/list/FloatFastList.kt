@@ -2,6 +2,11 @@ package cn.jzl.datastructure.list
 
 import kotlin.math.max
 
+/**
+ * `Float` 的 FastList 实现。
+ * - 使用 `FloatArray` 顺序存储，扩容策略为两倍或刚好满足需要。
+ * - 提供尾部/指定位置批量插入、`ensureCapacity`/`fill`、以及基于 `FloatArray` 的高效拼接。
+ */
 class FloatFastList(capacity: Int = 7) : AbstractMutableFastList<Float>(), FloatMutableFastList {
     private var data = FloatArray(capacity)
 

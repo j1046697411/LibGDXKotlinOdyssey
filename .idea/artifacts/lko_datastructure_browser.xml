@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="lko-datastructure-browser">
+    <output-path>$PROJECT_DIR$/lko-libs/lko-datastructure/build/libs</output-path>
+    <root id="archive" name="lko-datastructure-browser.jar">
+      <element id="module-output" name="LibGDXKotlinOdyssey.lko-datastructure.browserMain" />
+    </root>
+  </artifact>
+</component>

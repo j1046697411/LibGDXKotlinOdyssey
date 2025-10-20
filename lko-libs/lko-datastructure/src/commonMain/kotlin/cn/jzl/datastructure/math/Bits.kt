@@ -1,6 +1,7 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
 package cn.jzl.datastructure.math
+import kotlin.jvm.JvmInline
 
 inline fun Short.reverseBytes(): Short {
     val low = ((this.toInt() ushr 0) and 0xFF)

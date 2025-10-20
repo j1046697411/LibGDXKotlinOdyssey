@@ -18,7 +18,7 @@ kotlin {
 
         commonMain.dependencies {
             api(projects.lkoEcs)
-            api(projects.lkoMath)
+            api(projects.lkoDatastructure)
 
             api(libs.compose.runtime)
 

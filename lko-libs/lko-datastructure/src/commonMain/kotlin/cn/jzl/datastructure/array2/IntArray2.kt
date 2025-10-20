@@ -26,8 +26,6 @@ class IntArray2 @PublishedApi internal constructor(override val width: Int, over
         }
     }
 
-    override operator fun contains(element: Int): Boolean = element in data
-
     override fun iterator(): Iterator<Int> = data.iterator()
 
     companion object {

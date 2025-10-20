@@ -2,6 +2,11 @@ package cn.jzl.datastructure.list
 
 import kotlin.math.max
 
+/**
+ * `Char` 的 FastList 实现。
+ * - 使用 `CharArray` 顺序存储，扩容策略为两倍或刚好满足需要。
+ * - 支持批量插入、`ensureCapacity`/`fill`、以及与 `CharArray` 的高效互操作。
+ */
 class CharFastList(capacity: Int = 7) : AbstractMutableFastList<Char>(), CharMutableFastList {
     private var data = CharArray(capacity)
 

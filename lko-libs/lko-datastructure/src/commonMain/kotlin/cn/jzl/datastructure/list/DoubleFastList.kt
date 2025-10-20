@@ -2,6 +2,11 @@ package cn.jzl.datastructure.list
 
 import kotlin.math.max
 
+/**
+ * `Double` 的 FastList 实现。
+ * - 使用 `DoubleArray` 顺序存储，扩容为两倍或刚好满足需要。
+ * - 支持批量插入、`ensureCapacity`/`fill`、以及与 `DoubleArray` 的高效互操作。
+ */
 class DoubleFastList(capacity: Int = 7) : AbstractMutableFastList<Double>(), DoubleMutableFastList {
     private var data = DoubleArray(capacity)
 

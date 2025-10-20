@@ -6,7 +6,6 @@ import cn.jzl.datastructure.list.FloatFastList
 import cn.jzl.datastructure.list.IntFastList
 import cn.jzl.datastructure.list.ObjectFastList
 import cn.jzl.datastructure.math.vector.generic.Dimension
-import java.util.stream.Collectors
 import kotlin.math.max
 import kotlin.math.min
 
@@ -38,6 +37,7 @@ class BVH<T>(override val dimensions: Int) : Dimension, Sequence<T> {
     private val leafNodeSequence = leafNodes.values.asSequence()
 
     val size: Int get() = leafNodes.size
+    val root: BVHNode<T>? get() = rootNode
 
     fun isEmpty(): Boolean = rootNode == null
 
@@ -187,13 +187,13 @@ class BVH<T>(override val dimensions: Int) : Dimension, Sequence<T> {
 
     internal fun leafNodes(node: BVHNode<T>): Sequence<LeafNode<T>> = sequence {
         nodeStack.clear()
-        nodeStack.addLast(node)
+        nodeStack.insertLast(node)
         while (nodeStack.isNotEmpty()) {
             val node = nodeStack.removeLast()
             when (node) {
                 is InternalNode<T> -> {
-                    nodeStack.addLast(node.right)
-                    nodeStack.addLast(node.left)
+                    nodeStack.insertLast(node.right)
+                    nodeStack.insertLast(node.left)
                 }
 
                 is LeafNode<T> -> yield(node)
@@ -235,7 +235,7 @@ class BVH<T>(override val dimensions: Int) : Dimension, Sequence<T> {
      */
     private inline fun searchNodes(root: BVHNode<T>, intersect: (BVHRect) -> Boolean, callback: (LeafNode<T>) -> Unit) {
         val stack = nodeStack.also { it.clear() }
-        stack.addLast(root)
+        stack.insertLast(root)
 
         while (stack.isNotEmpty()) {
             val node = stack.removeLast()
@@ -246,8 +246,8 @@ class BVH<T>(override val dimensions: Int) : Dimension, Sequence<T> {
             when (node) {
                 is InternalNode<T> -> {
                     // 优化：将子节点按更可能相交的顺序入栈，减少不必要的遍历
-                    stack.addLast(node.left)
-                    stack.addLast(node.right)
+                    stack.insertLast(node.left)
+                    stack.insertLast(node.right)
                 }
 
                 is LeafNode<T> -> callback(node)

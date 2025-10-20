@@ -1,5 +1,10 @@
 package cn.jzl.datastructure.bvh
 
+/**
+ * BVH 内部节点（父节点）实现。
+ * - 插入策略：选择导致面积增量较小的子树进行插入，并维护父子关系。
+ * - 边界更新：将 `rect` 更新为包含左右子节点的最小包围矩形。
+ */
 data class InternalNode<T>(
     override val id: Int,
     override val bvh: BVH<T>,

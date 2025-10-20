@@ -1,6 +1,11 @@
 package cn.jzl.datastructure.bvh
 
 // 实现类
+/**
+ * BVH 叶子节点。
+ * - 保存实际数据项 `data` 与其包围盒 `rect`；参与树形结构的插入与边界更新。
+ * - `insertNode` 时与新叶子组合为一个 `InternalNode` 并维护父子关系。
+ */
 data class LeafNode<T>(
     override val id: Int,
     override val bvh: BVH<T>,

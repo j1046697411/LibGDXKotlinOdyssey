@@ -27,8 +27,6 @@ class FloatArray2 @PublishedApi internal constructor(override val width: Int, ov
         }
     }
 
-    override operator fun contains(element: Float): Boolean = data.any { abs(it - element) <= 1e-9 }
-
     override fun iterator(): Iterator<Float> = data.iterator()
 
     companion object {

@@ -26,8 +26,6 @@ class ByteArray2 @PublishedApi internal constructor(override val width: Int, ove
         }
     }
 
-    override operator fun contains(element: Byte): Boolean = element in data
-
     override fun iterator(): Iterator<Byte> = data.iterator()
 
     companion object {

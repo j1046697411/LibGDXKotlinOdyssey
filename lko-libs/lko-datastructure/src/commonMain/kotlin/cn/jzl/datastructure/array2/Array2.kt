@@ -25,15 +25,12 @@ data class Array2<T>(override val width: Int, override val height: Int, val data
         }
     }
 
-    override operator fun contains(element: T): Boolean = element in data
-
     override fun iterator(): Iterator<T> = data.iterator()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
 
-        other as Array2<*>
+        if (other !is Array2<*>) return false
 
         if (width != other.width) return false
         if (height != other.height) return false

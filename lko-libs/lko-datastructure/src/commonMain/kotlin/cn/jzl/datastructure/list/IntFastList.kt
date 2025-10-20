@@ -2,6 +2,11 @@ package cn.jzl.datastructure.list
 
 import kotlin.math.max
 
+/**
+ * `Int` 的 FastList 实现。
+ * - 使用 `IntArray` 作为顺序存储，按需扩容为原容量的两倍或刚好满足需要。
+ * - 支持尾部与任意位置批量插入、`ensureCapacity`/`fill`、以及基于 `IntArray` 的高效拼接。
+ */
 class IntFastList(capacity: Int = 7) : AbstractMutableFastList<Int>(), IntMutableFastList {
     private var data = IntArray(capacity)
 

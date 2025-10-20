@@ -1,4 +1,5 @@
 package cn.jzl.datastructure.math.vector.generic
+import kotlin.jvm.JvmInline
 
 import cn.jzl.datastructure.list.AbstractMutableFastList
 import cn.jzl.datastructure.list.CompositeMutableFastList
@@ -95,4 +96,3 @@ internal data class VectorListGenericVector<T>(private val index: Int, private v
         return components.joinToString(", ", "GenericVector(", ")")
     }
 }
-

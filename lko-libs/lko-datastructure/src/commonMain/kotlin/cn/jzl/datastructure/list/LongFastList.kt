@@ -2,6 +2,11 @@ package cn.jzl.datastructure.list
 
 import kotlin.math.max
 
+/**
+ * `Long` 的 FastList 实现。
+ * - 使用 `LongArray` 顺序存储，扩容策略为两倍或刚好满足需要。
+ * - 支持批量插入、`ensureCapacity`/`fill`、以及与 `LongArray` 的高效拼接。
+ */
 class LongFastList(capacity: Int = 7) : AbstractMutableFastList<Long>(), LongMutableFastList {
     private var data = LongArray(capacity)
 

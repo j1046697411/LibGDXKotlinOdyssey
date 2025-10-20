@@ -26,8 +26,6 @@ class LongArray2 @PublishedApi internal constructor(override val width: Int, ove
         }
     }
 
-    override operator fun contains(element: Long): Boolean = element in data
-
     override fun iterator(): Iterator<Long> = data.iterator()
 
     companion object {

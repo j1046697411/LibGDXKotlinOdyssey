@@ -20,6 +20,12 @@ fun IArray2<*>.checkRange(rect: RectangleInt) {
     check(inside(rect.x, rect.y) && inside(rect.x + rect.width - 1, rect.y + rect.height - 1)) { "range out of bounds: ($rect)" }
 }
 
+/**
+ * 二维数组接口（宽高与索引访问）。
+ * - `width`/`height` 为数组维度；`index(x,y)` 映射为行主序索引。
+ * - `get(x,y)`/`set(x,y,value)` 元素读写；`set(rect,value)` 对区域批量设置。
+ * - `contains(element)` 判定是否包含指定元素。
+ */
 interface IArray2<T> : Sequence<T> {
     val width: Int
 
@@ -30,8 +36,6 @@ interface IArray2<T> : Sequence<T> {
     operator fun set(x: Int, y: Int, value: T)
 
     operator fun set(rect: RectangleInt, value: T)
-
-    operator fun contains(element: T): Boolean
 }
 
 interface IntIArray2 : IArray2<Int>
@@ -53,6 +57,12 @@ fun <R> ObservableArray<*>.lock(block: () -> R): R {
     }
 }
 
+/**
+ * 可观察数组的通用接口。
+ * - `version`：变更版本号；在 `flush()` 后递增。
+ * - `lock()`/`unlock()`：批量变更的临界区控制；`unlock()` 时若空转到 0 则触发 `flush()`。
+ * - `flush()`：将累计的变更范围推送到观察者。
+ */
 interface ObservableArray<T> {
     val version: Int
 
@@ -63,6 +73,11 @@ interface ObservableArray<T> {
     fun unlock()
 }
 
+/**
+ * 二维数组的可观察包装器。
+ * - 包装 `IArray2<T>` 并提供区域级变更聚合与版本控制。
+ * - 在锁定期间累积最小包围矩形；解锁且锁计数归零时触发 `flush()` 回调。
+ */
 class ObservableArray2<T> internal constructor(
     private val base: IArray2<T>,
     private val updated: ObservableArray2<T>.(rect: RectangleInt) -> Unit

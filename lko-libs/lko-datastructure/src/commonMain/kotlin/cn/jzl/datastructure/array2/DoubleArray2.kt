@@ -27,8 +27,6 @@ class DoubleArray2 @PublishedApi internal constructor(override val width: Int, o
         }
     }
 
-    override operator fun contains(element: Double): Boolean = data.any { abs(it - element) <= 1e-9 }
-
     override fun iterator(): Iterator<Double> = data.iterator()
 
     companion object {

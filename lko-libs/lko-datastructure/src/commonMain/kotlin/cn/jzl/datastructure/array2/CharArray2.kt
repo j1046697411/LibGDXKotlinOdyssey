@@ -26,8 +26,6 @@ class CharArray2 @PublishedApi internal constructor(override val width: Int, ove
         }
     }
 
-    override operator fun contains(element: Char): Boolean = element in data
-
     override fun iterator(): Iterator<Char> = data.iterator()
 
     companion object {

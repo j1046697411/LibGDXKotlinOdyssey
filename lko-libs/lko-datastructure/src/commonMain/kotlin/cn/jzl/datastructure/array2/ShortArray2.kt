@@ -26,8 +26,6 @@ class ShortArray2 @PublishedApi internal constructor(override val width: Int, ov
         }
     }
 
-    override operator fun contains(element: Short): Boolean = element in data
-
     override fun iterator(): Iterator<Short> = data.iterator()
 
     companion object {

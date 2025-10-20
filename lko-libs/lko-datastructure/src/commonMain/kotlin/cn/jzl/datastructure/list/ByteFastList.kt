@@ -2,6 +2,11 @@ package cn.jzl.datastructure.list
 
 import kotlin.math.max
 
+/**
+ * `Byte` 的 FastList 实现。
+ * - 使用 `ByteArray` 顺序存储，扩容为两倍或刚好满足需要。
+ * - 支持批量插入、`ensureCapacity`/`fill`、以及与 `ByteArray` 的互操作。
+ */
 class ByteFastList(capacity: Int = 7) : AbstractMutableFastList<Byte>(), ByteMutableFastList {
     private var data = ByteArray(capacity)
 

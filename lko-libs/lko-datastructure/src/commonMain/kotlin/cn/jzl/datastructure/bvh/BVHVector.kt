@@ -1,4 +1,5 @@
 package cn.jzl.datastructure.bvh
+import kotlin.jvm.JvmInline
 
 /**
  * 表示BVH中的向量

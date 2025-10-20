@@ -1,6 +1,7 @@
 package cn.jzl.datastructure.math
 
 import kotlin.math.*
+import kotlin.jvm.JvmInline
 
 /**
  * Angle 表示以弧度为单位的角度轻量封装。
@@ -19,12 +20,6 @@ value class Angle(val radians: Float) : Interpolable<Angle> {
         val TWO_PI: Angle = PI * 2f
     }
 }
-
-/** 常用角度常量：0、π、π/2、2π（单位：弧度） */
-val ZERO_ANGLE: Angle = Angle(0f)
-val PI_ANGLE: Angle = Angle(PI.toFloat())
-val HALF_PI_ANGLE: Angle = Angle((PI / 2).toFloat())
-val TWO_PI_ANGLE: Angle = Angle((2 * PI).toFloat())
 
 /**
  * 与 Angle 的算术/求余。
@@ -187,4 +182,3 @@ fun Int.toAngleDegrees(): Angle = Angle(this.toFloat() * PI.toFloat() / 180f)
 
 /** 工厂方法：从度数创建 Angle（自动转换为弧度）。 */
 fun Long.toAngleDegrees(): Angle = Angle(this.toFloat() * PI.toFloat() / 180f)
-
