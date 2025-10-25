@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="lko-ecs-browser">
+    <output-path>$PROJECT_DIR$/lko-libs/lko-ecs/build/libs</output-path>
+    <root id="archive" name="lko-ecs-browser.jar">
+      <element id="module-output" name="LibGDXKotlinOdyssey.lko-ecs.browserMain" />
+    </root>
+  </artifact>
+</component>

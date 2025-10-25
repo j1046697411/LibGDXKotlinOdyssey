@@ -16,15 +16,13 @@ internal class CacheReadOnlyProperty<V : Any>(val typeToken: TypeToken<V>, val t
     private var value: V? = null
 
     override fun getValue(thisRef: DIAware, property: KProperty<*>): V {
-        return value ?: synchronized(this) {
-            value ?: run {
-                val contextType = erased(thisRef::class) as TypeToken<DIAware>
-                val context = DIContext(contextType, thisRef)
-                val directDI = thisRef.di.on(context)
-                val newValue = directDI[TypeToken.Unit, typeToken, tag].invoke(Unit)
-                this.value = newValue
-                newValue
-            }
+        return value ?: run {
+            val contextType = erased(thisRef::class) as TypeToken<DIAware>
+            val context = DIContext(contextType, thisRef)
+            val directDI = thisRef.di.on(context)
+            val newValue = directDI[TypeToken.Unit, typeToken, tag].invoke(Unit)
+            this.value = newValue
+            newValue
         }
     }
 }

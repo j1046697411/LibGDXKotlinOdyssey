@@ -1,7 +1,7 @@
 package cn.jzl.datastructure.bvh
 
 import kotlin.test.*
-import kotlin.system.measureTimeMillis
+import kotlin.time.measureTime
 
 class BVHTest {
 
@@ -554,7 +554,7 @@ class BVHTest {
             rect.max(bvhBulk, 0, x + width)
             rect.max(bvhBulk, 1, y + height)
         }
-        val bulkTime = measureTimeMillis {
+        val bulkTime = measureTime {
             bvhBulk.bulkInsert(rects.asSequence(), cbBulk)
         }
         val bulkDepth = bvhBulk.computeDepth()
@@ -567,7 +567,7 @@ class BVHTest {
             rect.max(bvhSeq, 0, x + width)
             rect.max(bvhSeq, 1, y + height)
         }
-        val seqTime = measureTimeMillis {
+        val seqTime = measureTime {
             rects.forEach { r -> bvhSeq.insert(r, cbSeq) }
         }
         val seqDepth = bvhSeq.computeDepth()
@@ -590,7 +590,7 @@ class BVHTest {
         }
 
         val queries = 400
-        val duration = measureTimeMillis {
+        val duration = measureTime {
             repeat(queries) { q ->
                 val cx = (q % 20) * 10f + 1f
                 val cy = (q / 20) * 10f + 1f
@@ -603,6 +603,6 @@ class BVHTest {
                 assertNotNull(results)
             }
         }
-        assertTrue(duration < 3000)
+        assertTrue(duration.inWholeMilliseconds < 3000)
     }
 }

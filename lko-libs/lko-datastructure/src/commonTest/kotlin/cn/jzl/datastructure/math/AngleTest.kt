@@ -8,17 +8,17 @@ private const val EPS = 1e-5f
 class AngleTest {
     @Test
     fun angle_constants() {
-        assertEquals(0f, ZERO_ANGLE.radians, EPS)
-        assertEquals(PI.toFloat(), PI_ANGLE.radians, EPS)
-        assertEquals((PI / 2).toFloat(), HALF_PI_ANGLE.radians, EPS)
-        assertEquals((2 * PI).toFloat(), TWO_PI_ANGLE.radians, EPS)
+        assertEquals(0f, Angle.ZERO.radians, EPS)
+        assertEquals(PI.toFloat(), Angle.PI.radians, EPS)
+        assertEquals((PI / 2).toFloat(), Angle.HALF_PI.radians, EPS)
+        assertEquals((2 * PI).toFloat(), Angle.TWO_PI.radians, EPS)
     }
 
     @Test
     fun angle_degree_conversion() {
-        assertEquals(180f, PI_ANGLE.degrees, EPS)
-        assertEquals(90f, HALF_PI_ANGLE.degrees, EPS)
-        assertEquals(360f, TWO_PI_ANGLE.degrees, EPS)
+        assertEquals(180f, Angle.PI.degrees, EPS)
+        assertEquals(90f, Angle.HALF_PI.degrees, EPS)
+        assertEquals(360f, Angle.TWO_PI.degrees, EPS)
 
         assertEquals(PI.toFloat(), 180f.toAngleDegrees().radians, EPS)
         assertEquals((PI / 2).toFloat(), 90.0.toAngleDegrees().radians, EPS)
@@ -28,10 +28,10 @@ class AngleTest {
 
     @Test
     fun angle_trig() {
-        assertEquals(0f, ZERO_ANGLE.sin, EPS)
-        assertEquals(1f, HALF_PI_ANGLE.sin, EPS)
-        assertEquals(-1f, PI_ANGLE.cos, EPS)
-        assertTrue(PI_ANGLE.tan.isFinite())
+        assertEquals(0f, Angle.ZERO.sin, EPS)
+        assertEquals(1f, Angle.HALF_PI.sin, EPS)
+        assertEquals(-1f, Angle.PI.cos, EPS)
+        assertTrue(Angle.PI.tan.isFinite())
     }
 
     @Test
@@ -54,7 +54,7 @@ class AngleTest {
         assertEquals((-20f * PI.toFloat() / 180f), a.deltaTo(b).radians, EPS)
 
         // wrap to [0, 2π)
-        val wrapped = (-90f).toAngleDegrees().wrap(ZERO_ANGLE, TWO_PI_ANGLE)
+        val wrapped = (-90f).toAngleDegrees().wrap(Angle.ZERO, Angle.TWO_PI)
         assertEquals((270f * PI.toFloat() / 180f), wrapped.radians, EPS)
 
         // coerce

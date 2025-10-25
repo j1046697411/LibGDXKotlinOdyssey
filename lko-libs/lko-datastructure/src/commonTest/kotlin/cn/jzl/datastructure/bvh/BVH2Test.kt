@@ -22,7 +22,7 @@ class BVH2Test {
     }
 
     @Test
-    // 场景：批量插入 3 个值（2、3、4），每个值生成一个靠近对角线的单位矩形； subsequent in a larger query rectangle.
+    // 场景：批量插入 3 个值（2、3、4），每个值生成一个靠近对角线的单位矩形
     // 预期：查询结果应包含所有插入的值集合 {2,3,4}。
     fun testBulkInsertAndRectSearch() {
         val bvh2 = BVH2<Int>(BVH(2))

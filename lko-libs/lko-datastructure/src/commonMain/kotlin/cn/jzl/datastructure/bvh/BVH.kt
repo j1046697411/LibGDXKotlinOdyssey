@@ -91,12 +91,13 @@ class BVH<T>(override val dimensions: Int) : Dimension, Sequence<T> {
 
     fun insert(data: T, callback: T.(BVHRect) -> Unit): Boolean {
         if (data in leafNodes) return false
-        rootNode = insertNode(createLeafNode(data, callback))
+        val leafNode = createLeafNode(data, callback)
+        rootNode = rootNode?.insertNode(leafNode) ?: leafNode
         return true
     }
 
-    private fun insertNode(leafNode: LeafNode<T>): BVHNode<T> {
-        val rootNode = rootNode ?: return leafNode
+    private fun BVHNode<T>.insertNode(leafNode: LeafNode<T>): BVHNode<T> {
+        val rootNode = this
         val leafNodeCount = leafNodes.size
         if (leafNodeCount <= 32) return rootNode.insertNode(leafNode)
         val maxDepth = computeDepth() - 1
@@ -307,7 +308,7 @@ class BVH<T>(override val dimensions: Int) : Dimension, Sequence<T> {
         }
         if (leaves.isEmpty()) return 0
         if (leaves.size <= 4) {
-            rootNode = leaves.fold(rootNode) { acc, leaf -> insertNode(leaf) }
+            rootNode = leaves.fold(rootNode) { acc, leaf -> acc?.insertNode(leaf) ?: leaf }
             return leaves.size
         }
         val insertCount = leaves.size

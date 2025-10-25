@@ -7,6 +7,8 @@ import cn.jzl.ecs.util.Bits
 import cn.jzl.ecs.util.Signal
 import cn.jzl.ecs.util.bitsOf
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
 import org.kodein.type.TypeToken
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -482,10 +484,7 @@ class FamilyDefinition {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as FamilyDefinition
-
+        if (other !is FamilyDefinition) return false
         if (allBits != other.allBits) return false
         if (anyBits != other.anyBits) return false
         if (noneBits != other.noneBits) return false
@@ -668,7 +667,7 @@ internal class ScheduleService(val world: World) : Updatable {
     private val waitNextFrameTasks = arrayListOf<FrameTask>()
     private val idGenerator = atomic(0)
     private val activeScheduleBits = bitsOf()
-    private val lock = Any()
+    private val lock = SynchronizedObject()
 
     fun schedule(scheduleTask: suspend ScheduleScore.() -> Unit): Schedule {
         val schedule = Schedule(idGenerator.getAndIncrement())
