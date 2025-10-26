@@ -5,6 +5,7 @@ package cn.jzl.ecs.v2
 import cn.jzl.di.*
 import kotlinx.atomicfu.atomic
 import org.kodein.type.TypeToken
+import kotlin.coroutines.Continuation
 import kotlin.time.Duration
 
 interface Component<C : Component<C>> {
@@ -38,9 +39,10 @@ inline fun World.create(entityId: Int, noinline configuration: EntityCreateConte
 inline fun World.configure(entity: Entity, noinline configuration: EntityUpdateContext.(Entity) -> Unit) = entityService.configure(entity, configuration)
 inline fun World.remove(entity: Entity) = entityService.remove(entity)
 inline fun World.schedule(
-    priority: Int = 0,
+    scheduleName: String = "",
+    priority: SchedulePriority = SchedulePriority.NORMAL,
     noinline configuration: suspend ScheduleScore.() -> Unit
-): Schedule = scheduleService.schedule(priority, configuration)
+): Schedule = scheduleService.schedule(scheduleName, priority, configuration)
 
 inline fun World.update(delta: Duration) = scheduleService.update(delta)
 
@@ -76,6 +78,9 @@ private val coreModule = module(TypeToken.Any) {
 interface ScheduleScore : EntityComponentContext {
     val active: Boolean
     val schedule: Schedule
+    val priority: SchedulePriority
+
+    suspend fun <R> suspendScheduleCoroutine(block: (Continuation<R>) -> Unit): R
 
     suspend fun waitNextFrame(): Duration
 

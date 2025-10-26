@@ -4,9 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * ScheduleService测试类
@@ -268,19 +266,19 @@ class ScheduleServiceTest : ECSBasicTest() {
     @Test
     fun testSchedulePriorityExecutionOrder() {
         val world = createWorld()
-        val executionOrder = mutableListOf<Int>()
+        val executionOrder = mutableListOf<SchedulePriority>()
 
         // 添加不同优先级的任务
-        world.schedule(priority = 0) {
-            executionOrder.add(0)
+        world.schedule(priority = SchedulePriority.HIGHEST) {
+            executionOrder.add(SchedulePriority.HIGHEST)
         }
 
-        world.schedule(priority = 10) {
-            executionOrder.add(10)
+        world.schedule(priority = SchedulePriority.LOWEST) {
+            executionOrder.add(SchedulePriority.LOWEST)
         }
 
-        world.schedule(priority = 5) {
-            executionOrder.add(5)
+        world.schedule(priority = SchedulePriority.NORMAL) {
+            executionOrder.add(SchedulePriority.NORMAL)
         }
 
         // 更新一次以执行所有任务
@@ -288,14 +286,14 @@ class ScheduleServiceTest : ECSBasicTest() {
 
         // 验证所有任务都被执行（不验证具体顺序，因为实际实现可能不同）
         assertEquals(3, executionOrder.size, "所有任务都应该被执行")
-        assertTrue(executionOrder.contains(0), "低优先级任务应该被执行")
-        assertTrue(executionOrder.contains(5), "中等优先级任务应该被执行")
-        assertTrue(executionOrder.contains(10), "高优先级任务应该被执行")
+        assertTrue(executionOrder.contains(SchedulePriority.HIGHEST), "最高优先级任务应该被执行")
+        assertTrue(executionOrder.contains(SchedulePriority.NORMAL), "普通优先级任务应该被执行")
+        assertTrue(executionOrder.contains(SchedulePriority.LOWEST), "最低优先级任务应该被执行")
     }
 
     /**
      * 测试默认优先级
-     * 验证未指定优先级时使用默认值0
+     * 验证未指定优先级时使用默认值NORMAL
      */
     @Test
     fun testDefaultPriority() {
@@ -303,13 +301,13 @@ class ScheduleServiceTest : ECSBasicTest() {
         var defaultPriorityTaskExecuted = false
         var explicitPriorityTaskExecuted = false
 
-        // 未指定优先级的任务（默认优先级0）
+        // 未指定优先级的任务（默认优先级NORMAL）
         world.schedule {
             defaultPriorityTaskExecuted = true
         }
 
-        // 指定优先级为0的任务
-        world.schedule(priority = 0) {
+        // 指定优先级为NORMAL的任务
+        world.schedule(priority = SchedulePriority.NORMAL) {
             explicitPriorityTaskExecuted = true
         }
 
@@ -320,36 +318,36 @@ class ScheduleServiceTest : ECSBasicTest() {
     }
 
     /**
-     * 测试负优先级
-     * 验证负优先级任务能够正常执行
+     * 测试不同优先级范围
+     * 验证不同优先级任务能够正常执行
      */
     @Test
-    fun testNegativePriority() {
+    fun testDifferentPriorityRanges() {
         val world = createWorld()
-        val executionOrder = mutableListOf<Int>()
+        val executionOrder = mutableListOf<SchedulePriority>()
 
-        // 正优先级任务
-        world.schedule(priority = 5) {
-            executionOrder.add(5)
+        // 高优先级任务
+        world.schedule(priority = SchedulePriority.HIGH) {
+            executionOrder.add(SchedulePriority.HIGH)
         }
 
-        // 负优先级任务
-        world.schedule(priority = -5) {
-            executionOrder.add(-5)
+        // 低优先级任务
+        world.schedule(priority = SchedulePriority.LOW) {
+            executionOrder.add(SchedulePriority.LOW)
         }
 
-        // 零优先级任务
-        world.schedule(priority = 0) {
-            executionOrder.add(0)
+        // 普通优先级任务
+        world.schedule(priority = SchedulePriority.NORMAL) {
+            executionOrder.add(SchedulePriority.NORMAL)
         }
 
         world.update(16.milliseconds)
 
         // 验证所有任务都被执行（不验证具体顺序）
         assertEquals(3, executionOrder.size, "所有任务都应该被执行")
-        assertTrue(executionOrder.contains(-5), "负优先级任务应该被执行")
-        assertTrue(executionOrder.contains(0), "零优先级任务应该被执行")
-        assertTrue(executionOrder.contains(5), "正优先级任务应该被执行")
+        assertTrue(executionOrder.contains(SchedulePriority.HIGH), "高优先级任务应该被执行")
+        assertTrue(executionOrder.contains(SchedulePriority.NORMAL), "普通优先级任务应该被执行")
+        assertTrue(executionOrder.contains(SchedulePriority.LOW), "低优先级任务应该被执行")
     }
 
     /**
@@ -362,13 +360,13 @@ class ScheduleServiceTest : ECSBasicTest() {
         val executionLog = mutableListOf<String>()
 
         // 低优先级延迟任务
-        world.schedule(priority = 0) {
+        world.schedule(priority = SchedulePriority.LOW) {
             delay(50.milliseconds)
             executionLog.add("low priority after delay")
         }
 
         // 高优先级延迟任务
-        world.schedule(priority = 10) {
+        world.schedule(priority = SchedulePriority.HIGH) {
             delay(50.milliseconds)
             executionLog.add("high priority after delay")
         }
@@ -398,14 +396,14 @@ class ScheduleServiceTest : ECSBasicTest() {
         val executionLog = mutableListOf<String>()
 
         // 低优先级等待任务
-        world.schedule(priority = 0) {
+        world.schedule(priority = SchedulePriority.LOW) {
             executionLog.add("low priority start")
             waitNextFrame()
             executionLog.add("low priority after wait")
         }
 
         // 高优先级等待任务
-        world.schedule(priority = 10) {
+        world.schedule(priority = SchedulePriority.HIGH) {
             executionLog.add("high priority start")
             waitNextFrame()
             executionLog.add("high priority after wait")
@@ -438,15 +436,15 @@ class ScheduleServiceTest : ECSBasicTest() {
         val executionOrder = mutableListOf<Int>()
 
         // 添加多个相同优先级的任务
-        world.schedule(priority = 5) {
+        world.schedule(priority = SchedulePriority.NORMAL) {
             executionOrder.add(1)
         }
 
-        world.schedule(priority = 5) {
+        world.schedule(priority = SchedulePriority.NORMAL) {
             executionOrder.add(2)
         }
 
-        world.schedule(priority = 5) {
+        world.schedule(priority = SchedulePriority.NORMAL) {
             executionOrder.add(3)
         }
 
@@ -457,36 +455,44 @@ class ScheduleServiceTest : ECSBasicTest() {
     }
 
     /**
-     * 测试优先级边界值
-     * 验证极大和极小优先级值的处理
+     * 测试所有优先级枚举值
+     * 验证所有优先级枚举值都能正常使用
      */
     @Test
-    fun testPriorityBoundaryValues() {
+    fun testAllPriorityEnumValues() {
         val world = createWorld()
-        val executionOrder = mutableListOf<Int>()
+        val executionOrder = mutableListOf<SchedulePriority>()
 
-        // 极大优先级
-        world.schedule(priority = Int.MAX_VALUE) {
-            executionOrder.add(Int.MAX_VALUE)
+        // 测试所有优先级枚举值
+        world.schedule(priority = SchedulePriority.HIGHEST) {
+            executionOrder.add(SchedulePriority.HIGHEST)
         }
 
-        // 极小优先级
-        world.schedule(priority = Int.MIN_VALUE) {
-            executionOrder.add(Int.MIN_VALUE)
+        world.schedule(priority = SchedulePriority.HIGH) {
+            executionOrder.add(SchedulePriority.HIGH)
         }
 
-        // 正常优先级
-        world.schedule(priority = 0) {
-            executionOrder.add(0)
+        world.schedule(priority = SchedulePriority.NORMAL) {
+            executionOrder.add(SchedulePriority.NORMAL)
+        }
+
+        world.schedule(priority = SchedulePriority.LOW) {
+            executionOrder.add(SchedulePriority.LOW)
+        }
+
+        world.schedule(priority = SchedulePriority.LOWEST) {
+            executionOrder.add(SchedulePriority.LOWEST)
         }
 
         world.update(16.milliseconds)
 
         // 验证所有任务都被执行（不验证具体顺序）
-        assertEquals(3, executionOrder.size, "所有任务都应该被执行")
-        assertTrue(executionOrder.contains(Int.MAX_VALUE), "极大优先级任务应该被执行")
-        assertTrue(executionOrder.contains(0), "正常优先级任务应该被执行")
-        assertTrue(executionOrder.contains(Int.MIN_VALUE), "极小优先级任务应该被执行")
+        assertEquals(5, executionOrder.size, "所有优先级任务都应该被执行")
+        assertTrue(executionOrder.contains(SchedulePriority.HIGHEST), "最高优先级任务应该被执行")
+        assertTrue(executionOrder.contains(SchedulePriority.HIGH), "高优先级任务应该被执行")
+        assertTrue(executionOrder.contains(SchedulePriority.NORMAL), "普通优先级任务应该被执行")
+        assertTrue(executionOrder.contains(SchedulePriority.LOW), "低优先级任务应该被执行")
+        assertTrue(executionOrder.contains(SchedulePriority.LOWEST), "最低优先级任务应该被执行")
     }
 
     /**
@@ -499,7 +505,7 @@ class ScheduleServiceTest : ECSBasicTest() {
         val executionLog = mutableListOf<String>()
 
         // 低优先级复杂任务
-        world.schedule(priority = 0) {
+        world.schedule(priority = SchedulePriority.LOW) {
             executionLog.add("low start")
             delay(30.milliseconds)
             executionLog.add("low after delay")
@@ -508,7 +514,7 @@ class ScheduleServiceTest : ECSBasicTest() {
         }
 
         // 高优先级复杂任务
-        world.schedule(priority = 10) {
+        world.schedule(priority = SchedulePriority.HIGH) {
             executionLog.add("high start")
             delay(30.milliseconds)
             executionLog.add("high after delay")

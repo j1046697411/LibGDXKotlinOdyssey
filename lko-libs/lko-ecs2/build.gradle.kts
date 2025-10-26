@@ -14,6 +14,7 @@ kotlin {
             api(projects.lkoDatastructure)
             api(libs.kodein.kaverit)
             api(libs.kotlinx.atomics)
+            api(libs.kotlinx.coroutines.core)
         }
 
         commonTest.dependencies {
