@@ -4,7 +4,6 @@ import cn.jzl.ecs.World
 import cn.jzl.graph.GraphNode
 import cn.jzl.graph.GraphNodeInputSide
 import cn.jzl.graph.GraphNodeOutputSide
-import cn.jzl.graph.NodeConfiguration
 import cn.jzl.graph.common.GraphType
 import cn.jzl.graph.common.PipelineNode
 import cn.jzl.graph.common.PipelineNodeInput

@@ -1,7 +1,6 @@
 package cn.jzl.graph.common
 
 import cn.jzl.ecs.World
-import cn.jzl.ecs.world
 import cn.jzl.graph.GraphConnection
 import cn.jzl.graph.GraphNode
 import cn.jzl.graph.common.config.GraphPipelineConfiguration

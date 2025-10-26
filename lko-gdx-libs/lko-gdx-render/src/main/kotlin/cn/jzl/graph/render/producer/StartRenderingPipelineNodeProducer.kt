@@ -8,7 +8,6 @@ import cn.jzl.graph.common.PipelineNodeOutput
 import cn.jzl.graph.common.config.GraphPipelineConfiguration
 import cn.jzl.graph.common.data.GraphWithProperties
 import cn.jzl.graph.common.producer.DualInputPipelineNodeProducer
-import cn.jzl.graph.common.producer.general.GeneralPipelineNode
 import cn.jzl.graph.common.rendering.PipelineBlackboard
 import cn.jzl.graph.render.RenderGraphType
 import cn.jzl.graph.render.RenderingPipelineNode
