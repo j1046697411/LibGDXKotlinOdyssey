@@ -27,9 +27,6 @@ class World(override val di: DI) : DIAware by di {
 
     @PublishedApi
     internal val familyService by instance<FamilyService>()
-
-    @PublishedApi
-    internal val scheduleService by instance<ScheduleService>()
 }
 
 inline fun World.isActive(entity: Entity): Boolean = entity in entityService
@@ -38,13 +35,6 @@ inline fun World.create(noinline configuration: EntityCreateContext.(Entity) -> 
 inline fun World.create(entityId: Int, noinline configuration: EntityCreateContext.(Entity) -> Unit): Entity = entityService.create(entityId, configuration)
 inline fun World.configure(entity: Entity, noinline configuration: EntityUpdateContext.(Entity) -> Unit) = entityService.configure(entity, configuration)
 inline fun World.remove(entity: Entity) = entityService.remove(entity)
-inline fun World.schedule(
-    scheduleName: String = "",
-    priority: SchedulePriority = SchedulePriority.NORMAL,
-    noinline configuration: suspend ScheduleScore.() -> Unit
-): Schedule = scheduleService.schedule(scheduleName, priority, configuration)
-
-inline fun World.update(delta: Duration) = scheduleService.update(delta)
 
 internal val idGenerator = atomic(0)
 
@@ -72,18 +62,7 @@ private val coreModule = module(TypeToken.Any) {
     this bind singleton { new(::EntityUpdateContextImpl) }
     this bind singleton { new(::EntityService) }
     this bind singleton { new(::FamilyService) }
-    this bind singleton { new(::ScheduleService) }
 }
 
-interface ScheduleScore : EntityComponentContext {
-    val active: Boolean
-    val schedule: Schedule
-    val priority: SchedulePriority
 
-    suspend fun <R> suspendScheduleCoroutine(block: (Continuation<R>) -> Unit): R
-
-    suspend fun waitNextFrame(): Duration
-
-    suspend fun delay(delay: Duration)
-}
 

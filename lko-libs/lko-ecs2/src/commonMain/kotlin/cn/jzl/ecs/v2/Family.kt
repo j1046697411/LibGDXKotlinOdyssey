@@ -6,7 +6,7 @@ import kotlinx.atomicfu.atomic
 
 class Family(
     override val world: World,
-    private val familyDefinition: FamilyDefinition
+    internal val familyDefinition: FamilyDefinition
 ) : EntityComponentContext by world.entityUpdateContext {
     private val entityBits = BitSet()
     private val entityCount = atomic(0)
