@@ -55,10 +55,23 @@ class LongFastList(capacity: Int = 7) : AbstractMutableFastList<Long>(), LongMut
         return old
     }
 
+    /**
+     * 移除指定索引处的元素并返回该元素。
+     * 当移除最后一个元素时，仅减少大小而不进行数组复制以提高性能。
+     *
+     * @param index 要移除的元素的索引
+     * @return 被移除的元素
+     * @throws IndexOutOfBoundsException 如果索引超出范围 [0, size)
+     */
     override fun removeAt(index: Int): Long {
         checkIndex(index)
         val old = data[index]
-        data.copyInto(data, index, index + 1, size)
+        
+        // 优化：当移除最后一个元素时，不需要复制数组
+        if (index != size - 1) {
+            data.copyInto(data, index, index + 1, size)
+        }
+        data[size - 1] = 0L
         size--
         return old
     }
