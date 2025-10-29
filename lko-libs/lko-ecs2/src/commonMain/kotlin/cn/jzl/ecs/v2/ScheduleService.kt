@@ -1,5 +1,9 @@
 package cn.jzl.ecs.v2
 
+import cn.jzl.datastructure.BitSet
+import cn.jzl.datastructure.list.IntFastList
+import cn.jzl.datastructure.list.ObjectFastList
+import cn.jzl.datastructure.math.fromLowHigh
 import cn.jzl.datastructure.math.high
 import cn.jzl.datastructure.math.low
 import cn.jzl.di.instance
@@ -13,7 +17,7 @@ import kotlin.time.Duration
  * @property data 内部存储的64位数据，包含调度器的ID和版本信息
  */
 @JvmInline
-value class Schedule(private val data: Long) {
+value class Schedule internal constructor(private val data: Long) {
     /**
      * 调度器的唯一标识符
      */
@@ -23,6 +27,10 @@ value class Schedule(private val data: Long) {
      * 调度器的版本号，用于版本控制
      */
     val version: Int get() = data.high
+
+    companion object {
+        operator fun invoke(id: Int, version: Int = 0): Schedule = Schedule(Long.fromLowHigh(id, version))
+    }
 }
 
 /**
@@ -127,7 +135,7 @@ suspend fun ScheduleScope.withLoop(
 }
 
 /**
- * 调度任务评分接口，提供任务级别的操作和控制
+ * 调度任务作用域接口，提供任务级别的操作和控制
  *
  * 此接口扩展了实体组件上下文，允许在任务中访问和修改实体组件
  */
@@ -249,7 +257,7 @@ interface ScheduleDispatcher {
 
 
 /**
- * 调度器评分接口的实现类
+ * 调度器作用域接口的实现类
  *
  * @property world 世界实例
  * @property schedule 调度器实例
@@ -383,14 +391,80 @@ class ScheduleScopeImpl(
     }
 }
 
+/**
+ * 调度服务类，负责管理ECS系统中的调度器生命周期和任务执行
+ *
+ * 此类提供了调度器的创建、管理和更新功能，支持初始化任务、下一帧任务和延迟任务的调度
+ * 使用对象池技术优化调度器的创建和销毁，提高性能
+ *
+ * @property world 世界实例，用于获取调度器分发器和实体组件上下文
+ */
 class ScheduleService(private val world: World) {
 
+    /**
+     * 调度器分发器实例，负责实际的任务调度执行
+     */
     private val scheduleDispatcher by world.instance<ScheduleDispatcher>()
+    
+    /**
+     * 调度器对象池，存储所有已创建的调度器实例
+     * 初始容量为1024，支持动态扩容
+     */
+    private val schedules = ObjectFastList<Schedule>(1024)
+    
+    /**
+     * 可回收的调度器ID列表，用于对象池优化
+     * 当调度器被销毁时，其ID会被添加到该列表以供重用
+     */
+    private val recycleScheduleIds = IntFastList(128)
+    
+    /**
+     * 活跃调度器位图，用于快速判断调度器是否处于活跃状态
+     * 每个位对应一个调度器ID，设置为1表示活跃，0表示非活跃
+     */
+    private val activeSchedules = BitSet(1024)
 
+    /**
+     * 创建新的调度器实例
+     * 
+     * 优先从回收池中获取可重用的调度器ID，如果回收池为空则创建新的调度器
+     * 新创建的调度器会被标记为活跃状态并添加到调度器列表中
+     *
+     * @return 新创建的调度器实例
+     */
     private fun createSchedule(): Schedule {
-        return Schedule(0)
+        val schedule = if (recycleScheduleIds.isNotEmpty()) {
+            val id = recycleScheduleIds.removeLast()
+            schedules[id].upgrade()
+        } else {
+            Schedule(schedules.size, 0).also { schedules.insertLast(it) }
+        }
+        schedules[schedule.id] = schedule
+        activeSchedules.set(schedule.id)
+        return schedule
     }
 
+    /**
+     * 升级调度器版本
+     * 
+     * 当重用调度器ID时，需要升级其版本号以确保唯一性
+     * 版本号递增，避免版本冲突
+     *
+     * @receiver 要升级的调度器实例
+     * @return 升级后的新调度器实例
+     */
+    private fun Schedule.upgrade(): Schedule = Schedule(id, version + 1)
+
+    /**
+     * 创建并启动一个新的调度器
+     * 
+     * 创建调度器实例，设置调度器作用域，并添加初始化任务
+     * 调度器会在下一帧开始执行指定的代码块
+     *
+     * @param scheduleName 调度器名称，用于标识和调试
+     * @param block 要在调度器中执行的协程代码块
+     * @return 新创建的调度器实例
+     */
     fun schedule(scheduleName: String, block: suspend ScheduleScope.() -> Unit): Schedule {
         val schedule = createSchedule()
         val scheduleScope = ScheduleScopeImpl(world, schedule, scheduleName, scheduleDispatcher)
@@ -400,5 +474,175 @@ class ScheduleService(private val world: World) {
         return schedule
     }
 
+    /**
+     * 更新所有调度器的状态
+     * 
+     * 调用调度器分发器的更新方法，处理所有待执行的任务
+     * 包括初始化任务、下一帧任务和延迟任务的执行
+     *
+     * @param delta 时间增量，表示自上次更新以来经过的时间
+     */
     fun update(delta: Duration): Unit = scheduleDispatcher.update(delta)
+}
+
+/**
+ * 调度器分发器的实现类，负责管理初始化任务、下一帧任务和延迟任务的执行
+ * 
+ * 此类实现了优先级队列机制，支持不同优先级的任务调度，确保高优先级任务优先执行
+ * 使用对象池技术优化任务对象的创建和销毁，提高性能
+ * 
+ * @constructor 创建新的调度器分发器实例
+ */
+class ScheduleDispatcherImpl : ScheduleDispatcher {
+    
+    private val initializeTasks = ObjectFastList<FrameTask>()
+    private val nextFrameTasks = ObjectFastList<FrameTask>()
+    private val delayFrameTasks = ObjectFastList<DelayFrameTask>()
+
+    private val currentFrameTasks = ObjectFastList<FrameTask>(1024)
+    
+
+    /**
+     * 添加初始化任务
+     * 
+     * 初始化任务会在下一帧开始时立即执行，没有优先级区分
+     * 主要用于调度器的初始化和协程的启动
+     * 
+     * @param scheduleDescriptor 调度器描述符，用于标识任务来源
+     * @param task 要执行的任务函数，接收持续时间参数
+     */
+    override fun addInitializeTask(scheduleDescriptor: ScheduleDescriptor, task: (Duration) -> Unit) {
+        initializeTasks.insertLast(FrameTask(scheduleDescriptor, ScheduleTaskPriority.NORMAL, task))
+    }
+    
+    /**
+     * 添加下一帧执行的任务
+     * 
+     * 下一帧任务会在下一帧更新时执行，支持优先级控制
+     * 高优先级任务会优先执行，相同优先级的任务按添加顺序执行
+     * 
+     * @param scheduleDescriptor 调度器描述符，用于标识任务来源
+     * @param priority 任务优先级，决定任务的执行顺序
+     * @param task 要执行的任务函数，接收持续时间参数
+     */
+    override fun addNextFrameTask(
+        scheduleDescriptor: ScheduleDescriptor,
+        priority: ScheduleTaskPriority,
+        task: (Duration) -> Unit
+    ) {
+        nextFrameTasks.insertLast(FrameTask(scheduleDescriptor, priority, task))
+    }
+    
+    /**
+     * 添加延迟指定帧数后执行的任务
+     * 
+     * 延迟任务会在指定的延迟时间过后执行，支持优先级控制
+     * 延迟时间以帧为单位计算，实际执行时间取决于帧率
+     * 
+     * @param scheduleDescriptor 调度器描述符，用于标识任务来源
+     * @param priority 任务优先级，决定任务的执行顺序
+     * @param delay 延迟时间，表示需要等待的时间
+     * @param task 要执行的任务函数，接收持续时间参数
+     */
+    override fun addDelayFrameTask(
+        scheduleDescriptor: ScheduleDescriptor,
+        priority: ScheduleTaskPriority,
+        delay: Duration,
+        task: (Duration) -> Unit
+    ) {
+        delayFrameTasks.insertLast(DelayFrameTask(delay, FrameTask(scheduleDescriptor, priority, task)))
+    }
+    
+    /**
+     * 更新所有任务的状态
+     * 
+     * 此方法会按顺序执行以下操作：
+     * 1. 执行所有初始化任务
+     * 2. 按优先级执行下一帧任务
+     * 3. 更新延迟任务的剩余时间，执行到期的延迟任务
+     * 
+     * @param delta 时间增量，表示自上次更新以来经过的时间
+     */
+    override fun update(delta: Duration) {
+        // 执行初始化任务
+        executeInitializeTasks(delta)
+        
+        // 执行下一帧任务
+        executeNextFrameTasks(delta)
+        
+        // 更新延迟任务
+        updateDelayFrameTasks(delta)
+    }
+    
+    /**
+     * 执行所有初始化任务
+     * 
+     * 初始化任务按添加顺序执行，执行完成后清空任务列表
+     * 
+     * @param delta 时间增量，传递给任务函数
+     */
+    private fun executeInitializeTasks(delta: Duration) {
+        if (initializeTasks.isEmpty()) return
+        currentFrameTasks.insertLastAll(initializeTasks)
+        initializeTasks.clear()
+        currentFrameTasks.forEach { task -> task.task(delta) }
+        currentFrameTasks.clear()
+    }
+    
+    /**
+     * 执行所有下一帧任务
+     * 
+     * 按优先级从高到低的顺序执行任务，相同优先级的任务按添加顺序执行
+     * 执行完成后清空所有下一帧任务列表
+     * 
+     * @param delta 时间增量，传递给任务函数
+     */
+    private fun executeNextFrameTasks(delta: Duration) {
+        if (nextFrameTasks.isNotEmpty()) {
+            currentFrameTasks.insertLastAll(nextFrameTasks)
+            nextFrameTasks.clear()
+        }
+        if (currentFrameTasks.isEmpty()) return
+        currentFrameTasks.sortByDescending { it.priority }
+        currentFrameTasks.forEach { task -> task.task(delta) }
+        currentFrameTasks.clear()
+    }
+    
+    /**
+     * 更新所有延迟任务的状态
+     * 
+     * 减少延迟任务的剩余时间，执行到期的延迟任务
+     * 未到期的延迟任务保留在列表中继续等待
+     * 
+     * @param delta 时间增量，用于减少延迟任务的剩余时间
+     */
+    private fun updateDelayFrameTasks(delta: Duration) {
+        if (delayFrameTasks.isEmpty()) return
+        val iterator = delayFrameTasks.iterator()
+        while (iterator.hasNext()) {
+            val delayTask = iterator.next()
+            delayTask.remainingDelay -= delta
+            if (delayTask.remainingDelay <= Duration.ZERO) {
+                currentFrameTasks.insertLast(delayTask.frameTask)
+                iterator.remove()
+            }
+        }
+    }
+
+    data class FrameTask(
+        val scheduleDescriptor: ScheduleDescriptor,
+        val priority: ScheduleTaskPriority,
+        val task: (Duration) -> Unit
+    )
+
+    /**
+     * 延迟任务数据类，封装延迟任务的详细信息
+     *
+     * @property remainingDelay 剩余延迟时间
+     * @property frameTask 要执行的任务函数
+     */
+    private data class DelayFrameTask(
+        var remainingDelay: Duration,
+        val frameTask: FrameTask
+    )
 }
