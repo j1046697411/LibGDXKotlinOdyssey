@@ -7,6 +7,8 @@ import cn.jzl.datastructure.math.fromLowHigh
 import cn.jzl.datastructure.math.high
 import cn.jzl.datastructure.math.low
 import cn.jzl.di.instance
+import kotlinx.atomicfu.locks.ReentrantLock
+import kotlinx.atomicfu.locks.withLock
 import kotlin.coroutines.*
 import kotlin.jvm.JvmInline
 import kotlin.time.Duration
@@ -123,7 +125,7 @@ interface ScheduleScope {
  * @receiver 调度器评分实例
  */
 suspend fun ScheduleScope.withLoop(
-    priority: ScheduleTaskPriority,
+    priority: ScheduleTaskPriority = ScheduleTaskPriority.NORMAL,
     block: suspend ScheduleTaskScope.(looper: ScheduleTaskLooper) -> Unit
 ): Unit = withTask(priority) {
     var loop = true
@@ -500,6 +502,7 @@ class ScheduleDispatcherImpl : ScheduleDispatcher {
     private val delayFrameTasks = ObjectFastList<DelayFrameTask>()
 
     private val currentFrameTasks = ObjectFastList<FrameTask>(1024)
+    private val lock = ReentrantLock()
     
 
     /**
@@ -511,7 +514,7 @@ class ScheduleDispatcherImpl : ScheduleDispatcher {
      * @param scheduleDescriptor 调度器描述符，用于标识任务来源
      * @param task 要执行的任务函数，接收持续时间参数
      */
-    override fun addInitializeTask(scheduleDescriptor: ScheduleDescriptor, task: (Duration) -> Unit) {
+    override fun addInitializeTask(scheduleDescriptor: ScheduleDescriptor, task: (Duration) -> Unit) : Unit= lock.withLock {
         initializeTasks.insertLast(FrameTask(scheduleDescriptor, ScheduleTaskPriority.NORMAL, task))
     }
     
@@ -529,7 +532,7 @@ class ScheduleDispatcherImpl : ScheduleDispatcher {
         scheduleDescriptor: ScheduleDescriptor,
         priority: ScheduleTaskPriority,
         task: (Duration) -> Unit
-    ) {
+    ) : Unit = lock.withLock {
         nextFrameTasks.insertLast(FrameTask(scheduleDescriptor, priority, task))
     }
     
@@ -549,7 +552,7 @@ class ScheduleDispatcherImpl : ScheduleDispatcher {
         priority: ScheduleTaskPriority,
         delay: Duration,
         task: (Duration) -> Unit
-    ) {
+    ) : Unit = lock.withLock {
         delayFrameTasks.insertLast(DelayFrameTask(delay, FrameTask(scheduleDescriptor, priority, task)))
     }
     
@@ -566,12 +569,10 @@ class ScheduleDispatcherImpl : ScheduleDispatcher {
     override fun update(delta: Duration) {
         // 执行初始化任务
         executeInitializeTasks(delta)
-        
-        // 执行下一帧任务
-        executeNextFrameTasks(delta)
-        
         // 更新延迟任务
         updateDelayFrameTasks(delta)
+        // 执行下一帧任务
+        executeNextFrameTasks(delta)
     }
     
     /**
@@ -646,3 +647,5 @@ class ScheduleDispatcherImpl : ScheduleDispatcher {
         val frameTask: FrameTask
     )
 }
+
+expect fun threadYield() : Unit
