@@ -8,9 +8,9 @@ interface EntityComponentContext {
     val Entity.componentBits: BitSet
     val Entity.active: Boolean
 
-    operator fun Entity.contains(componentType: ComponentType<*>): Boolean
+    operator fun Entity.contains(componentType: ComponentReadAccesses<*>): Boolean
 
-    operator fun <C : Any> Entity.get(componentType: ComponentType<C>): C
+    operator fun <C : Any> Entity.get(componentType: ComponentReadAccesses<C>): C
 
-    fun <C : Any> Entity.getOrNull(componentType: ComponentType<C>): C?
+    fun <C : Any> Entity.getOrNull(componentType: ComponentReadAccesses<C>): C?
 }

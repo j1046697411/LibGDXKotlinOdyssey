@@ -8,40 +8,40 @@ internal class EntityUpdateContextImpl(override val world: World) : EntityUpdate
     override val Entity.componentBits: BitSet get() = world.componentService.componentBits(this)
     override val Entity.active: Boolean get() = this in world.entityService
 
-    override fun Entity.minusAssign(componentType: ComponentType<*>) {
-        componentBits.clear(componentType.index)
-        world.componentService.holderOrNull<Any>(componentType.index)?.remove(this)
+    override fun Entity.minusAssign(componentType: ComponentWriteAccesses<*>) {
+        componentBits.clear(componentType.type.index)
+        world.componentService.holderOrNull<Any>(componentType.type.index)?.remove(this)
     }
 
-    override fun <C : Component<C>> Entity.minusAssign(component: Component<C>) {
-        componentBits.clear(component.type.index)
-        world.componentService.holderOrNull<C>(component.type.index)?.remove(this)
+    override fun <C : Any> Entity.set(componentType: ComponentWriteAccesses<C>, component: C): C? {
+        componentBits.set(componentType.type.index)
+        return world.componentService.holder(componentType.type).set(this, component)
     }
 
-    override fun <C : Any> Entity.set(componentType: ComponentType<C>, component: C): C? {
-        componentBits.set(componentType.index)
-        return world.componentService.holder(componentType).set(this, component)
+    override fun Entity.plusAssign(tag: ComponentWriteAccesses<Boolean>) {
+        componentBits.set(tag.type.index)
+        world.componentService.holder(tag.type)[this] = true
     }
 
-    override fun <C : Any> Entity.getOrPut(componentType: ComponentType<C>, provider: DIProvider<C>): C {
-        val holder = world.componentService.holder(componentType)
+    override fun <C : Any> Entity.getOrPut(componentType: ComponentWriteAccesses<C>, provider: DIProvider<C>): C {
+        val holder = world.componentService.holder(componentType.type)
         return holder.getOrNull(this) ?: run {
             val component = provider()
             holder[this] = component
-            componentBits.set(componentType.index)
+            componentBits.set(componentType.type.index)
             component
         }
     }
 
-    override fun Entity.contains(componentType: ComponentType<*>): Boolean {
-        return componentType.index in componentBits
+    override fun Entity.contains(componentType: ComponentReadAccesses<*>): Boolean {
+        return componentType.type.index in componentBits
     }
 
-    override fun <C : Any> Entity.get(componentType: ComponentType<C>): C {
-        return world.componentService.holder(componentType)[this]
+    override fun <C : Any> Entity.get(componentType: ComponentReadAccesses<C>): C {
+        return world.componentService.holder(componentType.type)[this]
     }
 
-    override fun <C : Any> Entity.getOrNull(componentType: ComponentType<C>): C? {
-        return world.componentService.holderOrNull<C>(componentType.index)?.getOrNull(this)
+    override fun <C : Any> Entity.getOrNull(componentType: ComponentReadAccesses<C>): C? {
+        return world.componentService.holderOrNull<C>(componentType.type.index)?.getOrNull(this)
     }
 }

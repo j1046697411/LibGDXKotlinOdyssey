@@ -32,12 +32,17 @@ class World(override val di: DI) : DIAware by di {
 }
 
 inline fun World.isActive(entity: Entity): Boolean = entity in entityService
-inline fun World.family(noinline configuration: FamilyDefinition.() -> Unit): Family = familyService.family(configuration)
-inline fun World.create(noinline configuration: EntityCreateContext.(Entity) -> Unit): Entity = entityService.create(configuration)
-inline fun World.create(entityId: Int, noinline configuration: EntityCreateContext.(Entity) -> Unit): Entity = entityService.create(entityId, configuration)
-inline fun World.configure(entity: Entity, noinline configuration: EntityUpdateContext.(Entity) -> Unit) = entityService.configure(entity, configuration)
 inline fun World.remove(entity: Entity) = entityService.remove(entity)
-inline fun World.schedule(scheduleName: String, noinline block: suspend ScheduleScope.() -> Unit): Schedule = scheduleService.schedule(scheduleName, block)
+inline fun World.schedule(
+    scheduleName: String = "",
+    scheduleTaskPriority: ScheduleTaskPriority = ScheduleTaskPriority.NORMAL,
+    noinline block: suspend ScheduleScope.() -> Unit
+): ScheduleDescriptor = scheduleService.schedule(scheduleName, scheduleTaskPriority, block)
+
+inline fun World.isActive(scheduleDescriptor: ScheduleDescriptor): Boolean {
+    return scheduleService.isActive(scheduleDescriptor.schedule)
+}
+
 inline fun World.update(delta: Duration): Unit = scheduleService.update(delta)
 
 internal val idGenerator = atomic(0)

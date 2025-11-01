@@ -4,9 +4,9 @@ import cn.jzl.datastructure.BitSet
 
 class FamilyDefinition {
 
-    private val allBits = BitSet.Companion()
-    private val anyBits = BitSet.Companion()
-    private val noneBits = BitSet.Companion()
+    internal val allBits = BitSet()
+    internal val anyBits = BitSet()
+    internal val noneBits = BitSet()
 
     fun all(vararg componentTypes: ComponentType<*>): FamilyDefinition = allBits.setComponentTypes(componentTypes)
     fun any(vararg componentTypes: ComponentType<*>): FamilyDefinition = anyBits.setComponentTypes(componentTypes)
