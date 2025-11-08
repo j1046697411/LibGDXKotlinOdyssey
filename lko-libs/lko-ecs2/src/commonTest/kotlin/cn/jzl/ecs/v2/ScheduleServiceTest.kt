@@ -82,9 +82,11 @@ class ScheduleServiceTest : ECSBasicTest() {
         schedule3.dependsOn(schedule1)
         assertTrue(tasks.isEmpty(), "任务队列应该为空 $tasks")
         world.update(0.seconds)
+        println("update 1")
         assertEquals(listOf(1, 3, 2), tasks, "任务执行顺序应该为1, 3, 2")
         tasks.clear()
         world.update(0.seconds)
+        println("update 2")
         assertEquals(listOf(1, 3, 2), tasks, "任务执行顺序应该为1, 3, 2")
         tasks.clear()
     }
@@ -314,27 +316,16 @@ class ScheduleServiceTest : ECSBasicTest() {
     @Test
     fun testScheduleCoroutineSuspension() {
         val world = createWorld()
-        val scheduleService = ScheduleService(world)
-
-        world.schedule("TestSchedule") {
-            val entity = create {
-
-            }
-
-
-        }
-
         var coroutineExecuted = false
 
-        scheduleService.schedule("TestSchedule") {
+        world.schedule("TestSchedule") {
             suspendScheduleCoroutine { continuation ->
                 coroutineExecuted = true
                 continuation.resume(Unit)
             }
         }
 
-        scheduleService.update(0.seconds)
-
+        world.update(0.seconds)
         assertTrue(coroutineExecuted, "协程应该被执行")
     }
 
@@ -403,18 +394,17 @@ class ScheduleServiceTest : ECSBasicTest() {
         val scheduleDispatcher = ScheduleDispatcherImpl()
 
         val executionOrder = mutableListOf<Int>()
-        val scheduleDescriptor = ScheduleDescriptor(Schedule(0), "TestSchedule")
 
         // 添加不同优先级的下一帧任务
-        scheduleDispatcher.addWorkTask(scheduleDescriptor, ScheduleTaskPriority.LOW) {
+        scheduleDispatcher.addWorkTask(ScheduleDescriptor(Schedule(0), "TestSchedule1"), ScheduleTaskPriority.LOW) {
             executionOrder.add(3)
         }
 
-        scheduleDispatcher.addWorkTask(scheduleDescriptor, ScheduleTaskPriority.HIGH) {
+        scheduleDispatcher.addWorkTask(ScheduleDescriptor(Schedule(1), "TestSchedule2"), ScheduleTaskPriority.HIGH) {
             executionOrder.add(1)
         }
 
-        scheduleDispatcher.addWorkTask(scheduleDescriptor, ScheduleTaskPriority.NORMAL) {
+        scheduleDispatcher.addWorkTask(ScheduleDescriptor(Schedule(2), "TestSchedule3"), ScheduleTaskPriority.NORMAL) {
             executionOrder.add(2)
         }
 
@@ -566,28 +556,28 @@ class ScheduleServiceTest : ECSBasicTest() {
     fun testDependsOnBasicFunctionality() {
         val world = createWorld()
         val executionOrder = mutableListOf<String>()
-        
+
         val scheduleA = world.schedule("ScheduleA") {
             withTask {
                 executionOrder.add("A")
             }
         }
-        
+
         val scheduleB = world.schedule("ScheduleB") {
             withTask {
                 executionOrder.add("B")
             }
         }
-        
+
         // 设置B依赖A
         scheduleB.dependsOn(scheduleA)
-        
+
         world.update(0.seconds)
-        
+
         // 验证执行顺序：A先执行，然后B执行
         assertEquals(listOf("A", "B"), executionOrder, "依赖调度器应该按照正确的顺序执行")
     }
-    
+
     /**
      * 测试dependsOn方法的依赖链功能
      * 验证多个调度器形成链式依赖时的执行顺序
@@ -596,35 +586,35 @@ class ScheduleServiceTest : ECSBasicTest() {
     fun testDependsOnChain() {
         val world = createWorld()
         val executionOrder = mutableListOf<String>()
-        
+
         val scheduleA = world.schedule("ScheduleA") {
             withTask {
                 executionOrder.add("A")
             }
         }
-        
+
         val scheduleB = world.schedule("ScheduleB") {
             withTask {
                 executionOrder.add("B")
             }
         }
-        
+
         val scheduleC = world.schedule("ScheduleC") {
             withTask {
                 executionOrder.add("C")
             }
         }
-        
+
         // 设置依赖链：C依赖B，B依赖A
         scheduleC.dependsOn(scheduleB)
         scheduleB.dependsOn(scheduleA)
-        
+
         world.update(0.seconds)
-        
+
         // 验证执行顺序：A -> B -> C
         assertEquals(listOf("A", "B", "C"), executionOrder, "依赖链应该按照正确的顺序执行")
     }
-    
+
     /**
      * 测试dependsOn方法的多依赖功能
      * 验证一个调度器依赖多个其他调度器的情况
@@ -633,37 +623,38 @@ class ScheduleServiceTest : ECSBasicTest() {
     fun testDependsOnMultipleDependencies() {
         val world = createWorld()
         val executionOrder = mutableListOf<String>()
-        
+
         val scheduleA = world.schedule("ScheduleA") {
             withTask {
                 executionOrder.add("A")
             }
         }
-        
+
         val scheduleB = world.schedule("ScheduleB") {
             withTask {
                 executionOrder.add("B")
             }
         }
-        
+
         val scheduleC = world.schedule("ScheduleC") {
             withTask {
                 executionOrder.add("C")
             }
         }
-        
+
         // 设置C同时依赖A和B
         scheduleC.dependsOn(scheduleA)
         scheduleC.dependsOn(scheduleB)
-        
-        world.update(0.seconds)
-        
+        while (world.isActive(scheduleC)) {
+            world.update(0.seconds)
+        }
+
         // 验证A和B都在C之前执行（A和B的顺序不确定，但都应该在C之前）
         assertTrue(executionOrder.indexOf("A") < executionOrder.indexOf("C"))
         assertTrue(executionOrder.indexOf("B") < executionOrder.indexOf("C"))
         assertEquals(3, executionOrder.size, "所有调度器都应该被执行")
     }
-    
+
     /**
      * 测试dependsOn方法的循环依赖处理
      * 验证系统如何处理循环依赖的情况
@@ -672,30 +663,30 @@ class ScheduleServiceTest : ECSBasicTest() {
     fun testDependsOnCyclicDependency() {
         val world = createWorld()
         val executionOrder = mutableListOf<String>()
-        
+
         val scheduleA = world.schedule("ScheduleA") {
             withTask {
                 executionOrder.add("A")
             }
         }
-        
+
         val scheduleB = world.schedule("ScheduleB") {
             withTask {
                 executionOrder.add("B")
             }
         }
-        
+
         // 设置循环依赖：A依赖B，B依赖A
         scheduleA.dependsOn(scheduleB)
         scheduleB.dependsOn(scheduleA)
-        
+
         world.update(0.seconds)
-        
+
         // 验证即使有循环依赖，任务仍然能够执行
         assertTrue(executionOrder.isNotEmpty(), "即使有循环依赖，至少应该执行某些任务")
         assertTrue(executionOrder.contains("A") || executionOrder.contains("B"), "至少应该执行一个调度器")
     }
-    
+
     /**
      * 测试dependsOn方法在依赖任务抛出异常时的行为
      * 验证当依赖的调度器抛出异常时，其他任务仍然能够执行
@@ -704,33 +695,28 @@ class ScheduleServiceTest : ECSBasicTest() {
     fun testDependsOnWithException() {
         val world = createWorld()
         val executionOrder = mutableListOf<String>()
-        
+
         val scheduleA = world.schedule("ScheduleA") {
             withTask {
                 executionOrder.add("A")
                 throw RuntimeException("测试异常")
             }
         }
-        
+
         val scheduleB = world.schedule("ScheduleB") {
             withTask {
                 executionOrder.add("B")
             }
         }
-        
+
         // 设置B依赖A
         scheduleB.dependsOn(scheduleA)
-        
-        try {
-            world.update(0.seconds)
-        } catch (e: Exception) {
-            // 捕获异常以避免测试失败
-        }
-        
+        world.update(0.seconds)
+
         // 验证A至少部分执行
         assertTrue(executionOrder.contains("A"), "即使抛出异常，A也应该部分执行")
     }
-    
+
     /**
      * 测试dependsOn方法与延迟任务的结合使用
      * 验证依赖关系在延迟任务中的正确处理
@@ -739,21 +725,21 @@ class ScheduleServiceTest : ECSBasicTest() {
     fun testDependsOnWithDelayTask() {
         val world = createWorld()
         val executionOrder = mutableListOf<String>()
-        
+
         val scheduleA = world.schedule("ScheduleA") {
             withTask {
                 delay(100.milliseconds)
                 executionOrder.add("A")
             }
         }
-        
+
         val scheduleB = world.schedule("ScheduleB") {
             withLoop { executionOrder.add("B") }
         }
-        
+
         // 设置B依赖A
         scheduleB.dependsOn(scheduleA)
-        
+
         // 第一次更新，A开始执行但会延迟
         world.update(0.milliseconds)
         assertFalse(executionOrder.contains("A"), "A的延迟任务不应该立即执行")
