@@ -27,6 +27,8 @@ import cn.jzl.datastructure.BitSet
 data class ScheduleDescriptor(
     val schedule: Schedule,
     val scheduleName: String,
+    @PublishedApi
+    internal var schedulePriority: SchedulePriority = SchedulePriority.Auto
 ) {
     /**
      * 依赖的调度器名称集合

@@ -2,8 +2,10 @@ package cn.jzl.ecs.v2
 
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.resume
 import kotlin.coroutines.startCoroutine
 import kotlin.coroutines.suspendCoroutine
+import kotlin.time.Duration
 
 /**
  * 调度器作用域接口的实现类
@@ -18,10 +20,10 @@ internal class ScheduleScopeImpl(
     schedule: Schedule,
     scheduleName: String,
     private val scheduleDispatcher: ScheduleDispatcher,
-    private val schedulePriority: ScheduleTaskPriority
-) : ScheduleScope {
+    schedulePriority: ScheduleTaskPriority
+) : ScheduleScope, EntityComponentContext by world.entityUpdateContext {
 
-    override val scheduleDescriptor: ScheduleDescriptor = ScheduleDescriptor(schedule, scheduleName)
+    override val scheduleDescriptor: ScheduleDescriptor = ScheduleDescriptor(schedule, scheduleName, schedulePriority)
 
     /**
      * 当前调度器实例
@@ -58,6 +60,18 @@ internal class ScheduleScopeImpl(
         }
     }
 
+    override suspend fun waitNextFrame(): Duration = suspendCoroutine {
+        scheduleDispatcher.addMainTask(scheduleDescriptor, scheduleDescriptor.schedulePriority) { delta ->
+            it.resume(delta)
+        }
+    }
+
+    override suspend fun delay(delay: Duration): Unit = suspendCoroutine {
+        scheduleDispatcher.addDelayFrameTask(scheduleDescriptor, scheduleDescriptor.schedulePriority, delay) { delta ->
+            it.resume(Unit)
+        }
+    }
+
     /**
      * 在调度器上下文中挂起协程
      *
@@ -67,13 +81,12 @@ internal class ScheduleScopeImpl(
      */
     override suspend fun <R> suspendScheduleCoroutine(
         dispatcherType: ScheduleScope.DispatcherType,
-        priority: SchedulePriority,
         block: World.(ScheduleContinuation<R>) -> Unit
     ): R = suspendCoroutine { continuation ->
-        val schedulePriority = if (priority == SchedulePriority.Auto) schedulePriority else priority
         val scheduleContinuation = object : ScheduleContinuation<R> by continuation {
             override val scheduleDispatcher: ScheduleDispatcher get() = this@ScheduleScopeImpl.scheduleDispatcher
             override fun resumeWith(result: Result<R>) {
+                val schedulePriority = scheduleDescriptor.schedulePriority
                 if (dispatcherType == ScheduleScope.DispatcherType.Main) {
                     scheduleDispatcher.addMainTask(scheduleDescriptor, schedulePriority) { delta ->
                         continuation.resumeWith(result)
@@ -92,7 +105,7 @@ internal class ScheduleScopeImpl(
         block: suspend ScheduleScope.() -> Unit,
         continuation: Continuation<Unit>
     ): ScheduleDescriptor {
-        scheduleDispatcher.addMainTask(scheduleDescriptor, schedulePriority) { delta ->
+        scheduleDispatcher.addMainTask(scheduleDescriptor, scheduleDescriptor.schedulePriority) { delta ->
             block.startCoroutine(this, continuation)
         }
         return scheduleDescriptor

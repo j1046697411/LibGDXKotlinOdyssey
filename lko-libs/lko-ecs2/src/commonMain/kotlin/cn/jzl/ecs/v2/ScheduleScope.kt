@@ -5,6 +5,7 @@ import cn.jzl.datastructure.math.toRatio
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.RestrictsSuspension
+import kotlin.coroutines.resume
 import kotlin.coroutines.startCoroutine
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -26,9 +27,9 @@ import kotlin.time.Duration.Companion.seconds
  */
 @RestrictsSuspension
 @ScheduleDsl
-interface ScheduleScope {
+interface ScheduleScope : EntityComponentContext {
 
-    val world: World
+    override val world: World
 
     /**
      * 当前调度器实例
@@ -77,7 +78,6 @@ interface ScheduleScope {
      */
     suspend fun <R> suspendScheduleCoroutine(
         dispatcherType: DispatcherType = DispatcherType.Work,
-        priority: SchedulePriority = SchedulePriority.Auto,
         block: World.(ScheduleContinuation<R>) -> Unit
     ): R
 
@@ -92,6 +92,10 @@ interface ScheduleScope {
      */
     fun family(configuration: FamilyDefinition.() -> Unit): Family
 
+    suspend fun waitNextFrame() : Duration
+
+    suspend fun delay(delay: Duration)
+
     /**
      * 调度器类型枚举
      *
@@ -102,13 +106,15 @@ interface ScheduleScope {
     enum class DispatcherType { Main, Work }
 }
 
-suspend inline fun ScheduleScope.withTask(
-    priority: SchedulePriority = SchedulePriority.Auto,
-    noinline block: suspend ScheduleTaskScope.() -> Unit
-): Unit = suspendScheduleCoroutine(ScheduleScope.DispatcherType.Main, priority) { scheduleContinuation ->
-    val scheduleTaskScore = ScheduleTaskScopeImpl(this, scheduleDescriptor, priority)
+suspend fun <R> ScheduleScope.withTask(
+    priority: ScheduleTaskPriority = ScheduleTaskPriority.NORMAL,
+    block: suspend ScheduleScope.() -> R
+): R = suspendScheduleCoroutine(ScheduleScope.DispatcherType.Work) { scheduleContinuation ->
+    val oldSchedulePriority = scheduleDescriptor.schedulePriority
+    scheduleDescriptor.schedulePriority = priority
     scheduleContinuation.scheduleDispatcher.addWorkTask(scheduleDescriptor, priority) {
-        block.startCoroutine(scheduleTaskScore, Continuation(EmptyCoroutineContext) {
+        block.startCoroutine(this@withTask, Continuation(EmptyCoroutineContext) {
+            scheduleDescriptor.schedulePriority = oldSchedulePriority
             scheduleContinuation.resumeWith(it)
         })
     }
@@ -122,8 +128,8 @@ suspend inline fun ScheduleScope.withTask(
  * @receiver 调度器评分实例
  */
 suspend inline fun ScheduleScope.withLoop(
-    priority: SchedulePriority = SchedulePriority.Auto,
-    noinline block: suspend ScheduleTaskScope.(looper: ScheduleTaskLooper) -> Unit
+    priority: ScheduleTaskPriority = ScheduleTaskPriority.NORMAL,
+    noinline block: suspend ScheduleScope.(looper: ScheduleTaskLooper) -> Unit
 ): Unit = withTask(priority) {
     var loop = true
     val looper = ScheduleTaskLooper { loop = false }
@@ -135,9 +141,9 @@ suspend inline fun ScheduleScope.withLoop(
 
 suspend inline fun ScheduleScope.withFixedUpdate(
     step: Duration,
-    priority: SchedulePriority = SchedulePriority.Auto,
-    crossinline onAlpha: ScheduleTaskScope.(alpha: Ratio) -> Unit = {},
-    crossinline block: ScheduleTaskScope.(ScheduleTaskLooper) -> Unit
+    priority: ScheduleTaskPriority = ScheduleTaskPriority.NORMAL,
+    crossinline onAlpha: ScheduleScope.(alpha: Ratio) -> Unit = {},
+    crossinline block: ScheduleScope.(ScheduleTaskLooper) -> Unit
 ): Unit = withTask(priority) {
     var accumulator: Duration = 0.seconds
     var loop = true

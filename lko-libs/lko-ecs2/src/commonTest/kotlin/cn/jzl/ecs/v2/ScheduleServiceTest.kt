@@ -142,19 +142,19 @@ class ScheduleServiceTest : ECSBasicTest() {
 
         // 第一次更新 - 执行第一次循环
         world.update(0.seconds)
-        assertEquals(listOf(1), executionCount)
+        assertEquals(listOf(1), executionCount, "第一次更新应该执行第一次循环")
 
         // 第二次更新 - 执行第二次循环
         world.update(0.seconds)
-        assertEquals(listOf(1, 2), executionCount)
+        assertEquals(listOf(1, 2), executionCount, "第二次更新应该执行第二次循环")
 
         // 第三次更新 - 执行第三次循环并停止
         world.update(0.seconds)
-        assertEquals(listOf(1, 2, 3), executionCount)
+        assertEquals(listOf(1, 2, 3), executionCount, "第三次更新应该执行第三次循环并停止")
 
         // 第四次更新 - 不会再执行
         world.update(0.seconds)
-        assertEquals(listOf(1, 2, 3), executionCount)
+        assertEquals(listOf(1, 2, 3), executionCount, "第四次更新不应该执行任务")
     }
 
     /**
@@ -220,13 +220,11 @@ class ScheduleServiceTest : ECSBasicTest() {
         var result = 0
 
         world.schedule("testConditionalExecution") {
-            withTask {
-                // 条件不满足时等待
-                while (!conditionMet) {
-                    waitNextFrame()
-                }
-                result = 42
+            // 条件不满足时等待
+            while (!conditionMet) {
+                waitNextFrame()
             }
+            result = 42
         }
 
         // 第一次更新，条件不满足
