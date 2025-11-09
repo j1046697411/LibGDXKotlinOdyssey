@@ -42,7 +42,7 @@ interface ScheduleDispatcher {
  */
     fun addMainTask(
         scheduleDescriptor: ScheduleDescriptor,
-        priority: ScheduleTaskPriority,
+        priority: SchedulePriority,
         task: (Duration) -> Unit
     )
 
@@ -67,7 +67,7 @@ interface ScheduleDispatcher {
  */
     fun addWorkTask(
         scheduleDescriptor: ScheduleDescriptor,
-        priority: ScheduleTaskPriority,
+        priority: SchedulePriority,
         task: (Duration) -> Unit
     )
 
@@ -94,7 +94,7 @@ interface ScheduleDispatcher {
  */
     fun addDelayFrameTask(
         scheduleDescriptor: ScheduleDescriptor,
-        priority: ScheduleTaskPriority,
+        priority: SchedulePriority,
         delay: Duration,
         task: (Duration) -> Unit
     )

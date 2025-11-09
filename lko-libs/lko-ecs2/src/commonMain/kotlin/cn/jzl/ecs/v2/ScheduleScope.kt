@@ -1,21 +1,23 @@
 package cn.jzl.ecs.v2
 
-import cn.jzl.di.instance
+import cn.jzl.datastructure.math.Ratio
+import cn.jzl.datastructure.math.toRatio
 import kotlin.coroutines.*
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * ScheduleScope.kt 定义了调度器作用域的核心接口
- * 
+ *
  * 调度器作用域是ECS系统中调度器上下文的核心接口，提供了：
  * 1. 组件读写访问的权限控制机制
  * 2. 协程挂起与恢复的底层支持
  * 3. 实体家族创建的能力
  * 4. 调度任务优先级与分发控制
- * 
+ *
  * 此接口通过@RestrictsSuspension注解限制了挂起函数的调用范围，确保只能在调度器上下文中使用，
  * 同时使用@ScheduleDsl注解提供了流畅的DSL体验。
- * 
+ *
  * 在ECS架构中，ScheduleScope作为连接系统、实体和组件的桥梁，使得开发者能够在调度环境中安全地
  * 访问和操作ECS世界中的各种元素，同时维持系统的并发安全性和性能。
  */
@@ -25,7 +27,7 @@ interface ScheduleScope {
 
     /**
      * 当前调度器实例
-     * 
+     *
      * 提供对当前正在执行的调度器的直接访问，可用于获取调度器的状态和配置信息
      */
     val schedule: Schedule
@@ -63,7 +65,7 @@ interface ScheduleScope {
      */
     suspend fun <R> suspendScheduleCoroutine(
         dispatcherType: DispatcherType = DispatcherType.Work,
-        priority: ScheduleTaskPriority = ScheduleTaskPriority.NORMAL,
+        priority: SchedulePriority = SchedulePriority.Auto,
         block: World.(ScheduleContinuation<R>) -> Unit
     ): R
 
@@ -89,7 +91,7 @@ interface ScheduleScope {
 }
 
 suspend inline fun ScheduleScope.withTask(
-    priority: ScheduleTaskPriority = ScheduleTaskPriority.NORMAL,
+    priority: SchedulePriority = SchedulePriority.Auto,
     noinline block: suspend ScheduleTaskScope.() -> Unit
 ): Unit = suspendScheduleCoroutine(ScheduleScope.DispatcherType.Main, priority) { scheduleContinuation ->
     val scheduleTaskScore = ScheduleTaskScopeImpl(this, scheduleContinuation.scheduleDescriptor, priority)
@@ -108,7 +110,7 @@ suspend inline fun ScheduleScope.withTask(
  * @receiver 调度器评分实例
  */
 suspend inline fun ScheduleScope.withLoop(
-    priority: ScheduleTaskPriority = ScheduleTaskPriority.NORMAL,
+    priority: SchedulePriority = SchedulePriority.Auto,
     noinline block: suspend ScheduleTaskScope.(looper: ScheduleTaskLooper) -> Unit
 ): Unit = withTask(priority) {
     var loop = true
@@ -117,6 +119,25 @@ suspend inline fun ScheduleScope.withLoop(
         block(looper)
         waitNextFrame()
     }
+}
+
+suspend inline fun ScheduleScope.withFixedUpdate(
+    step: Duration,
+    priority: SchedulePriority = SchedulePriority.Auto,
+    crossinline onAlpha: ScheduleTaskScope.(alpha: Ratio) -> Unit = {},
+    crossinline block: ScheduleTaskScope.(ScheduleTaskLooper) -> Unit
+): Unit = withTask(priority) {
+    var accumulator: Duration = 0.seconds
+    var loop = true
+    val looper = ScheduleTaskLooper { loop = false }
+    do {
+        accumulator += waitNextFrame()
+        while (accumulator >= step) {
+            block(looper)
+            accumulator -= step
+        }
+        onAlpha((accumulator.inWholeNanoseconds.toFloat() / step.inWholeNanoseconds).toRatio())
+    } while (loop)
 }
 
 suspend inline fun ScheduleScope.create(noinline configuration: EntityCreateContext.(Entity) -> Unit): Entity = suspendScheduleCoroutine { continuation ->
@@ -160,61 +181,4 @@ suspend inline fun <R> ScheduleScope.batch(noinline configuration: EntityService
 
 suspend inline fun ScheduleScope.batchCreation(noinline configuration: suspend SequenceScope<Entity>.(EntityService) -> Unit): List<Entity> = suspendScheduleCoroutine { continuation ->
     continuation.resume(sequence { configuration(entityService) }.toList())
-}
-
-interface ScheduleContinuation<R> : Continuation<R> {
-    val scheduleDispatcher: ScheduleDispatcher
-    val scheduleDescriptor: ScheduleDescriptor
-}
-
-/**
- * 调度任务评分接口的内部实现类
- *
- * @property priority 任务优先级
- */
-@PublishedApi
-internal class ScheduleTaskScopeImpl(
-    override val world: World,
-    private val scheduleDescriptor: ScheduleDescriptor,
-    private val priority: ScheduleTaskPriority
-) : ScheduleTaskScope, EntityComponentContext by world.entityUpdateContext {
-    val scheduleDispatcher by world.instance<ScheduleDispatcher>()
-
-    /**
-     * 等待下一帧执行
-     *
-     * @return 等待的持续时间
-     */
-    override suspend fun waitNextFrame(): Duration = suspendCoroutine { continuation ->
-        scheduleDispatcher.addWorkTask(scheduleDescriptor, priority) {
-            continuation.resume(it)
-        }
-    }
-
-    /**
-     * 延迟指定时间后执行
-     *
-     * @param delay 要延迟的时间
-     */
-    override suspend fun delay(delay: Duration): Unit = suspendCoroutine { continuation ->
-        scheduleDispatcher.addDelayFrameTask(scheduleDescriptor, priority, delay) {
-            continuation.resume(Unit)
-        }
-    }
-
-    /**
-     * 在任务上下文中挂起协程
-     *
-     * @param block 要在世界上下文中执行的代码块
-     * @return 代码块的执行结果
-     * @param R 返回类型参数
-     */
-    override suspend fun <R> suspendScheduleCoroutine(block: World.(Continuation<R>) -> Unit): R = suspendCoroutine { continuation ->
-        val scheduleContinuation = Continuation(continuation.context) { result ->
-            scheduleDispatcher.addWorkTask(scheduleDescriptor, priority) {
-                continuation.resumeWith(result)
-            }
-        }
-        world.block(scheduleContinuation)
-    }
 }

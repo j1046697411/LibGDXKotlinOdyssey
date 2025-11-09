@@ -153,25 +153,26 @@ class ScheduleService(private val world: World) {
  * - 命名约定：自动生成有意义的名称，便于调试和日志记录
  *
  * @param scheduleName 调度器名称，用于标识和调试
- * @param scheduleTaskPriority 调度器任务优先级，默认为NORMAL
+ * @param schedulePriority 调度器任务优先级，默认为NORMAL
  * @param block 要在调度器中执行的协程代码块
  * @return 新创建的调度器描述符，可用于后续操作和状态查询
  */
     fun schedule(
         scheduleName: String,
-        scheduleTaskPriority: ScheduleTaskPriority = ScheduleTaskPriority.NORMAL,
+        schedulePriority: ScheduleTaskPriority = ScheduleTaskPriority.NORMAL,
         block: suspend ScheduleScope.() -> Unit
     ): ScheduleDescriptor {
         // 创建调度器实例
         val schedule = createSchedule()
         // 创建调度器作用域，设置唯一名称
-        val scheduleScope = ScheduleScopeImpl(world, schedule, 
-            scheduleName.ifEmpty { "schedule-${schedule.id}-${schedule.version}" }, 
-            scheduleDispatcher)
+        val scheduleScope = ScheduleScopeImpl(
+            world, schedule,
+            scheduleName.ifEmpty { "schedule-${schedule.id}-${schedule.version}" },
+            scheduleDispatcher,
+            schedulePriority
+        )
         // 启动协程并设置完成回调以释放调度器
-        return scheduleScope.startCoroutine(scheduleTaskPriority, block) { 
-            releaseSchedule(schedule) 
-        }
+        return scheduleScope.startCoroutine(block) { releaseSchedule(schedule) }
     }
 
     /**

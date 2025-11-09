@@ -17,7 +17,8 @@ internal class ScheduleScopeImpl(
     private val world: World,
     schedule: Schedule,
     scheduleName: String,
-    private val scheduleDispatcher: ScheduleDispatcher
+    private val scheduleDispatcher: ScheduleDispatcher,
+    private val schedulePriority: ScheduleTaskPriority
 ) : ScheduleScope {
 
     private val scheduleDescriptor = ScheduleDescriptor(schedule, scheduleName)
@@ -66,17 +67,18 @@ internal class ScheduleScopeImpl(
      */
     override suspend fun <R> suspendScheduleCoroutine(
         dispatcherType: ScheduleScope.DispatcherType,
-        priority: ScheduleTaskPriority,
+        priority: SchedulePriority,
         block: World.(ScheduleContinuation<R>) -> Unit
     ): R = suspendCoroutine { continuation ->
+        val schedulePriority = if (priority == SchedulePriority.Auto) schedulePriority else priority
         val scheduleContinuation = object : ScheduleContinuation<R> by continuation {
             override val scheduleDispatcher: ScheduleDispatcher get() = this@ScheduleScopeImpl.scheduleDispatcher
             override val scheduleDescriptor: ScheduleDescriptor get() = this@ScheduleScopeImpl.scheduleDescriptor
             override fun resumeWith(result: Result<R>) {
                 if (dispatcherType == ScheduleScope.DispatcherType.Main) {
-                    scheduleDispatcher.addMainTask(scheduleDescriptor, priority) { continuation.resumeWith(result) }
+                    scheduleDispatcher.addMainTask(scheduleDescriptor, schedulePriority) { continuation.resumeWith(result) }
                 } else {
-                    scheduleDispatcher.addWorkTask(scheduleDescriptor, priority) { continuation.resumeWith(result) }
+                    scheduleDispatcher.addWorkTask(scheduleDescriptor, schedulePriority) { continuation.resumeWith(result) }
                 }
             }
         }
@@ -84,11 +86,10 @@ internal class ScheduleScopeImpl(
     }
 
     internal fun startCoroutine(
-        priority: ScheduleTaskPriority,
         block: suspend ScheduleScope.() -> Unit,
         onComplete: (Result<Unit>)-> Unit
     ): ScheduleDescriptor {
-        scheduleDispatcher.addMainTask(scheduleDescriptor, priority) {
+        scheduleDispatcher.addMainTask(scheduleDescriptor, schedulePriority) {
             block.startCoroutine(this, Continuation(EmptyCoroutineContext, onComplete))
         }
         return scheduleDescriptor
