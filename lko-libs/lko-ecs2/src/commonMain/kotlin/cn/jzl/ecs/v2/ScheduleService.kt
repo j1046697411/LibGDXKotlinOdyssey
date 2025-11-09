@@ -4,6 +4,8 @@ import cn.jzl.datastructure.BitSet
 import cn.jzl.datastructure.list.IntFastList
 import cn.jzl.datastructure.list.ObjectFastList
 import cn.jzl.di.instance
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration
 
 /**
@@ -172,7 +174,10 @@ class ScheduleService(private val world: World) {
             schedulePriority
         )
         // 启动协程并设置完成回调以释放调度器
-        return scheduleScope.startCoroutine(block) { releaseSchedule(schedule) }
+        return scheduleScope.startCoroutine(block, Continuation(EmptyCoroutineContext) {
+            it.exceptionOrNull()?.printStackTrace()
+            releaseSchedule(schedule)
+        })
     }
 
     /**

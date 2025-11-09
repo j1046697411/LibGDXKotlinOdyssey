@@ -71,7 +71,7 @@ interface EntityComponentContext {
      * 
      * 安全版本的组件获取方法，不会抛出异常
      * 
-     * @param entity 要获取组件的实体
+     * @param Entity 要获取组件的实体
      * @param componentType 要获取的组件类型
      * @return 实体的组件实例，如果不存在则返回null
      */

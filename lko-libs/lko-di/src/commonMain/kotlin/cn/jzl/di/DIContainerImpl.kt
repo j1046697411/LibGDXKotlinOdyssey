@@ -1,6 +1,7 @@
 package cn.jzl.di
 
 import org.kodein.type.TypeToken
+import kotlin.jvm.JvmInline
 
 @JvmInline
 internal value class DIContainerImpl(override val tree: DITree) : DIContainer {
@@ -16,7 +17,7 @@ internal value class DIContainerImpl(override val tree: DITree) : DIContainer {
         key: DI.Key<C, A, T>,
         overrideLevel: Int
     ): DIFactory<A, T>? = tree.find(key, overrideLevel).map { (realKey, definition, translator) ->
-        definition?.getFactory(directDI, realKey, translator, overrideLevel)
+        definition?.getFactory(directDI, key, realKey, translator, overrideLevel)
     }.firstOrNull()
 
     override fun <C : Any, A, T : Any> allFactories(
@@ -24,13 +25,14 @@ internal value class DIContainerImpl(override val tree: DITree) : DIContainer {
         key: DI.Key<C, A, T>,
         overrideLevel: Int
     ): Sequence<DIFactory<A, T>> = tree.find(key, overrideLevel).mapNotNull { (realKey, definition, translator) ->
-        definition?.getFactory(directDI, realKey, translator, overrideLevel)
+        definition?.getFactory(directDI, key, realKey, translator, overrideLevel)
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun <C : Any, A, T : Any> DIDefinition<Any, A, T>.getFactory(
         directDI: DirectDI<C>,
-        key: DI.Key<Any, A, T>,
+        key: DI.Key<C, A, T>,
+        realKey: DI.Key<Any, A, T>,
         translator: ContextTranslator<C, Any>?,
         overrideLevel: Int
     ): DIFactory<A, T> {
@@ -41,17 +43,19 @@ internal value class DIContainerImpl(override val tree: DITree) : DIContainer {
             newDirectDI,
             (directDI as? BindingDI<*, *>)?.node,
             key as DI.Key<Any, Any?, T>,
+            realKey as DI.Key<Any, Any?, T>,
             overrideLevel
         )
-        return binding.getFactory(bindingDI, key)
+        return binding.getFactory(bindingDI, realKey)
     }
 
     private fun <C : Any, T : Any> createBindingDI(
         directDI: DirectDI<C>,
         parentNode: Node<*, *, *>?,
         key: DI.Key<C, Any?, T>,
+        realKey: DI.Key<C, Any?, T>,
         overrideLevel: Int
-    ): BindingDI<C, T> = BindingDIImpl(directDI, Node(parentNode, key, overrideLevel))
+    ): BindingDI<C, T> = BindingDIImpl(directDI, realKey, Node(parentNode, key, overrideLevel))
 
     private fun <C : Any, S : Any> ContextTranslator<C, S>.toKDirectDI(
         directDI: DirectDI<C>
@@ -72,6 +76,7 @@ internal value class DIContainerImpl(override val tree: DITree) : DIContainer {
 
     private class BindingDIImpl<C : Any, T : Any>(
         directDI: DirectDI<C>,
+        override val key: DI.Key<C, Any?, T>,
         override val node: Node<C, Any?, T>
     ) : BindingDI<C, T>, DirectDI<C> by directDI {
         override fun overriddenFactory(): DIFactory<Any?, T>? {

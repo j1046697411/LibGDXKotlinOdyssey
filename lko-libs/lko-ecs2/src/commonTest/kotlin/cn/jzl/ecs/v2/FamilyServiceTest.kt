@@ -27,9 +27,8 @@ class FamilyServiceTest : ECSBasicTest() {
         val schedule = world.schedule("testFamilyWithAllComponents") {
             val family = family { all(Test1Component) }
             val test1Component = Test1Component.write
-            
             // 创建只有一个组件的实体
-            val entity1 = create { 
+            val entity1 = create {
                 it[test1Component] = Test1Component() 
             }
             
@@ -52,7 +51,7 @@ class FamilyServiceTest : ECSBasicTest() {
             // 创建没有指定组件的实体
             val entity1 = create {}
             // 创建有指定组件的实体
-            val entity2 = create { 
+            val entity2 = create {
                 it[test1Component] = Test1Component() 
             }
             
@@ -75,13 +74,13 @@ class FamilyServiceTest : ECSBasicTest() {
             }
             val test1Component = Test1Component.write
             val test1Tag = Test1Tag.write
-            
+
             // 创建符合条件的实体
-            val entity1 = create { 
-                it[test1Component] = Test1Component() 
+            val entity1 = create {
+                it[test1Component] = Test1Component()
             }
             // 创建不符合条件的实体
-            val entity2 = create { 
+            val entity2 = create {
                 it[test1Component] = Test1Component() 
                 it += test1Tag
             }
@@ -107,7 +106,7 @@ class FamilyServiceTest : ECSBasicTest() {
             family.onEntityRemoved.add { removedEntities.add(it) }
             
             val test1Component = Test1Component.write
-            val entity = create { 
+            val entity = create {
                 it[test1Component] = Test1Component() 
             }
             
@@ -116,7 +115,7 @@ class FamilyServiceTest : ECSBasicTest() {
             assertEquals(entity, insertedEntities[0], "inserted entity should match created entity")
             
             // 移除组件，使实体不再满足家族条件
-            configure(entity) { 
+            configure(entity) {
                 it -= test1Component 
             }
             
@@ -141,7 +140,7 @@ class FamilyServiceTest : ECSBasicTest() {
             family.onEntityRemoved.add { removedEntities.add(it) }
             
             val test1Component = Test1Component.write
-            val entity = create { 
+            val entity = create {
                 it[test1Component] = Test1Component() 
             }
             
@@ -180,10 +179,9 @@ class FamilyServiceTest : ECSBasicTest() {
             val family = family { all(Test1Component) }
             val test1Component = Test1Component.write
             val entities = mutableListOf<Entity>()
-            
             // 创建多个实体
             for (i in 1..3) {
-                val entity = create { 
+                val entity = create {
                     it[test1Component] = Test1Component() 
                 }
                 entities.add(entity)
@@ -205,23 +203,22 @@ class FamilyServiceTest : ECSBasicTest() {
         val schedule = world.schedule("testFamilyComponentDynamicChanges") {
             val family = family { all(Test1Component) }
             val test1Component = Test1Component.write
-            
             // 创建一个没有组件的实体
-            val entity = create {}
+            val entity = create { }
             
             // 初始状态：实体不在家族中
             assertFalse(entity in family, "entity should not be in family initially")
             assertEquals(0, family.size, "family size should be 0 initially")
             
             // 添加组件，使实体满足家族条件
-            configure(entity) { 
+            configure(entity) {
                 it[test1Component] = Test1Component() 
             }
             assertTrue(entity in family, "entity should be in family after adding component")
             assertEquals(1, family.size, "family size should be 1 after adding component")
             
             // 移除组件，使实体不再满足家族条件
-            configure(entity) { 
+             configure(entity) {
                 it -= test1Component 
             }
             assertFalse(entity in family, "entity should not be in family after removing component")

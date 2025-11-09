@@ -1,5 +1,6 @@
 package cn.jzl.ecs.v2
 
+import kotlin.coroutines.Continuation
 import kotlin.time.Duration
 
 /**

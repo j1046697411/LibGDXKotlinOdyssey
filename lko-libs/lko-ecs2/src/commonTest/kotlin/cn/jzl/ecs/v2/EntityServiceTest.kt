@@ -18,7 +18,7 @@ class EntityServiceTest {
                 it[test1Component] = Test1Component()
                 it += testTag
             }
-            configure(entity) {
+            configure( entity) {
                 assertTrue(it.active, "entity is not active")
                 assertTrue(test1Component in it, "component should be present")
                 assertTrue(testTag in it, "tag should be present")
@@ -50,6 +50,7 @@ class EntityServiceTest {
         val entityId = 456
         val schedule = world.schedule {
             val test1Component = Test1Component.write
+
             val entity = create(entityId) {
                 it[test1Component] = Test1Component()
             }

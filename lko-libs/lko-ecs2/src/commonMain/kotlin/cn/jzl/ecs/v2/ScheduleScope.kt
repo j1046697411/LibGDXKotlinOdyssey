@@ -2,7 +2,10 @@ package cn.jzl.ecs.v2
 
 import cn.jzl.datastructure.math.Ratio
 import cn.jzl.datastructure.math.toRatio
-import kotlin.coroutines.*
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.RestrictsSuspension
+import kotlin.coroutines.startCoroutine
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -25,12 +28,21 @@ import kotlin.time.Duration.Companion.seconds
 @ScheduleDsl
 interface ScheduleScope {
 
+    val world: World
+
     /**
      * 当前调度器实例
      *
      * 提供对当前正在执行的调度器的直接访问，可用于获取调度器的状态和配置信息
      */
     val schedule: Schedule
+
+    /**
+     * 当前调度器描述符
+     *
+     * 提供对当前调度器的详细配置信息，包括依赖、资源访问权限等
+     */
+    val scheduleDescriptor: ScheduleDescriptor
 
     /**
      * 获取对指定组件类型的写访问权限
@@ -94,10 +106,10 @@ suspend inline fun ScheduleScope.withTask(
     priority: SchedulePriority = SchedulePriority.Auto,
     noinline block: suspend ScheduleTaskScope.() -> Unit
 ): Unit = suspendScheduleCoroutine(ScheduleScope.DispatcherType.Main, priority) { scheduleContinuation ->
-    val scheduleTaskScore = ScheduleTaskScopeImpl(this, scheduleContinuation.scheduleDescriptor, priority)
-    scheduleContinuation.scheduleDispatcher.addWorkTask(scheduleContinuation.scheduleDescriptor, priority) {
+    val scheduleTaskScore = ScheduleTaskScopeImpl(this, scheduleDescriptor, priority)
+    scheduleContinuation.scheduleDispatcher.addWorkTask(scheduleDescriptor, priority) {
         block.startCoroutine(scheduleTaskScore, Continuation(EmptyCoroutineContext) {
-            scheduleContinuation.resume(Unit)
+            scheduleContinuation.resumeWith(it)
         })
     }
 }
@@ -138,47 +150,4 @@ suspend inline fun ScheduleScope.withFixedUpdate(
         }
         onAlpha((accumulator.inWholeNanoseconds.toFloat() / step.inWholeNanoseconds).toRatio())
     } while (loop)
-}
-
-suspend inline fun ScheduleScope.create(noinline configuration: EntityCreateContext.(Entity) -> Unit): Entity = suspendScheduleCoroutine { continuation ->
-    continuation.resume(entityService.create(configuration))
-}
-
-suspend inline fun ScheduleScope.create(entityId: Int, noinline configuration: EntityCreateContext.(Entity) -> Unit): Entity = suspendScheduleCoroutine { continuation ->
-    continuation.resume(entityService.create(entityId, configuration))
-}
-
-suspend inline fun ScheduleScope.configure(entity: Entity, noinline configuration: EntityUpdateContext.(Entity) -> Unit): Unit = suspendScheduleCoroutine { continuation ->
-    entityService.configure(entity, configuration)
-    continuation.resume(Unit)
-}
-
-suspend inline fun ScheduleScope.batchConfigure(entities: Sequence<Entity>, noinline configuration: EntityUpdateContext.(Entity) -> Unit): Unit = suspendScheduleCoroutine { continuation ->
-    entities.forEach { entityService.configure(it, configuration) }
-    continuation.resume(Unit)
-}
-
-suspend inline fun ScheduleScope.batchConfigure(entities: Iterable<Entity>, noinline configuration: EntityUpdateContext.(Entity) -> Unit): Unit = suspendScheduleCoroutine { continuation ->
-    entities.forEach { entityService.configure(it, configuration) }
-    continuation.resume(Unit)
-}
-
-suspend inline fun ScheduleScope.batchConfigure(family: Family, noinline configuration: EntityUpdateContext.(Entity) -> Unit) {
-    batchConfigure(family.entities, configuration)
-}
-
-suspend inline fun <T> ScheduleScope.batch(data: Sequence<T>, noinline configuration: EntityService.(T) -> Entity): List<Entity> = suspendScheduleCoroutine { continuation ->
-    continuation.resume(sequence { data.forEach { yield(entityService.configuration(it)) } }.toList())
-}
-
-suspend inline fun <T> ScheduleScope.batch(data: Iterable<T>, noinline configuration: EntityService.(T) -> Entity): List<Entity> = suspendScheduleCoroutine { continuation ->
-    continuation.resume(sequence { data.forEach { yield(entityService.configuration(it)) } }.toList())
-}
-
-suspend inline fun <R> ScheduleScope.batch(noinline configuration: EntityService.() -> R): R = suspendScheduleCoroutine { continuation ->
-    continuation.resume(entityService.configuration())
-}
-
-suspend inline fun ScheduleScope.batchCreation(noinline configuration: suspend SequenceScope<Entity>.(EntityService) -> Unit): List<Entity> = suspendScheduleCoroutine { continuation ->
-    continuation.resume(sequence { configuration(entityService) }.toList())
 }

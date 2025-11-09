@@ -4,5 +4,4 @@ import kotlin.coroutines.Continuation
 
 interface ScheduleContinuation<R> : Continuation<R> {
     val scheduleDispatcher: ScheduleDispatcher
-    val scheduleDescriptor: ScheduleDescriptor
 }

@@ -14,14 +14,14 @@ import kotlin.coroutines.suspendCoroutine
  * @property scheduleDispatcher 调度器分发器
  */
 internal class ScheduleScopeImpl(
-    private val world: World,
+    override val world: World,
     schedule: Schedule,
     scheduleName: String,
     private val scheduleDispatcher: ScheduleDispatcher,
     private val schedulePriority: ScheduleTaskPriority
 ) : ScheduleScope {
 
-    private val scheduleDescriptor = ScheduleDescriptor(schedule, scheduleName)
+    override val scheduleDescriptor: ScheduleDescriptor = ScheduleDescriptor(schedule, scheduleName)
 
     /**
      * 当前调度器实例
@@ -73,12 +73,15 @@ internal class ScheduleScopeImpl(
         val schedulePriority = if (priority == SchedulePriority.Auto) schedulePriority else priority
         val scheduleContinuation = object : ScheduleContinuation<R> by continuation {
             override val scheduleDispatcher: ScheduleDispatcher get() = this@ScheduleScopeImpl.scheduleDispatcher
-            override val scheduleDescriptor: ScheduleDescriptor get() = this@ScheduleScopeImpl.scheduleDescriptor
             override fun resumeWith(result: Result<R>) {
                 if (dispatcherType == ScheduleScope.DispatcherType.Main) {
-                    scheduleDispatcher.addMainTask(scheduleDescriptor, schedulePriority) { continuation.resumeWith(result) }
+                    scheduleDispatcher.addMainTask(scheduleDescriptor, schedulePriority) { delta ->
+                        continuation.resumeWith(result)
+                    }
                 } else {
-                    scheduleDispatcher.addWorkTask(scheduleDescriptor, schedulePriority) { continuation.resumeWith(result) }
+                    scheduleDispatcher.addWorkTask(scheduleDescriptor, schedulePriority) {
+                        continuation.resumeWith(result)
+                    }
                 }
             }
         }
@@ -87,10 +90,10 @@ internal class ScheduleScopeImpl(
 
     internal fun startCoroutine(
         block: suspend ScheduleScope.() -> Unit,
-        onComplete: (Result<Unit>)-> Unit
+        continuation: Continuation<Unit>
     ): ScheduleDescriptor {
-        scheduleDispatcher.addMainTask(scheduleDescriptor, schedulePriority) {
-            block.startCoroutine(this, Continuation(EmptyCoroutineContext, onComplete))
+        scheduleDispatcher.addMainTask(scheduleDescriptor, schedulePriority) { delta ->
+            block.startCoroutine(this, continuation)
         }
         return scheduleDescriptor
     }

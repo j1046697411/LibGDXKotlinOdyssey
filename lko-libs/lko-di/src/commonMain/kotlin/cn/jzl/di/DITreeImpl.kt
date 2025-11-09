@@ -132,7 +132,12 @@ internal class DITreeImpl(
 
     private fun Sequence<TagTree>.findByTag(tag: Any? = null): Sequence<DITreeKey<*, *, *, *>> {
         return if (tag != TagAll) {
-            mapNotNull { it[tag]?.asSequence() }.flatMap { it }
+            sequence {
+                for (tagTree in this@findByTag) {
+                    tagTree[tag]?.let { yieldAll(it) }
+                    tagTree[TagAll]?.let { yieldAll(it) }
+                }
+            }
         } else {
             flatMap { it.values.asSequence() }.flatMap { it }
         }

@@ -43,6 +43,28 @@ data class ScheduleDescriptor(
     private val dependencySchedules = mutableSetOf<Schedule>()
 
     /**
+     * 资源读访问权限位图
+     *
+     * 使用BitSet高效存储和查询资源读权限
+     */
+    internal val readResources: BitSet = BitSet()
+
+    /**
+     * 资源写访问权限位图
+     *
+     * 使用BitSet高效存储和查询资源写权限
+     */
+    @PublishedApi
+    internal val writeResources: BitSet = BitSet()
+
+    fun addResource(resource: Resource<*>, write: Boolean = false) {
+        if (write) writeResources.set(resource.index)
+        readResources.set(resource.index)
+        version++
+    }
+
+
+    /**
      * 组件读访问权限位图
      *
      * 使用BitSet高效存储和查询组件读权限
@@ -202,9 +224,6 @@ data class ScheduleDescriptor(
      * 3. 检查名称依赖：通过名称检测间接依赖关系
      * 4. 检查隐式依赖（数据依赖）：
      *    - 使用位运算intersects检测位图交叉情况
-     *    - 当前读 & 另一个写：需要在写入后读取
-     *    - 当前写 & 另一个读：需要在读前写入
-     *    - 当前写 & 另一个写：避免同时写入冲突
      * 5. 任意依赖条件满足则返回true
      *
      * 设计理念：
@@ -226,16 +245,11 @@ data class ScheduleDescriptor(
         // 检查名称依赖：当前是否依赖于另一个调度器的名称
         if (other.scheduleName in dependencyNames) return true
 
-        // 检查隐式依赖：
-        // 1. 当前读 & 另一个写
+        // 我需要读取资源，另一个调度器需要写入资源，表示我依赖另一个调度器
+        if (readResources.intersects(other.writeResources)) return true
+
+        // 我需要读取组件，另一个调度器需要写入组件，表示我依赖另一个调度器
         if (readAccessesBits.intersects(other.writeAccessesBits)) return true
-
-        // 2. 当前写 & 另一个读（数据竞争防护）
-        if (writeAccessesBits.intersects(other.readAccessesBits)) return true
-
-        // 3. 当前写 & 另一个写（写冲突防护）
-        if (writeAccessesBits.intersects(other.writeAccessesBits)) return true
-
         return false
     }
 
