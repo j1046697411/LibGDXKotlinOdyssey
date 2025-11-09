@@ -1,6 +1,8 @@
 package cn.jzl.ecs.v2
 
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.ReentrantLock
+import kotlinx.atomicfu.locks.withLock
 import kotlin.coroutines.resume
 import kotlin.test.*
 import kotlin.time.Duration.Companion.milliseconds
@@ -648,7 +650,7 @@ class ScheduleServiceTest : ECSBasicTest() {
         while (world.isActive(scheduleC)) {
             world.update(0.seconds)
         }
-
+        println("executionOrder: $executionOrder")
         // 验证A和B都在C之前执行（A和B的顺序不确定，但都应该在C之前）
         assertTrue(executionOrder.indexOf("A") < executionOrder.indexOf("C"))
         assertTrue(executionOrder.indexOf("B") < executionOrder.indexOf("C"))
