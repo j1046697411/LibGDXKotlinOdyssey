@@ -8,7 +8,7 @@ import kotlin.math.max
  * - 提供高效的尾部/指定位置批量插入与 `fill`/`ensureCapacity` 能力。
  * - `safeInsert`/`safeInsertLast` 通过回调顺序写入，避免多次边界检查与复制。
  */
-class ObjectFastList<T>(capacity: Int = 7) : AbstractMutableFastList<T>(), ObjectMutableFastList<T> {
+class ObjectFastList<T>(capacity: Int = 7, val order: Boolean = false) : AbstractMutableFastList<T>(), ObjectMutableFastList<T> {
     private var data: Array<Any?> = arrayOfNulls(capacity)
 
     override var size: Int = 0
@@ -69,12 +69,16 @@ class ObjectFastList<T>(capacity: Int = 7) : AbstractMutableFastList<T>(), Objec
         checkIndex(index)
         @Suppress("UNCHECKED_CAST")
         val old = data[index] as T
-        
-        // 优化：当移除最后一个元素时，不需要复制数组
-        if (index != size - 1) {
-            data.copyInto(data, index, index + 1, size)
+        if (order) {
+            // 优化：当移除最后一个元素时，不需要复制数组
+            if (index != size - 1) {
+                data.copyInto(data, index, index + 1, size)
+            }
+            data[size - 1] = null
+        } else {
+            data[index] = data[size - 1]
+            data[size - 1] = null
         }
-        data[size - 1] = null
         size--
         return old
     }

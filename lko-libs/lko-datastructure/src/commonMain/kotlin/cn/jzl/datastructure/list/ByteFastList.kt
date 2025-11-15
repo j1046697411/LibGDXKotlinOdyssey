@@ -7,7 +7,7 @@ import kotlin.math.max
  * - 使用 `ByteArray` 顺序存储，扩容为两倍或刚好满足需要。
  * - 支持批量插入、`ensureCapacity`/`fill`、以及与 `ByteArray` 的互操作。
  */
-class ByteFastList(capacity: Int = 7) : AbstractMutableFastList<Byte>(), ByteMutableFastList {
+class ByteFastList(capacity: Int = 7, val order: Boolean = false) : AbstractMutableFastList<Byte>(), ByteMutableFastList {
     private var data = ByteArray(capacity)
 
     override var size: Int = 0
@@ -66,12 +66,16 @@ class ByteFastList(capacity: Int = 7) : AbstractMutableFastList<Byte>(), ByteMut
     override fun removeAt(index: Int): Byte {
         checkIndex(index)
         val old = data[index]
-        
-        // 优化：当移除最后一个元素时，不需要复制数组
-        if (index != size - 1) {
-            data.copyInto(data, index, index + 1, size)
+        if (order) {
+            // 优化：当移除最后一个元素时，不需要复制数组
+            if (index != size - 1) {
+                data.copyInto(data, index, index + 1, size)
+            }
+            data[size - 1] = 0
+        } else {
+            data[index] = data[size - 1]
+            data[size - 1] = 0
         }
-        data[size - 1] = 0
         size--
         return old
     }

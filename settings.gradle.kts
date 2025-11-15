@@ -46,10 +46,15 @@ dependencyResolutionManagement {
     }
 }
 
-addPluginLibs(File(rootDir, "lko-libs"))
-addPluginLibs(File(rootDir, "lko-graph-libs"))
-addPluginLibs(File(rootDir, "lko-gdx-libs"))
-addPluginLibs(File(rootDir, "tests"))
+addPluginLibs(File(rootDir, "lko-libs/lko-datastructure"))
+addPluginLibs(File(rootDir, "lko-libs/lko-di"))
+addPluginLibs(File(rootDir, "lko-libs/lko-ecs4"))
+
+
+//addPluginLibs(File(rootDir, "lko-libs"))
+//addPluginLibs(File(rootDir, "lko-graph-libs"))
+//addPluginLibs(File(rootDir, "lko-gdx-libs"))
+//addPluginLibs(File(rootDir, "tests"))
 
 fun addPluginLibs(libs: File) {
     if (!libs.isDirectory) return

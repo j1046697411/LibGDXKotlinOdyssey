@@ -7,7 +7,7 @@ import kotlin.math.max
  * - 使用 `CharArray` 顺序存储，扩容策略为两倍或刚好满足需要。
  * - 支持批量插入、`ensureCapacity`/`fill`、以及与 `CharArray` 的高效互操作。
  */
-class CharFastList(capacity: Int = 7) : AbstractMutableFastList<Char>(), CharMutableFastList {
+class CharFastList(capacity: Int = 7, val order: Boolean = false) : AbstractMutableFastList<Char>(), CharMutableFastList {
     private var data = CharArray(capacity)
 
     override var size: Int = 0
@@ -67,12 +67,16 @@ class CharFastList(capacity: Int = 7) : AbstractMutableFastList<Char>(), CharMut
     override fun removeAt(index: Int): Char {
         checkIndex(index)
         val old = data[index]
-        
-        // 优化：当移除最后一个元素时，不需要复制数组
-        if (index != size - 1) {
-            data.copyInto(data, index, index + 1, size)
+        if (order) {
+            // 优化：当移除最后一个元素时，不需要复制数组
+            if (index != size - 1) {
+                data.copyInto(data, index, index + 1, size)
+            }
+            data[size - 1] = '\u0000'
+        } else {
+            data[index] = data[size - 1]
+            data[size - 1] = '\u0000'
         }
-        data[size - 1] = '\u0000'
         size--
         return old
     }

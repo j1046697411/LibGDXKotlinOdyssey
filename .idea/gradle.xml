@@ -9,20 +9,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/lko-gdx-libs/lko-gdx-render" />
-            <option value="$PROJECT_DIR$/lko-gdx-libs/lko-gdx-shader" />
-            <option value="$PROJECT_DIR$/lko-gdx-libs/lko-gdx-template" />
-            <option value="$PROJECT_DIR$/lko-gdx-libs/lko-gdx-ui" />
-            <option value="$PROJECT_DIR$/lko-graph-libs/lko-graph" />
-            <option value="$PROJECT_DIR$/lko-graph-libs/lko-graph-common" />
-            <option value="$PROJECT_DIR$/lko-graph-libs/lko-graph-shader" />
             <option value="$PROJECT_DIR$/lko-libs/lko-datastructure" />
             <option value="$PROJECT_DIR$/lko-libs/lko-di" />
-            <option value="$PROJECT_DIR$/lko-libs/lko-ecs" />
-            <option value="$PROJECT_DIR$/lko-libs/lko-ecs-ui" />
-            <option value="$PROJECT_DIR$/lko-libs/lko-ecs2" />
-            <option value="$PROJECT_DIR$/lko-libs/lko-shader" />
-            <option value="$PROJECT_DIR$/tests/lko-gdx-test" />
+            <option value="$PROJECT_DIR$/lko-libs/lko-ecs4" />
           </set>
         </option>
       </GradleProjectSettings>
