@@ -239,7 +239,7 @@ inline fun Long.without(bits: Long): Long = this and bits.inv()
 inline fun Long.with(bits: Long): Long = this or bits
 
 inline val Long.high: Int get() = (this ushr 32).toInt()
-inline val Long.low: Int get() = this.toInt()
+inline val Long.low: Int get() = (this and 0xffffffff).toInt()
 
 inline fun Long.Companion.fromLowHigh(low: Int, high: Int): Long {
     return (low.toLong() and 0xFFFFFFFFL) or (high.toLong() shl 32)

@@ -1,0 +1,42 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
+package cn.jzl.ecs
+
+abstract class EntityRelationContext(val world: World) {
+
+    @PublishedApi
+    internal val componentService: ComponentService get() = world.componentService
+
+    inline val Entity.entityType: EntityType get() = world.entityService.runOn(this) { entityType }
+
+    inline fun <reified C> component(): Relation = world.componentService.component<C>()
+    inline fun relation(kind: ComponentId, target: Entity): Relation = Relation(kind, target)
+    inline fun <reified K> relation(target: Entity): Relation = relation(componentService.id<K>(), target)
+    inline fun <reified K, reified T> relation(): Relation = relation(componentService.id<K>(), componentService.id<T>())
+
+    inline operator fun Entity.contains(relation: Relation): Boolean = world.relationService.hasRelation(this, relation)
+    inline fun <reified C> Entity.hasComponent(): Boolean = world.relationService.hasRelation(this, component<C>())
+    inline fun <reified T> Entity.hasTag(): Boolean = hasComponent<T>()
+
+    inline fun Entity.hasRelation(relation: Relation): Boolean = relation in this
+    inline fun <reified K> Entity.hasRelation(target: Entity): Boolean = hasRelation(relation<K>(target))
+    inline fun <reified K, reified T> Entity.hasRelation(): Boolean = hasRelation(relation<K, T>())
+
+    inline fun <reified C> Entity.getComponent(): C {
+        return world.relationService.getRelation(this, component<C>()) as C
+    }
+
+    inline fun <reified K> Entity.getRelation(target: Entity): K {
+        return world.relationService.getRelation(this, relation<K>(target)) as K
+    }
+
+    inline fun <reified K, reified T> Entity.getRelation(): K {
+        return world.relationService.getRelation(this, relation<K, T>()) as K
+    }
+
+    inline val Entity.children: Sequence<Entity>
+        get() = sequence {
+            val family = world.familyService.family { relation(componentService.components.childOf, this@children) }
+            family.archetypes.forEach { archetype -> yieldAll(archetype.table.entities) }
+        }
+}
