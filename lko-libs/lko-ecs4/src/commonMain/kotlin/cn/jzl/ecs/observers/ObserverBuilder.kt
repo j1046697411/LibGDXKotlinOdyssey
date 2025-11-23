@@ -10,4 +10,15 @@ data class ObserverBuilder<Context>(
     val matchQueries: List<Query<out QueriedEntity>>
 ) : ExecutableObserver<Context> {
     override fun filter(vararg query: Query<out QueriedEntity>): ExecutableObserver<Context> = copy(matchQueries = matchQueries + query)
+
+    override fun exec(handle: Context.() -> Unit): Observer {
+        val observer = Observer(
+            matchQueries,
+            involvedComponents,
+            events.listenToEvents,
+            events.mustHoldData
+        ) { entity, event, involved -> events.provideContext(entity, event).handle() }
+        events.onBuild(observer)
+        return observer
+    }
 }

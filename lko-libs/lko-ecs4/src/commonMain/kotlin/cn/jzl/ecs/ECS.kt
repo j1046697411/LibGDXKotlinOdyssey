@@ -4,11 +4,7 @@ package cn.jzl.ecs
 
 import cn.jzl.datastructure.BitSet
 import cn.jzl.datastructure.list.LongFastList
-import cn.jzl.di.DI
-import cn.jzl.di.DIMainBuilder
-import cn.jzl.di.instance
-import cn.jzl.di.new
-import cn.jzl.di.singleton
+import cn.jzl.di.*
 import cn.jzl.ecs.observers.ObserveService
 import cn.jzl.ecs.query.QueryService
 
@@ -16,7 +12,7 @@ typealias ComponentId = Entity
 
 inline fun <reified C> ComponentProvider.id(): ComponentId = getOrRegisterEntityForClass(C::class)
 
-inline fun <reified C : Any> ComponentProvider.configure(configuration: ComponentConfigureContext.(ComponentId) -> Unit): ComponentId {
+inline fun <reified C> ComponentProvider.configure(configuration: ComponentConfigureContext.(ComponentId) -> Unit): ComponentId {
     val componentEntity = getOrRegisterEntityForClass(C::class)
     world.entityService.configure(componentEntity) {
         val componentConfigureContext = ComponentConfigureContext(this)
@@ -24,8 +20,6 @@ inline fun <reified C : Any> ComponentProvider.configure(configuration: Componen
     }
     return componentEntity
 }
-
-
 
 
 private inline fun composite(
@@ -169,6 +163,22 @@ fun FamilyMatcher.FamilyBuilder.kind(kind: ComponentId) {
 inline fun World.entity(entity: Entity, configuration: EntityUpdateContext.(Entity) -> Unit) = entityService.configure(entity, configuration)
 inline fun World.entity(entityId: Int, configuration: EntityCreateContext.(Entity) -> Unit): Entity = entityService.create(entityId, configuration)
 inline fun World.entity(configuration: EntityCreateContext.(Entity) -> Unit): Entity = entityService.create(configuration)
+
+inline fun World.childOf(entity: Entity, configuration: EntityCreateContext.(Entity) -> Unit): Entity = entity {
+    configuration(it)
+    it.addRelation(componentService.components.childOf, entity)
+}
+
+inline fun World.childOf(entity: Entity, entityId: Int, configuration: EntityCreateContext.(Entity) -> Unit): Entity = entity(entityId) {
+    configuration(it)
+    it.addRelation(componentService.components.childOf, entity)
+}
+
+inline fun <reified C> World.componentId(): ComponentId = componentService.id<C>()
+inline fun <reified C> World.component(): Relation = componentService.component<C>()
+inline fun <reified C> World.componentId(configuration: ComponentConfigureContext.(ComponentId) -> Unit): ComponentId {
+    return componentService.configure<C>(configuration)
+}
 
 fun world(configuration: DIMainBuilder.() -> Unit): World {
     val di = DI {

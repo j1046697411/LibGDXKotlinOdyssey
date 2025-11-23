@@ -4,50 +4,16 @@ import cn.jzl.ecs.*
 import cn.jzl.ecs.query.Query
 import cn.jzl.ecs.query.ShorthandQuery
 
-inline fun <reified Context> ObserverBuilder<Context>.exec(noinline handle: Context.() -> Unit): Observer {
-    val observer = Observer(
-        queries = matchQueries,
-        involvedComponents = involvedComponents,
-        listenToEvents = events.listenToEvents,
-        mustHoldData = events.mustHoldData,
-        handle = { entity, event, _ -> events.provideContext(entity, event).handle() }
-    )
-    events.onBuild(observer)
-    return observer
-}
-
-inline fun <reified Context, reified E : ShorthandQuery> ObserverBuilder<Context>.exec(query: Query<E>, noinline handle: Context.(E) -> Unit): Observer {
-    val queries = matchQueries.toMutableList()
-    queries.add(query)
-    val observer = Observer(
-        queries = queries,
-        involvedComponents = involvedComponents,
-        listenToEvents = events.listenToEvents,
-        mustHoldData = events.mustHoldData,
-        handle = { entity, _, _ -> events.provideContext(entity, null).handle(query.entity) }
-    )
-    events.onBuild(observer)
-    return observer
-}
+inline fun <reified Context, reified E : ShorthandQuery> ObserverBuilder<Context>.exec(
+    query: Query<E>,
+    noinline handle: Context.(E) -> Unit
+): Observer = filter(query).exec { handle(query.entity) }
 
 inline fun <reified Context, reified E1 : ShorthandQuery, reified E2 : ShorthandQuery> ObserverBuilder<Context>.exec(
     query1: Query<E1>,
     query2: Query<E2>,
     noinline handle: Context.(E1, E2) -> Unit
-): Observer {
-    val queries = matchQueries.toMutableList()
-    queries.add(query1)
-    queries.add(query2)
-    val observer = Observer(
-        queries = queries,
-        involvedComponents = involvedComponents,
-        listenToEvents = events.listenToEvents,
-        mustHoldData = events.mustHoldData,
-        handle = { entity, _, _ -> events.provideContext(entity, null).handle(query1.entity, query2.entity) }
-    )
-    events.onBuild(observer)
-    return observer
-}
+): Observer = filter(query1, query2).exec { handle(query1.entity, query2.entity) }
 
 inline fun <reified E> World.observe(): ObserverEventsBuilder<ObserverContext> = observe {
     yield(componentService.id<E>())
@@ -80,13 +46,10 @@ inline fun <reified E> World.observeWithData(entity: Entity, noinline configure:
 }
 
 @PublishedApi
-internal fun World.attachObserver(entity: Entity, observer: Observer) {
-    entity {
-        it.addRelation<Observer>(entity, observer)
-        observer.listenToEvents.forEach { eventId ->
-            it.addRelation(observeService.eventOf, eventId)
-        }
-        it.addRelation(componentService.components.childOf, entity)
+internal fun World.attachObserver(entity: Entity, observer: Observer): Entity = childOf(entity) {
+    it.addRelation<Observer>(entity, observer)
+    observer.listenToEvents.forEach { eventId ->
+        it.addRelation(observeService.eventOf, eventId)
     }
 }
 

@@ -12,13 +12,15 @@ abstract class ObserverEventsBuilder<Context> : ExecutableObserver<Context> {
     abstract val world: World
     abstract val listenToEvents: Sequence<ComponentId>
     abstract val mustHoldData: Boolean
-    abstract val onBuild: (Observer) -> Unit
+    abstract val onBuild: (Observer) -> Entity
 
     abstract fun provideContext(entity: Entity, event: Any?): Context
 
     override fun filter(vararg query: Query<out QueriedEntity>): ObserverBuilder<Context> {
         return ObserverBuilder(this, EntityType.Companion.ENTITY_TYPE_EMPTY, query.toList())
     }
+
+    override fun exec(handle: Context.() -> Unit): Observer = filter().exec(handle)
 
     inline fun <reified C : Any> involving(size1: QueryShorthands.Size1? = null): ObserverBuilder<Context> {
         val component = world.componentService.component<C>()

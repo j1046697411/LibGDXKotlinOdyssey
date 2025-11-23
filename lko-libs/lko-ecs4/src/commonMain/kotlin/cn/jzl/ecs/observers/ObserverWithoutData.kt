@@ -7,7 +7,7 @@ import cn.jzl.ecs.World
 data class ObserverWithoutData(
     override val world: World,
     override val listenToEvents: Sequence<ComponentId>,
-    override val onBuild: (Observer) -> Unit
+    override val onBuild: (Observer) -> Entity
 ) : ObserverEventsBuilder<ObserverContext>() {
 
     override val mustHoldData: Boolean get() = false
