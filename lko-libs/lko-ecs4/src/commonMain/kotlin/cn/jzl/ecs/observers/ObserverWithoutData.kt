@@ -2,6 +2,7 @@ package cn.jzl.ecs.observers
 
 import cn.jzl.ecs.ComponentId
 import cn.jzl.ecs.Entity
+import cn.jzl.ecs.Relation
 import cn.jzl.ecs.World
 
 data class ObserverWithoutData(
@@ -15,11 +16,12 @@ data class ObserverWithoutData(
     private val observerContext = object : ObserverContext {
         override val world: World get() = this@ObserverWithoutData.world
         override var entity: Entity = Entity.Companion.ENTITY_INVALID
+        override var involvedRelation: Relation = world.observeService.notInvolvedRelation
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun provideContext(entity: Entity, event: Any?): ObserverContext {
+    override fun provideContext(entity: Entity, event: Any?, involvedRelation: Relation): ObserverContext {
         observerContext.entity = entity
+        observerContext.involvedRelation = involvedRelation
         return observerContext
     }
 }

@@ -20,12 +20,14 @@ data class Archetype(
     operator fun contains(relation: Relation): Boolean = entityType.indexOf(relation) >= 0
 
     operator fun plus(relation: Relation): Archetype {
+        if (relation in this) return this
         return componentAddEdges.getOrPut(relation) {
             archetypeProvider.getArchetype(entityType + relation)
         }
     }
 
     operator fun minus(relation: Relation): Archetype {
+        if (relation !in this) return this
         return componentRemoveEdges.getOrPut(relation) {
             archetypeProvider.getArchetype(entityType - relation)
         }

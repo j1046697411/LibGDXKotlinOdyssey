@@ -53,10 +53,10 @@ internal fun World.attachObserver(entity: Entity, observer: Observer): Entity = 
     }
 }
 
-inline fun <reified E> World.emit(entity: Entity, event: E, involvedRelation: Relation = observeService.noComponent) {
+inline fun <reified E> World.emit(entity: Entity, event: E, involvedRelation: Relation = observeService.notInvolvedRelation) {
     observeService.dispatch(entity, componentService.id<E>(), event, involvedRelation)
 }
 
-inline fun <reified E> World.emit(entity: Entity, involvedRelation: Relation = observeService.noComponent) {
+inline fun <reified E> World.emit(entity: Entity, involvedRelation: Relation = observeService.notInvolvedRelation) {
     observeService.dispatch(entity, componentService.id<E>(), null, involvedRelation)
 }

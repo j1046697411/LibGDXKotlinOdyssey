@@ -21,7 +21,7 @@ internal class ObserveService(private val world: World) {
     val observerId: ComponentId = world.componentService.id<Observer>()
     val eventOf: ComponentId = world.componentService.configure<Components.EventOf> { it.tag() }
 
-    val noComponent = Relation(world.componentService.components.any, world.componentService.components.any)
+    val notInvolvedRelation = Relation(world.componentService.components.any, world.componentService.components.any)
 
     private fun getQuery(target: Entity, eventId: ComponentId): Query<ObserveEntity> {
         return queries.getOrPut(Relation(target, eventId)) {
@@ -38,7 +38,7 @@ internal class ObserveService(private val world: World) {
 
     private fun Observer.handle(entity: Entity, event: Any?, involved: Relation) {
         if (mustHoldData && event == null) return
-        if (involved != noComponent && involved !in involvedComponents) return
+        if (involved != notInvolvedRelation && involvedRelations.isNotEmpty() && involved !in involvedRelations) return
         if (queries.isNotEmpty()) {
             world.entityService.runOn(entity) {
                 if (queries.all { query -> this in query }) {

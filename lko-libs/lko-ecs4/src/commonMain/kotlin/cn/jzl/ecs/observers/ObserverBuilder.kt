@@ -17,7 +17,7 @@ data class ObserverBuilder<Context>(
             involvedComponents,
             events.listenToEvents,
             events.mustHoldData
-        ) { entity, event, involved -> events.provideContext(entity, event).handle() }
+        ) { entity, event, involved -> events.provideContext(entity, event, involved).handle() }
         events.onBuild(observer)
         return observer
     }

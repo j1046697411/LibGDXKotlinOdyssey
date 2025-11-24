@@ -10,6 +10,8 @@ value class Relation @PublishedApi internal constructor(@PublishedApi internal v
     val kind: ComponentId get() = Entity(data.low)
     val target: Entity get() = Entity(data.high)
 
+    operator fun compareTo(other: Relation): Int = data.compareTo(other.data)
+
     override fun toString(): String = "Relation(kind = $kind, target = $target)"
 
     companion object {

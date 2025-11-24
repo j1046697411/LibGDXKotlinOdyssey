@@ -16,6 +16,10 @@ data class EntityType @PublishedApi internal constructor(@PublishedApi internal 
         return Relation(data[index])
     }
 
+    fun getOrNull(index: Int): Relation? {
+        return data.getOrNull(index)?.let { Relation(it) }
+    }
+
     operator fun plus(relation: Relation): EntityType = EntityType(data + relation.data)
     operator fun minus(relation: Relation): EntityType = EntityType(data.filter { it != relation.data }.toLongArray())
 

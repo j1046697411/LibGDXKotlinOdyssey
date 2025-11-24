@@ -7,7 +7,7 @@ import cn.jzl.ecs.query.Query
 
 data class Observer(
     val queries: List<Query<out QueriedEntity>>,
-    val involvedComponents: EntityType,
+    val involvedRelations: EntityType,
     val listenToEvents: Sequence<Entity>,
     val mustHoldData: Boolean = false,
     val handle: ObserverHandle
