@@ -11,20 +11,25 @@ abstract class QueriedEntity(val world: World) : AccessorOperations() {
     private var archetype: Archetype = world.archetypeService.rootArchetype
 
     @PublishedApi
+    internal val batchEntityEditor = BatchEntityEditor(world, Entity.ENTITY_INVALID)
+
+    @PublishedApi
     internal var entityIndex: Int = -1
 
     val entity: Entity get() = archetype.table.entities[entityIndex]
     val entityType: EntityType get() = archetype.entityType
 
     fun build(): Family = world.familyService.family {
-        val families = mutableListOf<OneFamilyMatching>()
+        val families = mutableListOf<FamilyMatching>()
         accessors.asSequence().filterIsInstance<FamilyMatching>()
             .forEach {
-                if (it !is OneFamilyMatching) {
+                if (!it.isMarkedNullable) {
                     it.run { matching() }
                     return@forEach
                 }
-                families.add(it)
+                if (it.optionalGroup == OptionalGroup.One) {
+                    families.add(it)
+                }
             }
         if (families.isNotEmpty()) or { families.forEach { it.run { matching() } } }
         configure()

@@ -8,6 +8,7 @@ import cn.jzl.ecs.Relation
 import cn.jzl.ecs.World
 import cn.jzl.ecs.configure
 import cn.jzl.ecs.id
+import cn.jzl.ecs.query.OptionalGroup
 import cn.jzl.ecs.query.QueriedEntity
 import cn.jzl.ecs.query.Query
 import cn.jzl.ecs.query.query
@@ -45,6 +46,7 @@ internal class ObserveService(private val world: World) {
                     queries.forEach { query ->
                         query.entity.updateCache(this)
                         query.entity.entityIndex = it
+                        query.entity.batchEntityEditor.entity = entity
                     }
                     handle.handle(entity, event, involved)
                 }
@@ -55,8 +57,8 @@ internal class ObserveService(private val world: World) {
     }
 
     private class ObserveEntity(world: World, target: Entity, private val eventId: ComponentId) : QueriedEntity(world) {
-        val targetObserver: Observer? by oneRelationOrNull(target) { null }
-        val globalObserver: Observer? by oneRelationOrNull(world.observeService.observerId) { null }
+        val targetObserver: Observer? by relation<Observer?>(world.observeService.observerId, OptionalGroup.One)
+        val globalObserver: Observer? by relation(world.observeService.observerId, OptionalGroup.One)
         override fun FamilyMatcher.FamilyBuilder.configure() {
             relation(world.observeService.eventOf, eventId)
         }

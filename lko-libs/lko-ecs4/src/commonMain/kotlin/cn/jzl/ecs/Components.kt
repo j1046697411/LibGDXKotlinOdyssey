@@ -8,10 +8,13 @@ internal class Components(componentProvider: ComponentProvider) {
     val childOf: ComponentId = componentProvider.configure<ChildOf> { it.tag() }
 
     val componentId: ComponentId = componentProvider.id<ComponentOf>()
+    val shadedId: ComponentId = componentProvider.id<ShadedOf>()
 
     val onInserted: ComponentId = componentProvider.id<OnInserted>()
     val onRemoved: ComponentId = componentProvider.id<OnRemoved>()
     val onUpdated: ComponentId = componentProvider.id<OnUpdated>()
+
+    sealed class ShadedOf
 
     sealed class ComponentOf
     sealed class ChildOf

@@ -1,20 +1,31 @@
 package cn.jzl.ecs.query
 
+import cn.jzl.ecs.Archetype
 import cn.jzl.ecs.Relation
 import kotlin.reflect.KProperty
+import kotlin.reflect.KType
 
-class RelationAccessor<T : Any>(relation: Relation) : AbstractCachedAccessor(relation), ReadWriteAccessor<T> {
+
+class RelationAccessor<T>(
+    type: KType,
+    relation: Relation,
+    optionalGroup: OptionalGroup,
+    provider: Archetype.(Relation) -> Int,
+) : AbstractCachedAccessor(type, relation, optionalGroup, provider), ReadWriteAccessor<T> {
 
     @Suppress("UNCHECKED_CAST")
     override fun getValue(thisRef: QueriedEntity, property: KProperty<*>): T {
-        check(componentIndex != -1) { "Component index is not set" }
+        if (isMarkedNullable && componentIndex == -1) return null as T
+        check(componentIndex != -1) { "Component index is not set $componentIndex $relation ${archetype?.entityType}" }
         val archetype = requireNotNull(this.archetype) { "Archetype is null" }
-        return archetype.table[thisRef.entityIndex, componentIndex] as T
+        return thisRef.world.relationService.getRelation(archetype, relation, thisRef.entityIndex, componentIndex) as T
     }
 
     override fun setValue(thisRef: QueriedEntity, property: KProperty<*>, value: T) {
-        check(componentIndex != -1) { "Component index is not set" }
-        val archetype = requireNotNull(this.archetype) { "Archetype is null" }
-        archetype.table[thisRef.entityIndex, componentIndex] = value
+        if (value != null) {
+            thisRef.batchEntityEditor.addRelation(thisRef.entity, relation, value)
+        } else {
+            thisRef.batchEntityEditor.removeRelation(thisRef.entity, relation)
+        }
     }
 }

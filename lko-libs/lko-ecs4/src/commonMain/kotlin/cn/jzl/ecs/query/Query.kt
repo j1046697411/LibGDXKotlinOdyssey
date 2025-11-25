@@ -20,6 +20,7 @@ class Query<E : QueriedEntity>(val entity: E) : Sequence<E> {
             entity.updateCache(archetype)
             for (entityIndex in 0 until archetype.table.entities.size) {
                 entity.entityIndex = entityIndex
+                entity.batchEntityEditor.entity = entity.entity
                 yield(entity)
                 check(entityIndex == entity.entityIndex)
             }

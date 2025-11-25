@@ -30,4 +30,7 @@ class World(@PublishedApi internal val di: DI) {
 
     @PublishedApi
     internal val observeService by di.instance<ObserveService>()
+
+    @PublishedApi
+    internal val shadedComponentService by di.instance<ShadedComponentService>()
 }

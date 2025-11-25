@@ -23,7 +23,7 @@ class EntityService(@PublishedApi internal val world: World) {
     ): Entity = postCreate(world.entityStore.create(entityId), configuration)
 
     inline fun configure(entity: Entity, configuration: EntityUpdateContext.(Entity) -> Unit) {
-        val batchEntityEditor = BatchEntityEditor(entity)
+        val batchEntityEditor = BatchEntityEditor(world, entity)
         val entityCreateContext = EntityUpdateContext(world, batchEntityEditor)
         entityCreateContext.configuration(entity)
         batchEntityEditor.apply(world)
@@ -34,7 +34,7 @@ class EntityService(@PublishedApi internal val world: World) {
         val rootArchetype = world.archetypeService.rootArchetype
         val entityIndex = rootArchetype.table.insert(entity) { }
         updateEntityRecord(entity, rootArchetype, entityIndex)
-        val entityEditor = BatchEntityEditor(entity)
+        val entityEditor = BatchEntityEditor(world, entity)
         val entityUpdateContext = EntityUpdateContext(world, entityEditor)
         entityUpdateContext.configuration(entity)
         entityEditor.apply(world)

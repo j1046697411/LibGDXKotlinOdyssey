@@ -13,8 +13,17 @@ value class RelationService(private val world: World) {
     }
 
     fun getRelation(entity: Entity, relation: Relation): Any? = entityService.runOn(entity) { entityIndex ->
-        val componentIndex = table.entityType.indexOf(relation)
-        if (componentIndex != -1) table[entityIndex, componentIndex] else null
+        val componentIndex = table.entityType.indexOf(relation).takeIf { it != -1 } ?: return@runOn null
+        return@runOn getRelation(this, relation, entityIndex, componentIndex)
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    internal inline fun getRelation(archetype: Archetype, relation: Relation, entityIndex: Int, componentIndex: Int): Any? {
+        return if (world.componentService.isShadedComponent(relation)) {
+            world.shadedComponentService[relation]
+        } else {
+            archetype.table[entityIndex, componentIndex]
+        }
     }
 
     @PublishedApi
