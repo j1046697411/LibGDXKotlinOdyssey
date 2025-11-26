@@ -5,7 +5,10 @@ internal class Components(componentProvider: ComponentProvider) {
 
     val any: ComponentId = componentProvider.id<Any>()
 
-    val childOf: ComponentId = componentProvider.configure<ChildOf> { it.tag() }
+    val childOf: ComponentId = componentProvider.configure<ChildOf> {
+        it.tag()
+        it.singleRelation()
+    }
 
     val componentId: ComponentId = componentProvider.id<ComponentOf>()
     val shadedId: ComponentId = componentProvider.id<ShadedOf>()

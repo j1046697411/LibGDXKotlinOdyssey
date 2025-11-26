@@ -8,4 +8,8 @@ value class ComponentConfigureContext(private val entityCreateContext: EntityCre
     fun Entity.tag(): Unit = with(entityCreateContext) {
         world.componentService.entityTags.set(id)
     }
+
+    fun Entity.singleRelation(): Unit = with(entityCreateContext) {
+        world.componentService.singleRelationBits.set(id)
+    }
 }

@@ -2,6 +2,7 @@ package cn.jzl.datastructure
 
 import cn.jzl.datastructure.list.LongFastList
 import kotlin.jvm.JvmInline
+import kotlin.math.max
 
 @JvmInline
 value class BitSet(val data: LongFastList) : Sequence<Int> {
@@ -133,6 +134,13 @@ value class BitSet(val data: LongFastList) : Sequence<Int> {
         ensureCapacity(other.data.size)
         for (i in 0 until other.data.size) {
             data[i] = data[i] xor other.data[i]
+        }
+    }
+
+    fun andNot(other: BitSet) {
+        ensureCapacity(max(data.size, other.data.size))
+        for (i in 0 until data.size) {
+            data[i] = data[i] and (other.data.getOrNull(i)?.inv() ?: -1L)
         }
     }
 

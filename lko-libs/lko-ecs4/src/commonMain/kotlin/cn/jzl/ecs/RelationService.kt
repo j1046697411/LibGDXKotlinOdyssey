@@ -1,7 +1,11 @@
 package cn.jzl.ecs
 
 import cn.jzl.datastructure.list.SortSet
+import cn.jzl.ecs.query.QueriedEntity
+import cn.jzl.ecs.query.Query
+import cn.jzl.ecs.query.query
 import kotlin.jvm.JvmInline
+
 @JvmInline
 value class RelationService(private val world: World) {
 
@@ -23,6 +27,24 @@ value class RelationService(private val world: World) {
             world.shadedComponentService[relation]
         } else {
             archetype.table[entityIndex, componentIndex]
+        }
+    }
+
+    @PublishedApi
+    internal fun getRelationUp(entity: Entity, kind: Entity): Entity? = entityService.runOn(entity) { entityIndex ->
+        check(world.componentService.isShadedComponent(Relation(kind, entity)))
+        return@runOn entityType.filter { relation -> relation.kind == kind }.firstOrNull()?.target
+    }
+
+    @PublishedApi
+    internal fun getRelationDown(entity: Entity, kind: Entity): Query<QueriedEntity> {
+        val relation = Relation(kind, entity)
+        return world.query {
+            object : QueriedEntity(this) {
+                override fun FamilyMatcher.FamilyBuilder.configure() {
+                    relation(relation)
+                }
+            }
         }
     }
 

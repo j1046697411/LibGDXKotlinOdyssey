@@ -2,6 +2,9 @@
 
 package cn.jzl.ecs
 
+import cn.jzl.ecs.query.QueriedEntity
+import cn.jzl.ecs.query.Query
+
 abstract class EntityRelationContext(val world: World) {
 
     @PublishedApi
@@ -10,6 +13,7 @@ abstract class EntityRelationContext(val world: World) {
     inline val Entity.entityType: EntityType get() = world.entityService.runOn(this) { entityType }
 
     inline fun <reified C> component(): Relation = world.componentService.component<C>()
+    inline fun <reified C> sharedComponent(): Relation = relation<C>(componentService.components.shadedId)
     inline fun relation(kind: ComponentId, target: Entity): Relation = Relation(kind, target)
     inline fun <reified K> relation(target: Entity): Relation = relation(componentService.id<K>(), target)
     inline fun <reified K, reified T> relation(): Relation = relation(componentService.id<K>(), componentService.id<T>())
@@ -26,6 +30,10 @@ abstract class EntityRelationContext(val world: World) {
         return world.relationService.getRelation(this, component<C>()) as C
     }
 
+    inline fun <reified C> Entity.getSharedComponent(): C {
+        return world.relationService.getRelation(this, sharedComponent<C>()) as C
+    }
+
     inline fun <reified K> Entity.getRelation(target: Entity): K {
         return world.relationService.getRelation(this, relation<K>(target)) as K
     }
@@ -34,9 +42,15 @@ abstract class EntityRelationContext(val world: World) {
         return world.relationService.getRelation(this, relation<K, T>()) as K
     }
 
-    inline val Entity.children: Sequence<Entity>
-        get() = sequence {
-            val family = world.familyService.family { relation(componentService.components.childOf, this@children) }
-            family.archetypes.forEach { archetype -> yieldAll(archetype.table.entities) }
-        }
+    inline fun <reified K> Entity.getRelationUp(): Entity? {
+        return world.relationService.getRelationUp(this, world.componentId<K>())
+    }
+
+    inline fun <reified K> Entity.getRelationDown(): Query<QueriedEntity> {
+        return world.relationService.getRelationDown(this, world.componentId<K>())
+    }
+
+    inline val Entity.children: Query<QueriedEntity> get() = getRelationDown<Components.ChildOf>()
+
+    inline val Entity.parent: Entity? get() = getRelationUp<Components.ChildOf>()
 }

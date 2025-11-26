@@ -4,6 +4,7 @@ package cn.jzl.ecs
 
 import cn.jzl.datastructure.BitSet
 import cn.jzl.datastructure.list.LongFastList
+import cn.jzl.datastructure.list.ObjectFastList
 import cn.jzl.di.*
 import cn.jzl.ecs.observers.ObserveService
 import cn.jzl.ecs.query.QueryService
@@ -80,19 +81,60 @@ fun or(world: World, keys: LongFastList, block: FamilyMatcher.FamilyBuilder.() -
 
 fun xor(world: World, keys: LongFastList, block: FamilyMatcher.FamilyBuilder.() -> Unit): FamilyMatcher {
     val result = BitSet()
+    val temp = BitSet(0)
+    val m2 = BitSet()
+    val allArchetypeResults = ObjectFastList<BitSet>()
+
     return composite(world, keys, 2, block) { familyMatchers ->
         object : FamilyMatcher {
-            override fun match(archetype: Archetype): Boolean = familyMatchers.none { it.match(archetype) }
+            override fun match(archetype: Archetype): Boolean =
+                familyMatchers.count { it.match(archetype) } == 1
 
             override fun FamilyMatcher.FamilyMatchScope.getArchetypeBits(): BitSet {
                 result.clear()
-                familyMatchers.fold(result) { acc, familyMatcher ->
-                    val bits = familyMatcher.run { getArchetypeBits() }
-                    acc.or(bits)
-                    acc
+                when (familyMatchers.size) {
+                    0 -> return result
+                    1 -> return familyMatchers.single().run { getArchetypeBits() }
+                    2 -> {
+                        // 两个匹配器的特殊情况 - 使用原生 XOR 操作
+                        val first = familyMatchers.component1().run { getArchetypeBits() }
+                        val second = familyMatchers.component2().run { getArchetypeBits() }
+                        result.or(first)
+                        result.xor(second)
+                        return result
+                    }
+                    else -> {
+                        // 多个匹配器的通用情况
+                        allArchetypeResults.clear()
+
+                        // 保持您的高性能批量插入操作
+                        allArchetypeResults.safeInsertLast(familyMatchers.size) {
+                            familyMatchers.forEach { unsafeInsert(it.run { getArchetypeBits() }) }
+                        }
+
+                        // 计算所有位的 OR (至少在一个匹配器中存在的位)
+                        for (i in 0 until allArchetypeResults.size) {
+                            result.or(allArchetypeResults[i])
+                        }
+
+                        // 计算 M2 (在至少两个匹配器中存在的位)
+                        m2.clear()
+                        for (i in 0 until allArchetypeResults.size) {
+                            val first = allArchetypeResults[i]
+                            for (j in i + 1 until allArchetypeResults.size) {
+                                val second = allArchetypeResults[j]
+                                temp.clear()
+                                temp.or(first)
+                                temp.and(second)
+                                m2.or(temp)
+                            }
+                        }
+
+                        // 最终结果: OR_all AND NOT M2
+                        result.andNot(m2)
+                        return result
+                    }
                 }
-                result.xor(allArchetypeBits)
-                return result
             }
         }
     }
