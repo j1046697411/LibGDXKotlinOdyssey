@@ -13,7 +13,7 @@ abstract class AccessorOperations {
     @PublishedApi
     internal val cachingAccessors = mutableSetOf<CachedAccessor>()
 
-    inline fun <reified K> QueriedEntity.relation(
+    inline fun <reified K> QueryEntityContext.relation(
         target: Entity,
         group: OptionalGroup = OptionalGroup.Ignore
     ): RelationAccessor<K> = addAccessor {
@@ -25,11 +25,11 @@ abstract class AccessorOperations {
         }
     }
 
-    inline fun <reified K, reified T> QueriedEntity.relation(
+    inline fun <reified K, reified T> QueryEntityContext.relation(
         group: OptionalGroup = OptionalGroup.Ignore
     ): RelationAccessor<K> = relation(world.componentService.id<T>(), group)
 
-    inline fun <reified C> QueriedEntity.component(
+    inline fun <reified C> QueryEntityContext.component(
         group: OptionalGroup = OptionalGroup.Ignore
     ): RelationAccessor<C> = relation(world.componentService.components.componentId, group)
 

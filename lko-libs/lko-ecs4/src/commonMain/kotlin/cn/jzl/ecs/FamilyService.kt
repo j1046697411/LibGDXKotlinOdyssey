@@ -6,10 +6,10 @@ import cn.jzl.datastructure.list.LongFastList
 class FamilyService(private val world: World) : FamilyMatcher.FamilyMatchScope {
 
     private val componentMap = mutableMapOf<Relation, BitSet>()
-    override val allArchetypeBits: BitSet = BitSet.Companion()
+    override val allArchetypeBits: BitSet = BitSet()
 
     private val families = mutableMapOf<String, Family>()
-    private val emptyBits = BitSet.Companion()
+    private val emptyBits = BitSet()
 
     private inline val componentService: ComponentService get() = world.componentService
     private inline val archetypeService: ArchetypeService get() = world.archetypeService

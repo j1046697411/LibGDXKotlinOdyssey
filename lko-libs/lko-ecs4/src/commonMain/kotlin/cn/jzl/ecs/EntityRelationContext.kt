@@ -2,7 +2,7 @@
 
 package cn.jzl.ecs
 
-import cn.jzl.ecs.query.QueriedEntity
+import cn.jzl.ecs.query.QueryEntityContext
 import cn.jzl.ecs.query.Query
 
 abstract class EntityRelationContext(val world: World) {
@@ -46,11 +46,11 @@ abstract class EntityRelationContext(val world: World) {
         return world.relationService.getRelationUp(this, world.componentId<K>())
     }
 
-    inline fun <reified K> Entity.getRelationDown(): Query<QueriedEntity> {
+    inline fun <reified K> Entity.getRelationDown(): Query<QueryEntityContext> {
         return world.relationService.getRelationDown(this, world.componentId<K>())
     }
 
-    inline val Entity.children: Query<QueriedEntity> get() = getRelationDown<Components.ChildOf>()
+    inline val Entity.children: Query<QueryEntityContext> get() = getRelationDown<Components.ChildOf>()
 
     inline val Entity.parent: Entity? get() = getRelationUp<Components.ChildOf>()
 }

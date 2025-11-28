@@ -3,7 +3,7 @@ package cn.jzl.ecs.query
 import cn.jzl.ecs.*
 import kotlin.reflect.KProperty
 
-abstract class QueriedEntity(val world: World) : AccessorOperations() {
+abstract class QueryEntityContext(val world: World) : AccessorOperations() {
 
     @PublishedApi
     internal val properties = mutableMapOf<String, Accessor>()
@@ -42,13 +42,13 @@ abstract class QueriedEntity(val world: World) : AccessorOperations() {
         accessors.forEach { if (it is CachedAccessor) it.updateCache(archetype) }
     }
 
-    operator fun <A : Accessor> A.provideDelegate(thisRef: QueriedEntity, property: KProperty<*>): A {
+    operator fun <A : Accessor> A.provideDelegate(thisRef: QueryEntityContext, property: KProperty<*>): A {
         properties[property.name] = this
         return this
     }
 }
 
-abstract class ShorthandQuery(world: World) : QueriedEntity(world)
+abstract class ShorthandQuery(world: World) : QueryEntityContext(world)
 abstract class ShorthandQuery1<C>(world: World) : ShorthandQuery(world) {
     abstract val component1: C
     operator fun component1(): C = component1
@@ -79,7 +79,7 @@ abstract class ShorthandQuery6<C1, C2, C3, C4, C5, C6>(world: World) : Shorthand
     operator fun component6(): C6 = component6
 }
 
-inline fun <reified E : QueriedEntity> World.query(factory: World.() -> E): Query<E> = queryService.query(factory)
+inline fun <reified E : QueryEntityContext> World.query(factory: World.() -> E): Query<E> = queryService.query(factory)
 
 inline fun <reified C : Any> World.shorthandQuery(
     size1: QueryShorthands.Size1? = null,

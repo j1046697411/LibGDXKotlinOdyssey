@@ -5,32 +5,36 @@ import cn.jzl.datastructure.math.fromLowHigh
 import cn.jzl.datastructure.math.high
 import cn.jzl.datastructure.math.low
 
-class EntityService(@PublishedApi internal val world: World) {
+@PublishedApi
+internal class EntityService(val world: World) {
 
-    @PublishedApi
-    internal val entityRecords = LongFastList()
+    val entityRecords = LongFastList()
 
     @Suppress("NOTHING_TO_INLINE")
     inline operator fun get(entityId: Int): Entity? = world.entityStore[entityId]
 
     inline fun create(
+        event: Boolean = true,
         configuration: EntityCreateContext.(Entity) -> Unit = {}
-    ): Entity = postCreate(world.entityStore.create(), configuration)
+    ): Entity = postCreate(world.entityStore.create(), event, configuration)
 
     inline fun create(
         entityId: Int,
+        event: Boolean = true,
         configuration: EntityCreateContext.(Entity) -> Unit = {}
-    ): Entity = postCreate(world.entityStore.create(entityId), configuration)
+    ): Entity = postCreate(world.entityStore.create(entityId), event, configuration)
 
-    inline fun configure(entity: Entity, configuration: EntityUpdateContext.(Entity) -> Unit) {
+    inline fun configure(entity: Entity, event: Boolean = true, configuration: EntityUpdateContext.(Entity) -> Unit) {
         val batchEntityEditor = BatchEntityEditor(world, entity)
         val entityCreateContext = EntityUpdateContext(world, batchEntityEditor)
         entityCreateContext.configuration(entity)
         batchEntityEditor.apply(world)
+        if (event) {
+            world.observeService.dispatch(entity, world.components.onEntityUpdated)
+        }
     }
 
-    @PublishedApi
-    internal inline fun postCreate(entity: Entity, configuration: EntityCreateContext.(Entity) -> Unit): Entity = entity.also {
+    inline fun postCreate(entity: Entity, event: Boolean = true, configuration: EntityCreateContext.(Entity) -> Unit): Entity = entity.also {
         val rootArchetype = world.archetypeService.rootArchetype
         val entityIndex = rootArchetype.table.insert(entity) { }
         updateEntityRecord(entity, rootArchetype, entityIndex)
@@ -38,10 +42,31 @@ class EntityService(@PublishedApi internal val world: World) {
         val entityUpdateContext = EntityUpdateContext(world, entityEditor)
         entityUpdateContext.configuration(entity)
         entityEditor.apply(world)
+        if (event) {
+            world.observeService.dispatch(entity, world.components.onEntityCreated)
+        }
     }
 
-    @PublishedApi
-    internal fun updateEntityRecord(entity: Entity, archetype: Archetype, row: Int) {
+    inline fun childOf(
+        parent: Entity,
+        event: Boolean = true,
+        configuration: EntityCreateContext.(Entity) -> Unit
+    ): Entity = create(event) {
+        configuration(it)
+        it.addRelation(world.components.childOf, parent)
+    }
+
+    inline fun childOf(
+        parent: Entity,
+        entityId: Int,
+        event: Boolean = true,
+        configuration: EntityCreateContext.(Entity) -> Unit
+    ): Entity = create(entityId, event) {
+        configuration(it)
+        it.addRelation(world.components.childOf, parent)
+    }
+
+    fun updateEntityRecord(entity: Entity, archetype: Archetype, row: Int) {
         entityRecords.ensureCapacity(entity.id + 1, -1)
         entityRecords[entity.id] = Long.fromLowHigh(archetype.id, row)
     }
@@ -58,6 +83,7 @@ class EntityService(@PublishedApi internal val world: World) {
     }
 
     fun destroy(entity: Entity): Unit = runOn(entity) {
+//        world.observeService.dispatch(entity, world.componentService.components.onEntityDestroyed)
         world.entityStore.destroy(entity)
         updateEntityRecord(entity, world.archetypeService.rootArchetype, -1)
         table.remove(it)

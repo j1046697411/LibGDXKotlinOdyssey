@@ -14,14 +14,14 @@ class RelationAccessor<T>(
 ) : AbstractCachedAccessor(type, relation, optionalGroup, provider), ReadWriteAccessor<T> {
 
     @Suppress("UNCHECKED_CAST")
-    override fun getValue(thisRef: QueriedEntity, property: KProperty<*>): T {
+    override fun getValue(thisRef: QueryEntityContext, property: KProperty<*>): T {
         if (isMarkedNullable && componentIndex == -1) return null as T
         check(componentIndex != -1) { "Component index is not set $componentIndex $relation ${archetype?.entityType}" }
         val archetype = requireNotNull(this.archetype) { "Archetype is null" }
         return thisRef.world.relationService.getRelation(archetype, relation, thisRef.entityIndex, componentIndex) as T
     }
 
-    override fun setValue(thisRef: QueriedEntity, property: KProperty<*>, value: T) {
+    override fun setValue(thisRef: QueryEntityContext, property: KProperty<*>, value: T) {
         if (value != null) {
             thisRef.batchEntityEditor.addRelation(thisRef.entity, relation, value)
         } else {

@@ -1,5 +1,7 @@
 package cn.jzl.ecs
 
+import cn.jzl.ecs.observers.Observer
+
 @PublishedApi
 internal class Components(componentProvider: ComponentProvider) {
 
@@ -17,6 +19,13 @@ internal class Components(componentProvider: ComponentProvider) {
     val onRemoved: ComponentId = componentProvider.id<OnRemoved>()
     val onUpdated: ComponentId = componentProvider.id<OnUpdated>()
 
+    val onEntityCreated: ComponentId = componentProvider.id<OnEntityCreated>()
+    val onEntityUpdated: ComponentId = componentProvider.id<OnEntityUpdated>()
+    val onEntityDestroyed: ComponentId = componentProvider.id<OnEntityDestroyed>()
+
+    val observerId: ComponentId = componentProvider.id<Observer>()
+    val eventId: ComponentId = componentProvider.configure<EventOf> { it.tag() }
+
     sealed class ShadedOf
 
     sealed class ComponentOf
@@ -26,4 +35,8 @@ internal class Components(componentProvider: ComponentProvider) {
     sealed class OnInserted
     sealed class OnRemoved
     sealed class OnUpdated
+
+    sealed class OnEntityCreated
+    sealed class OnEntityUpdated
+    sealed class OnEntityDestroyed
 }

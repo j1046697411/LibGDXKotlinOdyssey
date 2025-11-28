@@ -6,7 +6,7 @@ import cn.jzl.datastructure.list.IntFastList
 class EntityStoreImpl : EntityStore {
 
     private val entities = Entities()
-    private val activeEntities = BitSet.Companion(1024)
+    private val activeEntities = BitSet(1024)
     private val recycledEntityIds = IntFastList(256)
 
     override val size: Int get() = activeEntities.size

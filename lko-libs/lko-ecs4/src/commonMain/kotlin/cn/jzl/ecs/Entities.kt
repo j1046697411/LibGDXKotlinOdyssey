@@ -12,6 +12,8 @@ value class Entities(private val entities: IntFastList = IntFastList()) : Sequen
 
     fun add(entity: Entity): Unit = entities.insertLast(entity.data)
 
+    fun remove(entity: Entity): Boolean = entities.remove(entity.data)
+
     operator fun set(index: Int, entity: Entity) {
         entities[index] = entity.data
     }

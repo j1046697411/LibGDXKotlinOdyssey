@@ -33,4 +33,7 @@ class World(@PublishedApi internal val di: DI) {
 
     @PublishedApi
     internal val shadedComponentService by di.instance<ShadedComponentService>()
+
+    @PublishedApi
+    internal val components: Components get() = componentService.components
 }

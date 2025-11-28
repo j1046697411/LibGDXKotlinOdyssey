@@ -1,7 +1,7 @@
 package cn.jzl.ecs
 
 import cn.jzl.datastructure.list.SortSet
-import cn.jzl.ecs.query.QueriedEntity
+import cn.jzl.ecs.query.QueryEntityContext
 import cn.jzl.ecs.query.Query
 import cn.jzl.ecs.query.query
 import kotlin.jvm.JvmInline
@@ -37,10 +37,10 @@ value class RelationService(private val world: World) {
     }
 
     @PublishedApi
-    internal fun getRelationDown(entity: Entity, kind: Entity): Query<QueriedEntity> {
+    internal fun getRelationDown(entity: Entity, kind: Entity): Query<QueryEntityContext> {
         val relation = Relation(kind, entity)
         return world.query {
-            object : QueriedEntity(this) {
+            object : QueryEntityContext(this) {
                 override fun FamilyMatcher.FamilyBuilder.configure() {
                     relation(relation)
                 }

@@ -9,46 +9,45 @@ import cn.jzl.ecs.World
 import cn.jzl.ecs.configure
 import cn.jzl.ecs.id
 import cn.jzl.ecs.query.OptionalGroup
-import cn.jzl.ecs.query.QueriedEntity
+import cn.jzl.ecs.query.QueryEntityContext
 import cn.jzl.ecs.query.Query
+import cn.jzl.ecs.query.forEach
 import cn.jzl.ecs.query.query
 import cn.jzl.ecs.relation
 
 @PublishedApi
 internal class ObserveService(private val world: World) {
 
-    private val queries = mutableMapOf<Relation, Query<ObserveEntity>>()
+    private val queries = mutableMapOf<Relation, Query<ObserveEntityContext>>()
 
-    val observerId: ComponentId = world.componentService.id<Observer>()
-    val eventOf: ComponentId = world.componentService.configure<Components.EventOf> { it.tag() }
+    val notInvolvedRelation: Relation by lazy { Relation(world.components.any, world.components.any) }
 
-    val notInvolvedRelation = Relation(world.componentService.components.any, world.componentService.components.any)
-
-    private fun getQuery(target: Entity, eventId: ComponentId): Query<ObserveEntity> {
+    private fun getQuery(target: Entity, eventId: ComponentId): Query<ObserveEntityContext> {
         return queries.getOrPut(Relation(target, eventId)) {
-            world.query { ObserveEntity(world, target, eventId) }
+            world.query { ObserveEntityContext(world, target, eventId) }
         }
     }
 
-    fun dispatch(entity: Entity, eventId: ComponentId, event: Any?, involved: Relation) {
+    fun dispatch(entity: Entity, eventId: ComponentId, event: Any? = null, involved: Relation = notInvolvedRelation) {
         getQuery(entity, eventId).forEach {
-            it.targetObserver?.handle(entity, event, involved)
-            it.globalObserver?.handle(entity, event, involved)
+            targetObserver?.handle(entity, event, involved)
+            globalObserver?.handle(entity, event, involved)
         }
     }
 
-    private fun Observer.handle(entity: Entity, event: Any?, involved: Relation) {
+    private fun Observer.handle(entity: Entity, event: Any?, involved: Relation ) {
         if (mustHoldData && event == null) return
         if (involved != notInvolvedRelation && involvedRelations.isNotEmpty() && involved !in involvedRelations) return
         if (queries.isNotEmpty()) {
-            world.entityService.runOn(entity) {
+            world.entityService.runOn(entity) { entityIndex ->
                 if (queries.all { query -> this in query }) {
-                    queries.forEach { query ->
-                        query.entity.updateCache(this)
-                        query.entity.entityIndex = it
-                        query.entity.batchEntityEditor.entity = entity
+                    queries.forEach {
+                        it.context.updateCache(this)
+                        it.context.entityIndex = entityIndex
+                        it.context.batchEntityEditor.entity = entity
                     }
                     handle.handle(entity, event, involved)
+                    queries.forEach { it.context.batchEntityEditor.apply(world) }
                 }
             }
         } else {
@@ -56,11 +55,11 @@ internal class ObserveService(private val world: World) {
         }
     }
 
-    private class ObserveEntity(world: World, target: Entity, private val eventId: ComponentId) : QueriedEntity(world) {
-        val targetObserver: Observer? by relation<Observer?>(world.observeService.observerId, OptionalGroup.One)
-        val globalObserver: Observer? by relation(world.observeService.observerId, OptionalGroup.One)
+    private class ObserveEntityContext(world: World, target: Entity, private val eventId: ComponentId) : QueryEntityContext(world) {
+        val targetObserver: Observer? by relation<Observer?>(target, OptionalGroup.One)
+        val globalObserver: Observer? by relation<Observer?>(world.components.observerId, OptionalGroup.One)
         override fun FamilyMatcher.FamilyBuilder.configure() {
-            relation(world.observeService.eventOf, eventId)
+            relation(world.components.eventId, eventId)
         }
     }
 }

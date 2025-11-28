@@ -15,7 +15,7 @@ inline fun <reified C> ComponentProvider.id(): ComponentId = getOrRegisterEntity
 
 inline fun <reified C> ComponentProvider.configure(configuration: ComponentConfigureContext.(ComponentId) -> Unit): ComponentId {
     val componentEntity = getOrRegisterEntityForClass(C::class)
-    world.entityService.configure(componentEntity) {
+    world.entityService.configure(componentEntity, false) {
         val componentConfigureContext = ComponentConfigureContext(this)
         componentConfigureContext.configuration(it)
     }
@@ -103,6 +103,7 @@ fun xor(world: World, keys: LongFastList, block: FamilyMatcher.FamilyBuilder.() 
                         result.xor(second)
                         return result
                     }
+
                     else -> {
                         // 多个匹配器的通用情况
                         allArchetypeResults.clear()
@@ -202,25 +203,28 @@ fun FamilyMatcher.FamilyBuilder.kind(kind: ComponentId) {
     })
 }
 
-inline fun World.entity(entity: Entity, configuration: EntityUpdateContext.(Entity) -> Unit) = entityService.configure(entity, configuration)
-inline fun World.entity(entityId: Int, configuration: EntityCreateContext.(Entity) -> Unit): Entity = entityService.create(entityId, configuration)
-inline fun World.entity(configuration: EntityCreateContext.(Entity) -> Unit): Entity = entityService.create(configuration)
+inline fun World.entity(entity: Entity, configuration: EntityUpdateContext.(Entity) -> Unit) = entityService.configure(entity, true, configuration)
+inline fun World.entity(entityId: Int, configuration: EntityCreateContext.(Entity) -> Unit): Entity = entityService.create(entityId, true, configuration)
+inline fun World.entity(configuration: EntityCreateContext.(Entity) -> Unit): Entity = entityService.create(true, configuration)
 
-inline fun World.childOf(entity: Entity, configuration: EntityCreateContext.(Entity) -> Unit): Entity = entity {
-    configuration(it)
-    it.addRelation(componentService.components.childOf, entity)
-}
+inline fun World.childOf(
+    entity: Entity,
+    configuration: EntityCreateContext.(Entity) -> Unit
+): Entity = entityService.childOf(entity, true, configuration)
 
-inline fun World.childOf(entity: Entity, entityId: Int, configuration: EntityCreateContext.(Entity) -> Unit): Entity = entity(entityId) {
-    configuration(it)
-    it.addRelation(componentService.components.childOf, entity)
-}
+inline fun World.childOf(
+    entity: Entity,
+    entityId: Int,
+    configuration: EntityCreateContext.(Entity) -> Unit
+): Entity = entityService.childOf(entity, entityId, true, configuration)
 
 inline fun <reified C> World.componentId(): ComponentId = componentService.id<C>()
 inline fun <reified C> World.component(): Relation = componentService.component<C>()
 inline fun <reified C> World.componentId(configuration: ComponentConfigureContext.(ComponentId) -> Unit): ComponentId {
     return componentService.configure<C>(configuration)
 }
+
+inline fun World.destroy(entity: Entity): Unit = entityService.destroy(entity)
 
 fun world(configuration: DIMainBuilder.() -> Unit): World {
     val di = DI {
@@ -231,13 +235,13 @@ fun world(configuration: DIMainBuilder.() -> Unit): World {
 
         this bind singleton { new(::ArchetypeService) }
         this bind singleton { new(::ComponentService) }
-        this bind singleton { new(::Components) }
 
         this bind singleton { new(::RelationService) }
         this bind singleton { new(::FamilyService) }
 
         this bind singleton { new(::QueryService) }
         this bind singleton { new(::ObserveService) }
+        this bind singleton { new(::ShadedComponentService) }
 
         configuration()
     }
