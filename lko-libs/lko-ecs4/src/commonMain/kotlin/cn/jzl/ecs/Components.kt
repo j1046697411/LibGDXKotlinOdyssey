@@ -12,6 +12,13 @@ internal class Components(componentProvider: ComponentProvider) {
         it.singleRelation()
     }
 
+    val prefab: ComponentId = componentProvider.configure<Prefab> { it.tag() }
+
+    val instanceOf: ComponentId = componentProvider.configure<InstanceOf> {
+        it.tag()
+        it.singleRelation()
+    }
+
     val componentId: ComponentId = componentProvider.id<ComponentOf>()
     val shadedId: ComponentId = componentProvider.id<ShadedOf>()
 
@@ -31,6 +38,9 @@ internal class Components(componentProvider: ComponentProvider) {
     sealed class ComponentOf
     sealed class ChildOf
     sealed class EventOf
+
+    sealed class Prefab
+    sealed class InstanceOf
 
     sealed class OnInserted
     sealed class OnRemoved

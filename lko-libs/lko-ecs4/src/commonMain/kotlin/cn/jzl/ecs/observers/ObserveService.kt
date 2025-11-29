@@ -1,13 +1,10 @@
 package cn.jzl.ecs.observers
 
 import cn.jzl.ecs.ComponentId
-import cn.jzl.ecs.Components
 import cn.jzl.ecs.Entity
 import cn.jzl.ecs.FamilyMatcher
 import cn.jzl.ecs.Relation
 import cn.jzl.ecs.World
-import cn.jzl.ecs.configure
-import cn.jzl.ecs.id
 import cn.jzl.ecs.query.OptionalGroup
 import cn.jzl.ecs.query.QueryEntityContext
 import cn.jzl.ecs.query.Query

@@ -171,7 +171,7 @@ fun FamilyMatcher.FamilyBuilder.relation(relation: Relation) {
     keys.add(relation.data)
     matcher(object : FamilyMatcher {
 
-        override fun match(archetype: Archetype): Boolean = relation in archetype
+        override fun match(archetype: Archetype): Boolean = archetype.match(relation)
 
         override fun FamilyMatcher.FamilyMatchScope.getArchetypeBits(): BitSet = getArchetypeBits(relation)
     })
@@ -187,7 +187,7 @@ fun FamilyMatcher.FamilyBuilder.target(target: Entity) {
     val relation = Relation(world.componentService.components.any, target)
     keys.add(relation.data)
     matcher(object : FamilyMatcher {
-        override fun match(archetype: Archetype): Boolean = archetype.entityType.any { it.target == target }
+        override fun match(archetype: Archetype): Boolean = archetype.match(relation)
 
         override fun FamilyMatcher.FamilyMatchScope.getArchetypeBits(): BitSet = getArchetypeBits(relation)
     })
@@ -197,7 +197,7 @@ fun FamilyMatcher.FamilyBuilder.kind(kind: ComponentId) {
     val relation = Relation(kind, world.componentService.components.any)
     keys.add(relation.data)
     matcher(object : FamilyMatcher {
-        override fun match(archetype: Archetype): Boolean = archetype.entityType.any { it.kind == kind }
+        override fun match(archetype: Archetype): Boolean = archetype.match(relation)
 
         override fun FamilyMatcher.FamilyMatchScope.getArchetypeBits(): BitSet = getArchetypeBits(relation)
     })
@@ -217,6 +217,30 @@ inline fun World.childOf(
     entityId: Int,
     configuration: EntityCreateContext.(Entity) -> Unit
 ): Entity = entityService.childOf(entity, entityId, true, configuration)
+
+inline fun World.instanceOf(
+    prefab: Entity,
+    configuration: EntityCreateContext.(Entity) -> Unit
+): Entity {
+    entity(prefab) { it.addTag<Components.Prefab>() }
+    return entityService.create(true) {
+        configuration(it)
+        it.addRelation(components.instanceOf, prefab)
+    }
+}
+
+inline fun World.instanceOf(
+    prefab: Entity,
+    entityId: Int,
+    configuration: EntityCreateContext.(Entity) -> Unit
+): Entity {
+    entity(prefab) { it.addTag<Components.Prefab>() }
+    return entityService.create(entityId, true) {
+        configuration(it)
+        it.addRelation(components.instanceOf, prefab)
+    }
+}
+
 
 inline fun <reified C> World.componentId(): ComponentId = componentService.id<C>()
 inline fun <reified C> World.component(): Relation = componentService.component<C>()

@@ -3,7 +3,7 @@ package cn.jzl.ecs.query
 import cn.jzl.ecs.*
 import kotlin.reflect.KProperty
 
-abstract class QueryEntityContext(val world: World) : AccessorOperations() {
+abstract class QueryEntityContext(val world: World, private val involvePrefab: Boolean = false) : AccessorOperations() {
 
     @PublishedApi
     internal val properties = mutableMapOf<String, Accessor>()
@@ -21,6 +21,9 @@ abstract class QueryEntityContext(val world: World) : AccessorOperations() {
 
     fun build(): Family = world.familyService.family {
         val families = mutableListOf<FamilyMatching>()
+        if (!involvePrefab) {
+            not { component<Components.Prefab>() }
+        }
         accessors.asSequence().filterIsInstance<FamilyMatching>()
             .forEach {
                 if (!it.isMarkedNullable) {

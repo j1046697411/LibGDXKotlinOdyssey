@@ -13,26 +13,25 @@ value class RelationService(private val world: World) {
     internal val entityService: EntityService get() = world.entityService
 
     fun hasRelation(entity: Entity, relation: Relation): Boolean = entityService.runOn(entity) {
-        relation in this
+        getComponentIndex(relation) != null
     }
 
     fun getRelation(entity: Entity, relation: Relation): Any? = entityService.runOn(entity) { entityIndex ->
-        val componentIndex = table.entityType.indexOf(relation).takeIf { it != -1 } ?: return@runOn null
+        val componentIndex = getComponentIndex(relation) ?: return@runOn null
         return@runOn getRelation(this, relation, entityIndex, componentIndex)
     }
 
     @Suppress("NOTHING_TO_INLINE")
-    internal inline fun getRelation(archetype: Archetype, relation: Relation, entityIndex: Int, componentIndex: Int): Any? {
-        return if (world.componentService.isShadedComponent(relation)) {
-            world.shadedComponentService[relation]
-        } else {
-            archetype.table[entityIndex, componentIndex]
-        }
+    internal inline fun getRelation(archetype: Archetype, relation: Relation, entityIndex: Int, componentIndex: ComponentIndex): Any? {
+        if (world.componentService.isShadedComponent(relation)) return world.shadedComponentService[relation]
+        if (componentIndex.prefabEntity == Entity.ENTITY_INVALID) return archetype.table[entityIndex, componentIndex.index]
+        // 关系组件是预制体的组件，需要从预制体实体中获取
+        return world.entityService.runOn(componentIndex.prefabEntity) { table[it, componentIndex.index] }
     }
 
     @PublishedApi
     internal fun getRelationUp(entity: Entity, kind: Entity): Entity? = entityService.runOn(entity) { entityIndex ->
-        check(world.componentService.isShadedComponent(Relation(kind, entity)))
+        check(world.componentService.isSingleRelation(Relation(kind, entity)))
         return@runOn entityType.filter { relation -> relation.kind == kind }.firstOrNull()?.target
     }
 

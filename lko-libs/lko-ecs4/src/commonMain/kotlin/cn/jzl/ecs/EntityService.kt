@@ -4,6 +4,7 @@ import cn.jzl.datastructure.list.LongFastList
 import cn.jzl.datastructure.math.fromLowHigh
 import cn.jzl.datastructure.math.high
 import cn.jzl.datastructure.math.low
+import cn.jzl.ecs.query.forEach
 
 @PublishedApi
 internal class EntityService(val world: World) {
@@ -82,10 +83,16 @@ internal class EntityService(val world: World) {
         return archetype.block(record.high)
     }
 
-    fun destroy(entity: Entity): Unit = runOn(entity) {
-//        world.observeService.dispatch(entity, world.componentService.components.onEntityDestroyed)
+    fun destroy(entity: Entity): Unit = runOn(entity) { entityIndex ->
+        world.observeService.dispatch(entity, world.componentService.components.onEntityDestroyed)
+        configure(entity) {
+            it.children.forEach { destroy(this.entity) }
+        }
+        entityType.forEach {
+            world.observeService.dispatch(entity, world.components.onRemoved, null, it)
+        }
         world.entityStore.destroy(entity)
         updateEntityRecord(entity, world.archetypeService.rootArchetype, -1)
-        table.remove(it)
+        table.remove(entityIndex)
     }
 }

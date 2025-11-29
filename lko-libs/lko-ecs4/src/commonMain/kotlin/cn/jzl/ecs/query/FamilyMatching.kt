@@ -11,4 +11,3 @@ interface FamilyMatching {
     fun FamilyMatcher.FamilyBuilder.matching()
 }
 
-enum class OptionalGroup { Ignore, One }

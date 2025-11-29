@@ -17,7 +17,7 @@ class FamilyService(private val world: World) : FamilyMatcher.FamilyMatchScope {
     internal fun registerArchetype(archetype: Archetype) {
         allArchetypeBits.set(archetype.id)
         fun set(relation: Relation): Unit = componentMap.getOrPut(relation) { BitSet.Companion() }.set(archetype.id)
-        archetype.entityType.forEach { relation: Relation ->
+        archetype.instanceEntityType.forEach { relation: Relation ->
             if (relation.isRelation()) {
                 set(Relation(relation.kind, componentService.components.any))
                 set(Relation(componentService.components.any, relation.target))

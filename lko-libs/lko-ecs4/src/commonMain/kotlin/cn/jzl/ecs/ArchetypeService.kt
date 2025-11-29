@@ -13,11 +13,14 @@ class ArchetypeService(private val world: World) : ArchetypeProvider {
     }
 
     private fun createArchetype(entityType: EntityType): Archetype {
-        // 使用 archetypes.size 而不是 typeToArchetypeMap.size，确保 ID 和索引一致
-        val archetype = Archetype(archetypes.size, entityType, this, world.componentService)
-        // 先添加到 archetypes，确保 ID 和索引一致
+        val archetype = Archetype(
+            archetypes.size,
+            entityType,
+            this,
+            world.componentService,
+            world.entityService
+        )
         archetypes.insertLast(archetype)
-        // 然后注册到 familyService
         world.familyService.registerArchetype(archetype)
         return archetype
     }

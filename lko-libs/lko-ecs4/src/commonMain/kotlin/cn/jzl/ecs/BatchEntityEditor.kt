@@ -12,8 +12,7 @@ internal data class BatchEntityEditor(val world: World, internal var entity: Ent
 
     override fun addRelation(entity: Entity, relation: Relation, data: Any) {
         check(entity == this.entity) { "entity must be $entity" }
-        check(world.componentService.holdsData(relation)) { }
-
+        check(world.componentService.holdsData(relation)) { "relation $relation must hold data" }
         if (world.componentService.isShadedComponent(relation)) {
             world.shadedComponentService[relation] = data
             addRelation(entity, relation)

@@ -1,5 +1,6 @@
 package cn.jzl.ecs.query
 
+import cn.jzl.ecs.ComponentIndex
 import cn.jzl.ecs.Entity
 import cn.jzl.ecs.Relation
 import cn.jzl.ecs.id
@@ -18,11 +19,7 @@ abstract class AccessorOperations {
         group: OptionalGroup = OptionalGroup.Ignore
     ): RelationAccessor<K> = addAccessor {
         val relation = Relation(world.componentService.id<K>(), target)
-        if (world.componentService.isShadedComponent(relation)) {
-            RelationAccessor(typeOf<K>(), relation, group) { entityType.indexOf(it) }
-        } else {
-            RelationAccessor(typeOf<K>(), relation, group) { table.entityType.indexOf(it) }
-        }
+        RelationAccessor(typeOf<K>(), relation, group) { getComponentIndex(relation) }
     }
 
     inline fun <reified K, reified T> QueryEntityContext.relation(
@@ -32,6 +29,10 @@ abstract class AccessorOperations {
     inline fun <reified C> QueryEntityContext.component(
         group: OptionalGroup = OptionalGroup.Ignore
     ): RelationAccessor<C> = relation(world.componentService.components.componentId, group)
+
+    inline fun <reified S> QueryEntityContext.sharedComponent(
+        group: OptionalGroup = OptionalGroup.Ignore
+    ): RelationAccessor<S> = relation(world.componentService.components.shadedId, group)
 
     @PublishedApi
     internal inline fun <T : Accessor> addAccessor(create: () -> T): T {
