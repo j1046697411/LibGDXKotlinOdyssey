@@ -10,4 +10,5 @@ plugins {
     alias(libs.plugins.google.ksp) apply false
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlin.serialization) apply false
 }

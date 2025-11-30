@@ -49,6 +49,7 @@ dependencyResolutionManagement {
 addPluginLibs(File(rootDir, "lko-libs/lko-datastructure"))
 addPluginLibs(File(rootDir, "lko-libs/lko-di"))
 addPluginLibs(File(rootDir, "lko-libs/lko-ecs4"))
+addPluginLibs(File(rootDir, "lko-libs/lko-ecs-serialization"))
 
 
 //addPluginLibs(File(rootDir, "lko-libs"))

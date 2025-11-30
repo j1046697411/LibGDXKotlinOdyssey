@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/lko-libs/lko-datastructure" />
             <option value="$PROJECT_DIR$/lko-libs/lko-di" />
+            <option value="$PROJECT_DIR$/lko-libs/lko-ecs-serialization" />
             <option value="$PROJECT_DIR$/lko-libs/lko-ecs4" />
           </set>
         </option>

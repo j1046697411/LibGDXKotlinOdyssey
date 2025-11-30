@@ -82,7 +82,7 @@ abstract class ShorthandQuery6<C1, C2, C3, C4, C5, C6>(world: World) : Shorthand
     operator fun component6(): C6 = component6
 }
 
-inline fun <reified E : QueryEntityContext> World.query(factory: World.() -> E): Query<E> = queryService.query(factory)
+inline fun <reified E : QueryEntityContext> World.query(noinline factory: World.() -> E): Query<E> = queryService.query(factory)
 
 inline fun <reified C : Any> World.shorthandQuery(
     size1: QueryShorthands.Size1? = null,

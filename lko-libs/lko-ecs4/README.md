@@ -84,6 +84,7 @@ lko-ecs4 是一个基于 **关系架构** 的高性能 **Kotlin 多平台游戏�
 - **查询系统**：提供强大的实体查询能力，支持复杂的过滤条件。
 - **事件机制**：支持观察者模式，方便游戏中的事件处理和通信。
 - **类型安全**：利用 Kotlin 的类型系统，提供类型安全的 API。
+- **预制体支持**：支持创建和实例化预制体，实现游戏对象的复用和快速创建。
 
 ## 快速开始
 
@@ -177,6 +178,52 @@ val equippedWeaponsQuery = world.query {
         override fun FamilyMatcher.FamilyBuilder.configure() {
             // 匹配装备到玩家的实体
             relation(Relation(equippedToComponentId, player))
+        }
+    }
+}
+```
+
+### 预制体示例
+```kotlin
+// 定义游戏组件类
+class Position(val x: Float, val y: Float)
+class Velocity(val dx: Float, val dy: Float)
+class Health(val value: Int)
+class PlayerTag
+
+// 创建玩家预制体
+val playerPrefab = world.entity {
+    it.addComponent(Position(0f, 0f))
+    it.addComponent(Velocity(1f, 0f))
+    it.addComponent(Health(100))
+    it.addTag<PlayerTag>()
+}
+
+// 从预制体创建玩家实例
+val player1 = world.instanceOf(playerPrefab) {
+    // 可以覆盖预制体的组件值
+    it.addComponent(Position(10f, 10f))
+}
+
+// 从预制体创建另一个玩家实例，使用指定的实体ID
+val player2 = world.instanceOf(playerPrefab, 100) {
+    it.addComponent(Position(20f, 20f))
+}
+
+// 查询所有玩家实例（包括预制体和实例）
+val allPlayersQuery = world.query {
+    object : QueryEntityContext(this, involvePrefab = true) {
+        override fun FamilyMatcher.FamilyBuilder.configure() {
+            component<PlayerTag>()
+        }
+    }
+}
+
+// 查询仅玩家实例（不包括预制体）
+val playerInstancesQuery = world.query {
+    object : QueryEntityContext(this) {
+        override fun FamilyMatcher.FamilyBuilder.configure() {
+            component<PlayerTag>()
         }
     }
 }
@@ -672,11 +719,21 @@ class MovementSystem(private val world: World) {
         
         // 更新实体位置
         movingEntitiesQuery.forEach {
-            val position = this[Position::class] as Position
-            val velocity = this[Velocity::class] as Velocity
-            this[Position::class] = Position(
-                position.x + velocity.dx * deltaTime,
-                position.y + velocity.dy * deltaTime
+            // 获取当前实体
+            val entity = this.entity
+            
+            // 通过关系服务访问组件数据
+            val position = world.relationService.getRelation(entity, world.component<Position>()) as Position
+            val velocity = world.relationService.getRelation(entity, world.component<Velocity>()) as Velocity
+            
+            // 更新组件数据
+            world.relationService.addRelation(
+                entity,
+                world.component<Position>(),
+                Position(
+                    position.x + velocity.dx * deltaTime,
+                    position.y + velocity.dy * deltaTime
+                )
             )
         }
     }
@@ -699,14 +756,33 @@ class CollisionSystem(private val world: World) {
         }
         
         // 检测碰撞
-        val entities = colliderEntitiesQuery.toList()
+        val entities = mutableListOf<Entity>()
+        colliderEntitiesQuery.forEach {
+            entities.add(this.entity)
+        }
+        
         for (i in entities.indices) {
             for (j in i + 1 until entities.size) {
                 val entity1 = entities[i]
                 val entity2 = entities[j]
+                
+                // 获取实体组件数据
+                val position1 = world.relationService.getRelation(entity1, world.component<Position>()) as Position
+                val collider1 = world.relationService.getRelation(entity1, world.component<Collider>()) as Collider
+                val position2 = world.relationService.getRelation(entity2, world.component<Position>()) as Position
+                val collider2 = world.relationService.getRelation(entity2, world.component<Collider>()) as Collider
+                
                 // 检测碰撞逻辑
+                if (isColliding(position1, collider1, position2, collider2)) {
+                    // 处理碰撞
+                }
             }
         }
+    }
+    
+    private fun isColliding(pos1: Position, collider1: Collider, pos2: Position, collider2: Collider): Boolean {
+        // 碰撞检测逻辑
+        return false
     }
 }
 ```
@@ -729,7 +805,11 @@ class InputSystem(private val world: World, private val input: Input) {
         
         // 处理输入
         playerQuery.forEach {
-            val velocity = this[Velocity::class] as Velocity
+            // 获取当前实体
+            val entity = this.entity
+            
+            // 通过关系服务访问组件数据
+            val velocity = world.relationService.getRelation(entity, world.component<Velocity>()) as Velocity
             var newVelocity = velocity
             
             if (input.isKeyPressed(Key.UP)) {
@@ -745,7 +825,8 @@ class InputSystem(private val world: World, private val input: Input) {
                 newVelocity = Velocity(newVelocity.dx + 1f, newVelocity.dy)
             }
             
-            this[Velocity::class] = newVelocity
+            // 更新组件数据
+            world.relationService.addRelation(entity, world.component<Velocity>(), newVelocity)
         }
     }
 }

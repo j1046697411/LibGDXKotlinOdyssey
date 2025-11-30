@@ -6,8 +6,13 @@ import cn.jzl.datastructure.BitSet
 import cn.jzl.datastructure.list.LongFastList
 import cn.jzl.datastructure.list.ObjectFastList
 import cn.jzl.di.*
+import cn.jzl.ecs.addon.AddonService
+import cn.jzl.ecs.addon.WorldSetup
+import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.observers.ObserveService
 import cn.jzl.ecs.query.QueryService
+import cn.jzl.ecs.system.Phase
+import cn.jzl.ecs.system.PipelineImpl
 
 typealias ComponentId = Entity
 
@@ -250,8 +255,8 @@ inline fun <reified C> World.componentId(configuration: ComponentConfigureContex
 
 inline fun World.destroy(entity: Entity): Unit = entityService.destroy(entity)
 
-fun world(configuration: DIMainBuilder.() -> Unit): World {
-    val di = DI {
+internal val codeAddon = createAddon("ECSCodeAddon", {}) {
+    injects {
         this bind singleton { World(this.di) }
 
         this bind singleton { new(::EntityService) }
@@ -266,10 +271,29 @@ fun world(configuration: DIMainBuilder.() -> Unit): World {
         this bind singleton { new(::QueryService) }
         this bind singleton { new(::ObserveService) }
         this bind singleton { new(::ShadedComponentService) }
-
-        configuration()
+        this bind singleton { new(::PipelineImpl) }
+        this bind singleton { new(::AddonService) }
     }
-    val world by di.instance<World>()
+    Unit
+}
 
+fun world(configuration: WorldSetup.() -> Unit): World {
+    val mainBuilder = DIMainBuilder("WorldSetup")
+    val world: World by lazy {
+        val di = DI(mainBuilder)
+        di.on(DIContext).instance()
+    }
+    val runOnOrAfters = mutableListOf<Pair<Phase, World.() -> Unit>>()
+    val worldSetup = WorldSetup(
+        configurator = { mainBuilder.it() },
+        runOnOrAfter = { name, phase, block -> runOnOrAfters.add(phase to block) }
+    )
+    worldSetup.apply { install(codeAddon) }
+    worldSetup.configuration()
+    for ((phase, block) in runOnOrAfters) {
+        world.pipeline.runOnOrAfter(phase) { world.block() }
+    }
+    world.pipeline.runStartupTasks()
+    runOnOrAfters.clear()
     return world
 }
