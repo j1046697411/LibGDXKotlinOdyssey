@@ -10,6 +10,7 @@ import cn.jzl.ecs.addon.AddonService
 import cn.jzl.ecs.addon.WorldSetup
 import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.observers.ObserveService
+import cn.jzl.ecs.query.ECSDsl
 import cn.jzl.ecs.query.QueryService
 import cn.jzl.ecs.system.Phase
 import cn.jzl.ecs.system.PipelineImpl
@@ -84,6 +85,7 @@ fun or(world: World, keys: LongFastList, block: FamilyMatcher.FamilyBuilder.() -
     }
 }
 
+@ECSDsl
 fun xor(world: World, keys: LongFastList, block: FamilyMatcher.FamilyBuilder.() -> Unit): FamilyMatcher {
     val result = BitSet()
     val temp = BitSet(0)
@@ -146,6 +148,7 @@ fun xor(world: World, keys: LongFastList, block: FamilyMatcher.FamilyBuilder.() 
     }
 }
 
+@ECSDsl
 fun not(world: World, keys: LongFastList, block: FamilyMatcher.FamilyBuilder.() -> Unit): FamilyMatcher {
     val result = BitSet()
     return composite(world, keys, 3, block) { familyMatchers ->
@@ -165,9 +168,16 @@ fun not(world: World, keys: LongFastList, block: FamilyMatcher.FamilyBuilder.() 
     }
 }
 
+@ECSDsl
 fun FamilyMatcher.FamilyBuilder.and(block: FamilyMatcher.FamilyBuilder.() -> Unit) = matcher(and(world, this.keys, block))
+
+@ECSDsl
 fun FamilyMatcher.FamilyBuilder.or(block: FamilyMatcher.FamilyBuilder.() -> Unit) = matcher(or(world, keys, block))
+
+@ECSDsl
 fun FamilyMatcher.FamilyBuilder.xor(block: FamilyMatcher.FamilyBuilder.() -> Unit) = matcher(xor(world, keys, block))
+
+@ECSDsl
 fun FamilyMatcher.FamilyBuilder.not(block: FamilyMatcher.FamilyBuilder.() -> Unit) = matcher(not(world, keys, block))
 
 fun FamilyMatcher.FamilyBuilder.relation(kind: ComponentId, target: Entity): Unit = relation(Relation(kind, target))
@@ -208,21 +218,29 @@ fun FamilyMatcher.FamilyBuilder.kind(kind: ComponentId) {
     })
 }
 
+@ECSDsl
 inline fun World.entity(entity: Entity, configuration: EntityUpdateContext.(Entity) -> Unit) = entityService.configure(entity, true, configuration)
+
+@ECSDsl
 inline fun World.entity(entityId: Int, configuration: EntityCreateContext.(Entity) -> Unit): Entity = entityService.create(entityId, true, configuration)
+
+@ECSDsl
 inline fun World.entity(configuration: EntityCreateContext.(Entity) -> Unit): Entity = entityService.create(true, configuration)
 
+@ECSDsl
 inline fun World.childOf(
     entity: Entity,
     configuration: EntityCreateContext.(Entity) -> Unit
 ): Entity = entityService.childOf(entity, true, configuration)
 
+@ECSDsl
 inline fun World.childOf(
     entity: Entity,
     entityId: Int,
     configuration: EntityCreateContext.(Entity) -> Unit
 ): Entity = entityService.childOf(entity, entityId, true, configuration)
 
+@ECSDsl
 inline fun World.instanceOf(
     prefab: Entity,
     configuration: EntityCreateContext.(Entity) -> Unit
@@ -234,6 +252,7 @@ inline fun World.instanceOf(
     }
 }
 
+@ECSDsl
 inline fun World.instanceOf(
     prefab: Entity,
     entityId: Int,
@@ -249,6 +268,8 @@ inline fun World.instanceOf(
 
 inline fun <reified C> World.componentId(): ComponentId = componentService.id<C>()
 inline fun <reified C> World.component(): Relation = componentService.component<C>()
+
+@ECSDsl
 inline fun <reified C> World.componentId(configuration: ComponentConfigureContext.(ComponentId) -> Unit): ComponentId {
     return componentService.configure<C>(configuration)
 }
@@ -284,12 +305,20 @@ fun world(configuration: WorldSetup.() -> Unit): World {
         di.on(DIContext).instance()
     }
     val runOnOrAfters = mutableListOf<Pair<Phase, World.() -> Unit>>()
+    val injectors = mutableListOf<DIMainBuilder.() -> Unit>()
     val worldSetup = WorldSetup(
-        configurator = { mainBuilder.it() },
+        injector = { injectors.add(it) },
         runOnOrAfter = { name, phase, block -> runOnOrAfters.add(phase to block) }
     )
     worldSetup.apply { install(codeAddon) }
     worldSetup.configuration()
+    var index = 0
+    while (index < injectors.size) {
+        val injector = injectors[index]
+        mainBuilder.injector()
+        index++
+    }
+
     for ((phase, block) in runOnOrAfters) {
         world.pipeline.runOnOrAfter(phase) { world.block() }
     }

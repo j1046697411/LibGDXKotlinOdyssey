@@ -13,7 +13,12 @@ import cn.jzl.ecs.observers.observe
 import cn.jzl.ecs.query.QueryGroupedBy.QueryGroup
 import kotlinx.coroutines.CancellationException
 
-@Target(AnnotationTarget.TYPE_PARAMETER, AnnotationTarget.CLASS, AnnotationTarget.TYPE)
+@Target(
+    AnnotationTarget.TYPE_PARAMETER,
+    AnnotationTarget.CLASS,
+    AnnotationTarget.TYPE,
+    AnnotationTarget.FUNCTION,
+)
 @DslMarker
 annotation class ECSDsl
 

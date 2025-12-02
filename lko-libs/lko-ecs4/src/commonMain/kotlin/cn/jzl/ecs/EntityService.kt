@@ -83,16 +83,48 @@ internal class EntityService(val world: World) {
         return archetype.block(record.high)
     }
 
-    fun destroy(entity: Entity): Unit = runOn(entity) { entityIndex ->
-        world.observeService.dispatch(entity, world.componentService.components.onEntityDestroyed)
-        configure(entity) {
-            it.children.forEach { destroy(this.entity) }
+    fun destroy(entity: Entity) {
+        val entities = Entities()
+        entities.add(entity)
+        batchDestroy(entities)
+    }
+
+    fun destroy(entities: Entities) {
+        if (entities.size == 0) return
+        val awaitDeletedEntities = Entities()
+        awaitDeletedEntities.addAll(entities)
+        batchDestroy(awaitDeletedEntities)
+    }
+
+    private fun batchDestroy(entities: Entities) {
+        var index = 0
+        // 收集需要删除的实体
+        while (index < entities.size) {
+            val pendingEntity = entities[index]
+            configure(pendingEntity) { it.children.forEach { entities.add(this.entity) } }
+            index++
         }
-        entityType.forEach {
-            world.observeService.dispatch(entity, world.components.onRemoved, null, it)
+
+        // 先触发所有实体的 onEntityDestroyed 事件
+        entities.forEach { entity ->
+            world.observeService.dispatch(entity, world.componentService.components.onEntityDestroyed)
         }
-        world.entityStore.destroy(entity)
-        updateEntityRecord(entity, world.archetypeService.rootArchetype, -1)
-        table.remove(entityIndex)
+
+        // 按收集的顺序一个一个删除
+        entities.forEach { entity ->
+            runOn(entity) { entityIndex ->
+                entityType.forEach {
+                    world.observeService.dispatch(entity, world.components.onRemoved, null, it)
+                }
+                val isNotLast = entityIndex != table.size - 1
+                table.remove(entityIndex)
+                val movedEntity = if (table.size > 0 && isNotLast) table[entityIndex] else null
+                if (movedEntity != null) {
+                    updateEntityRecord(movedEntity, this, entityIndex)
+                }
+                updateEntityRecord(entity, world.archetypeService.rootArchetype, -1)
+                world.entityStore.destroy(entity)
+            }
+        }
     }
 }

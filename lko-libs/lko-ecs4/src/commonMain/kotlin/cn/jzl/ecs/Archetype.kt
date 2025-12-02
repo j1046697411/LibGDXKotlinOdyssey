@@ -74,20 +74,23 @@ data class Archetype internal constructor(
         }
     }
 
-    operator fun contains(relation: Relation): Boolean = entityType.indexOf(relation) >= 0
+    operator fun contains(relation: Relation): Boolean {
+        entityType.indexOf(relation).takeIf { it == -1 } ?: return true
+        val prefab = prefab ?: return false
+        return entityService.runOn(prefab) { relation in this }
+    }
 
     operator fun plus(relation: Relation): Archetype {
-        if (relation in this) return this
+        if (entityType.indexOf(relation) != -1) return this
         return componentAddEdges.getOrPut(relation) {
             archetypeProvider.getArchetype(entityType + relation)
         }
     }
 
     operator fun minus(relation: Relation): Archetype {
-        if (relation !in this) return this
+        if (entityType.indexOf(relation) == -1) return this
         return componentRemoveEdges.getOrPut(relation) {
             archetypeProvider.getArchetype(entityType - relation)
         }
     }
-
 }
