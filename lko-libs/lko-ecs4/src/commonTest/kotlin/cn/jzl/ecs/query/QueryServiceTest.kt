@@ -40,7 +40,7 @@ class QueryServiceTest {
         
         // 创建查询，获取所有具有Position和Velocity组件的实体
         val movingEntitiesQuery = world.query {
-            object : QueryEntityContext(this) {
+            object : EntityQueryContext(this) {
                 override fun FamilyMatcher.FamilyBuilder.configure() {
                     component<Position>()
                     component<Velocity>()
@@ -87,7 +87,7 @@ class QueryServiceTest {
         
         // 创建复杂查询：具有Position和Health组件，或者具有Velocity和EnemyTag组件的实体
         val complexQuery = world.query {
-            object : QueryEntityContext(this) {
+            object : EntityQueryContext(this) {
                 override fun FamilyMatcher.FamilyBuilder.configure() {
                     or {
                         and {
@@ -135,7 +135,7 @@ class QueryServiceTest {
         
         // 创建查询
         val query = world.query {
-            object : QueryEntityContext(this) {
+            object : EntityQueryContext(this) {
                 override fun FamilyMatcher.FamilyBuilder.configure() {
                     component<Position>()
                     component<Velocity>()
@@ -176,7 +176,7 @@ class QueryServiceTest {
         
         // 创建查询
         val query = world.query {
-            object : QueryEntityContext(this) {
+            object : EntityQueryContext(this) {
                 override fun FamilyMatcher.FamilyBuilder.configure() {
                     component<Position>()
                     component<Velocity>()
@@ -225,7 +225,7 @@ class QueryServiceTest {
         
         // 创建查询
         val query = world.query {
-            object : QueryEntityContext(this) {
+            object : EntityQueryContext(this) {
                 override fun FamilyMatcher.FamilyBuilder.configure() {
                     component<Position>()
                     component<Velocity>()

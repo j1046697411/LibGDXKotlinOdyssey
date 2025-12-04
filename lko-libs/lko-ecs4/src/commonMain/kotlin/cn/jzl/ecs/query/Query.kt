@@ -513,7 +513,7 @@ inline fun <T> QueryStream<T>.joinToString(
     return builder.toString()
 }
 
-abstract class QueryAssociatedBy<K, E : QueryEntityContext>(val query: Query<E>) : QueryStream<E> by query {
+abstract class QueryAssociatedBy<K, E : EntityQueryContext>(val query: Query<E>) : QueryStream<E> by query {
 
     private val map = mutableMapOf<K, Entity>()
 
@@ -555,7 +555,7 @@ abstract class QueryAssociatedBy<K, E : QueryEntityContext>(val query: Query<E>)
     }
 }
 
-abstract class QueryGroupedBy<K, E : QueryEntityContext>(val query: Query<E>) : QueryStream<QueryGroup<K, E>> {
+abstract class QueryGroupedBy<K, E : EntityQueryContext>(val query: Query<E>) : QueryStream<QueryGroup<K, E>> {
 
     private val queryGroups = mutableMapOf<K, QueryGroup<K, E>>()
     override val world: World get() = query.world
@@ -598,7 +598,7 @@ abstract class QueryGroupedBy<K, E : QueryEntityContext>(val query: Query<E>) : 
         queryGroups.clear()
     }
 
-    class QueryGroup<K, E : QueryEntityContext> internal constructor(val query: Query<E>, val key: K) : QueryStream<E> {
+    class QueryGroup<K, E : EntityQueryContext> internal constructor(val query: Query<E>, val key: K) : QueryStream<E> {
         private val entities = Entities()
         override val world: World get() = query.world
 
@@ -632,19 +632,19 @@ abstract class QueryGroupedBy<K, E : QueryEntityContext>(val query: Query<E>) : 
     }
 }
 
-inline fun <K, E : QueryEntityContext> Query<E>.associatedBy(crossinline associateBy: E.() -> K): QueryStream<E> {
+inline fun <K, E : EntityQueryContext> Query<E>.associatedBy(crossinline associateBy: E.() -> K): QueryStream<E> {
     return object : QueryAssociatedBy<K, E>(this) {
         override fun E.associateBy(): K = associateBy()
     }
 }
 
-fun <K, E : QueryEntityContext> Query<E>.groupedBy(keySelector: E.() -> K): QueryGroupedBy<K, E> {
+fun <K, E : EntityQueryContext> Query<E>.groupedBy(keySelector: E.() -> K): QueryGroupedBy<K, E> {
     return object : QueryGroupedBy<K, E>(this) {
         override fun E.keySelector(): K = keySelector()
     }
 }
 
-class Query<E : QueryEntityContext>(@PublishedApi internal val context: E) : QueryStream<E> {
+class Query<E : EntityQueryContext>(@PublishedApi internal val context: E) : QueryStream<E> {
 
     override val world: World get() = context.world
 

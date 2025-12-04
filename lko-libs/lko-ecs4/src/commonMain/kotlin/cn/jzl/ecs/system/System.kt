@@ -1,8 +1,9 @@
 package cn.jzl.ecs.system
 
 import cn.jzl.ecs.World
+import cn.jzl.ecs.WorldOwner
 import cn.jzl.ecs.query.Query
-import cn.jzl.ecs.query.QueryEntityContext
+import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.query.forEach
 import kotlin.time.Duration
 
@@ -15,27 +16,27 @@ enum class Phase {
 }
 
 interface Pipeline {
-    fun runOnOrAfter(phase: Phase, block: () -> Unit)
+    fun runOnOrAfter(phase: Phase, block: WorldOwner.() -> Unit)
 
     fun onSystemAdd(run: (System<*>) -> Unit)
 
     fun runStartupTasks()
 
-    fun <C : QueryEntityContext> addSystem(system: System<C>): TrackedSystem<C>
+    fun <C : EntityQueryContext> addSystem(system: System<C>): TrackedSystem<C>
 
     fun getRepeatingInExecutionOrder(): Sequence<TrackedSystem<*>>
 }
 
-class PipelineImpl(private val world: World) : Pipeline {
+class PipelineImpl(override val world: World) : Pipeline, WorldOwner {
 
     private val onSystemAdd = mutableListOf<(System<*>) -> Unit>()
     private val trackedSystems = mutableListOf<TrackedSystem<*>>()
     private val scheduled = Array(Phase.entries.size) {
-        mutableListOf<() -> Unit>()
+        mutableListOf<WorldOwner.() -> Unit>()
     }
     private var currentPhase = Phase.entries.first()
 
-    override fun runOnOrAfter(phase: Phase, block: () -> Unit) {
+    override fun runOnOrAfter(phase: Phase, block: WorldOwner.() -> Unit) {
         if (currentPhase >= phase) {
             block()
             return
@@ -56,7 +57,7 @@ class PipelineImpl(private val world: World) : Pipeline {
         }
     }
 
-    override fun <C : QueryEntityContext> addSystem(system: System<C>): TrackedSystem<C> {
+    override fun <C : EntityQueryContext> addSystem(system: System<C>): TrackedSystem<C> {
         onSystemAdd.forEach { it(system) }
         val query = world.queryService.query { system.context }
         val trackedSystem = TrackedSystem(system, query)
@@ -67,18 +68,18 @@ class PipelineImpl(private val world: World) : Pipeline {
     override fun getRepeatingInExecutionOrder(): Sequence<TrackedSystem<*>> = trackedSystems.asSequence()
 }
 
-data class System<C : QueryEntityContext>(
+data class System<C : EntityQueryContext>(
     val name: String,
     val context: C,
     val onTick: Query<C>.() -> Unit,
     val interval: Duration? = null
 )
 
-data class TrackedSystem<C : QueryEntityContext>(val system: System<C>, val query: Query<C>) {
+data class TrackedSystem<C : EntityQueryContext>(val system: System<C>, val query: Query<C>) {
     fun tick(): Unit = system.run { query.onTick() }
 }
 
-data class SystemBuilder<C : QueryEntityContext>(
+data class SystemBuilder<C : EntityQueryContext>(
     val pipeline: Pipeline,
     val context: C,
     val name: String,

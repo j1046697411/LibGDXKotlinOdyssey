@@ -3,22 +3,22 @@ package cn.jzl.ecs
 class EntityUpdateContext(world: World, entityEditor: EntityEditor) : EntityCreateContext(world, entityEditor) {
 
     inline fun <reified C> Entity.removeComponent() {
-        entityEditor.removeRelation(this, component<C>())
+        entityEditor.removeRelation(this, relations.component<C>())
     }
 
     inline fun <reified C> Entity.removeSharedComponent() {
-        entityEditor.removeRelation(this, sharedComponent<C>())
+        entityEditor.removeRelation(this, relations.sharedComponent<C>())
     }
 
     inline fun <reified K> Entity.removeTag() {
-        entityEditor.removeRelation(this, component<K>())
+        entityEditor.removeRelation(this, relations.component<K>())
     }
 
     inline fun <reified K, reified T> Entity.removeRelation() {
-        entityEditor.removeRelation(this, relation<K, T>())
+        entityEditor.removeRelation(this, relations.relation<K, T>())
     }
 
     inline fun <reified K> Entity.removeRelation(target: Entity) {
-        entityEditor.removeRelation(this, relation<K>(target))
+        entityEditor.removeRelation(this, relations.relation<K>(target))
     }
 }

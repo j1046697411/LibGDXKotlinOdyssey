@@ -2,8 +2,7 @@ package cn.jzl.ecs
 
 import cn.jzl.ecs.observers.Observer
 
-@PublishedApi
-internal class Components(componentProvider: ComponentProvider) {
+class Components(componentProvider: ComponentProvider) {
 
     val any: ComponentId = componentProvider.id<Any>()
 

@@ -5,7 +5,7 @@ import cn.jzl.ecs.Entity
 import cn.jzl.ecs.EntityType
 import cn.jzl.ecs.Relation
 import cn.jzl.ecs.World
-import cn.jzl.ecs.query.QueryEntityContext
+import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.query.Query
 import cn.jzl.ecs.query.QueryShorthands
 
@@ -17,7 +17,7 @@ abstract class ObserverEventsBuilder<Context> : ExecutableObserver<Context> {
 
     abstract fun provideContext(entity: Entity, event: Any?, involvedRelation: Relation): Context
 
-    override fun filter(vararg query: Query<out QueryEntityContext>): ObserverBuilder<Context> {
+    override fun filter(vararg query: Query<out EntityQueryContext>): ObserverBuilder<Context> {
         return ObserverBuilder(this, EntityType.Companion.ENTITY_TYPE_EMPTY, query.toList())
     }
 

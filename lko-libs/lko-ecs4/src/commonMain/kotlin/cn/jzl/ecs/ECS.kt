@@ -6,7 +6,6 @@ import cn.jzl.datastructure.BitSet
 import cn.jzl.datastructure.list.LongFastList
 import cn.jzl.datastructure.list.ObjectFastList
 import cn.jzl.di.*
-import cn.jzl.ecs.addon.AddonService
 import cn.jzl.ecs.addon.WorldSetup
 import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.observers.ObserveService
@@ -218,6 +217,23 @@ fun FamilyMatcher.FamilyBuilder.kind(kind: ComponentId) {
     })
 }
 
+interface WorldOwner {
+    val world: World
+}
+
+class RelationProvider(@PublishedApi internal val world: World) {
+    inline fun <reified C> id(): ComponentId = world.componentService.id<C>()
+    fun relation(kind: ComponentId, target: Entity): Relation = Relation(kind, target)
+    inline fun <reified K> relation(target: Entity): Relation = relation(id<K>(), target)
+    inline fun <reified K, reified T> relation(): Relation = relation(id<K>(), id<T>())
+
+    inline fun <reified C> component(): Relation = relation(id<C>(), world.components.componentId)
+    inline fun <reified C> sharedComponent(): Relation = relation(id<C>(), world.components.shadedId)
+}
+
+inline val WorldOwner.relations: RelationProvider get() = world.relations
+inline val WorldOwner.components: Components get() = world.componentService.components
+
 @ECSDsl
 inline fun World.entity(entity: Entity, configuration: EntityUpdateContext.(Entity) -> Unit) = entityService.configure(entity, true, configuration)
 
@@ -293,7 +309,8 @@ internal val codeAddon = createAddon("ECSCodeAddon", {}) {
         this bind singleton { new(::ObserveService) }
         this bind singleton { new(::ShadedComponentService) }
         this bind singleton { new(::PipelineImpl) }
-        this bind singleton { new(::AddonService) }
+
+        this bind singleton { new(::RelationProvider) }
     }
     Unit
 }
@@ -304,11 +321,11 @@ fun world(configuration: WorldSetup.() -> Unit): World {
         val di = DI(mainBuilder)
         di.on(DIContext).instance()
     }
-    val runOnOrAfters = mutableListOf<Pair<Phase, World.() -> Unit>>()
+    val phaseTasks = mutableListOf<Pair<Phase, WorldOwner.() -> Unit>>()
     val injectors = mutableListOf<DIMainBuilder.() -> Unit>()
     val worldSetup = WorldSetup(
         injector = { injectors.add(it) },
-        runOnOrAfter = { name, phase, block -> runOnOrAfters.add(phase to block) }
+        phaseTaskRegistry = { name, phase, block -> phaseTasks.add(phase to block) }
     )
     worldSetup.apply { install(codeAddon) }
     worldSetup.configuration()
@@ -319,10 +336,10 @@ fun world(configuration: WorldSetup.() -> Unit): World {
         index++
     }
 
-    for ((phase, block) in runOnOrAfters) {
-        world.pipeline.runOnOrAfter(phase) { world.block() }
+    for ((phase, task) in phaseTasks) {
+        world.pipeline.runOnOrAfter(phase) { task() }
     }
     world.pipeline.runStartupTasks()
-    runOnOrAfters.clear()
+    phaseTasks.clear()
     return world
 }

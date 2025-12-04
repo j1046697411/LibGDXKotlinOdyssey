@@ -3,10 +3,10 @@ package cn.jzl.ecs.observers
 import cn.jzl.ecs.Entity
 import cn.jzl.ecs.EntityType
 import cn.jzl.ecs.query.Query
-import cn.jzl.ecs.query.QueryEntityContext
+import cn.jzl.ecs.query.EntityQueryContext
 
 data class Observer(
-    val queries: List<Query<out QueryEntityContext>>,
+    val queries: List<Query<out EntityQueryContext>>,
     val involvedRelations: EntityType,
     val listenToEvents: Sequence<Entity>,
     val mustHoldData: Boolean = false,

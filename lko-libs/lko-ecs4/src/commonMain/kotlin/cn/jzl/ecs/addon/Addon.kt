@@ -3,6 +3,7 @@ package cn.jzl.ecs.addon
 import cn.jzl.di.DIMainBuilder
 import cn.jzl.di.singleton
 import cn.jzl.ecs.World
+import cn.jzl.ecs.WorldOwner
 import cn.jzl.ecs.query.ECSDsl
 import cn.jzl.ecs.system.Phase
 
@@ -15,7 +16,7 @@ fun interface Injector {
 
 class WorldSetup(
     val injector: Injector,
-    val runOnOrAfter: (String, Phase, World.() -> Unit) -> Unit,
+    val phaseTaskRegistry: (String, Phase, WorldOwner.() -> Unit) -> Unit,
 ) {
 
     @PublishedApi
@@ -34,7 +35,7 @@ class WorldSetup(
                     addonInstaller.configs.forEach { config.it() }
                     onInstall(config)
                 }
-                if (instances != null) {
+                if (instances != null && instances != Unit) {
                     val bindInstances: Instances & Any = instances
                     this bind singleton(tag = addon) { bindInstances }
                 }
@@ -70,50 +71,35 @@ fun <Configuration, Instance> createAddon(
     name = name,
     defaultConfiguration = defaultConfiguration,
 ) {
-    AddonSetup(name, it, injector, runOnOrAfter).init()
-}
-
-class AddonService(world: World) {
-
-    @PublishedApi
-    internal val addonToInstances = mutableMapOf<String, AddonToInstance<*>>()
-
-    inline fun <reified Instance> install(addon: Addon<*, Instance>, instance: Instance) {
-        println("install ${addon.name} with instance $instance")
-        addonToInstances[addon.name] = AddonToInstance(addon, instance)
-    }
-
-    @PublishedApi
-    internal data class AddonToInstance<Instance>(val addon: Addon<*, Instance>, val instance: Instance)
+    AddonSetup(name, it, this).init()
 }
 
 data class AddonSetup<Configuration>(
     val name: String,
     val configuration: Configuration,
-    val injector: Injector,
-    val runOnOrAfter: (String, Phase, World.() -> Unit) -> Unit
+    @PublishedApi internal val worldSetup: WorldSetup
 ) {
 
     @ECSDsl
     fun injects(configuration: DIMainBuilder.() -> Unit): AddonSetup<Configuration> = apply {
-        injector.inject(configuration)
+        worldSetup.injector.inject(configuration)
     }
 
     @ECSDsl
-    inline fun components(crossinline configuration: World.() -> Unit): AddonSetup<Configuration> = on(Phase.INIT_COMPONENTS, configuration)
+    inline fun components(crossinline configuration: WorldOwner.() -> Unit): AddonSetup<Configuration> = on(Phase.INIT_COMPONENTS, configuration)
 
     @ECSDsl
-    inline fun systems(crossinline configuration: World.() -> Unit): AddonSetup<Configuration> = on(Phase.INIT_SYSTEMS, configuration)
+    inline fun systems(crossinline configuration: WorldOwner.() -> Unit): AddonSetup<Configuration> = on(Phase.INIT_SYSTEMS, configuration)
 
     @ECSDsl
-    inline fun entities(crossinline configuration: World.() -> Unit): AddonSetup<Configuration> = on(Phase.INIT_ENTITIES, configuration)
+    inline fun entities(crossinline configuration: WorldOwner.() -> Unit): AddonSetup<Configuration> = on(Phase.INIT_ENTITIES, configuration)
 
     @ECSDsl
-    inline fun onStart(crossinline configuration: World.() -> Unit): AddonSetup<Configuration> = on(Phase.ENABLE, configuration)
+    inline fun onStart(crossinline configuration: WorldOwner.() -> Unit): AddonSetup<Configuration> = on(Phase.ENABLE, configuration)
 
     @ECSDsl
-    inline fun on(phase: Phase, crossinline configuration: World.() -> Unit): AddonSetup<Configuration> = apply {
-        runOnOrAfter(name, phase) { configuration() }
+    inline fun on(phase: Phase, crossinline configuration: WorldOwner.() -> Unit): AddonSetup<Configuration> = apply {
+        worldSetup.phaseTaskRegistry(name, phase) { configuration() }
     }
 }
 
@@ -121,8 +107,4 @@ data class Addon<Configuration, Instance>(
     val name: String,
     val defaultConfiguration: WorldSetup.() -> Configuration,
     val onInstall: WorldSetup.(Configuration) -> Instance,
-) {
-    fun withConfig(
-        customConfiguration: WorldSetup.() -> Configuration
-    ): Addon<Configuration, Instance> = copy(defaultConfiguration = customConfiguration)
-}
+)

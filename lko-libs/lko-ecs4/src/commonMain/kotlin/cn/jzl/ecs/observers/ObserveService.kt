@@ -6,7 +6,7 @@ import cn.jzl.ecs.FamilyMatcher
 import cn.jzl.ecs.Relation
 import cn.jzl.ecs.World
 import cn.jzl.ecs.query.OptionalGroup
-import cn.jzl.ecs.query.QueryEntityContext
+import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.query.Query
 import cn.jzl.ecs.query.forEach
 import cn.jzl.ecs.query.query
@@ -15,13 +15,13 @@ import cn.jzl.ecs.relation
 @PublishedApi
 internal class ObserveService(private val world: World) {
 
-    private val queries = mutableMapOf<Relation, Query<ObserveEntityContext>>()
+    private val queries = mutableMapOf<Relation, Query<ObserveEntityQueryContext>>()
 
     val notInvolvedRelation: Relation by lazy { Relation(world.components.any, world.components.any) }
 
-    private fun getQuery(target: Entity, eventId: ComponentId): Query<ObserveEntityContext> {
+    private fun getQuery(target: Entity, eventId: ComponentId): Query<ObserveEntityQueryContext> {
         return queries.getOrPut(Relation(target, eventId)) {
-            world.query { ObserveEntityContext(world, target, eventId) }
+            world.query { ObserveEntityQueryContext(world, target, eventId) }
         }
     }
 
@@ -52,7 +52,7 @@ internal class ObserveService(private val world: World) {
         }
     }
 
-    private class ObserveEntityContext(world: World, target: Entity, private val eventId: ComponentId) : QueryEntityContext(world) {
+    private class ObserveEntityQueryContext(world: World, target: Entity, private val eventId: ComponentId) : EntityQueryContext(world) {
         val targetObserver: Observer? by relation<Observer?>(target, OptionalGroup.One)
         val globalObserver: Observer? by relation<Observer?>(world.components.observerId, OptionalGroup.One)
         override fun FamilyMatcher.FamilyBuilder.configure() {

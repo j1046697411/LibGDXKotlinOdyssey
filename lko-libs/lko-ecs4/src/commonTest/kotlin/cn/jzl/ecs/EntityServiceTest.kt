@@ -1,12 +1,11 @@
 package cn.jzl.ecs
 
 import cn.jzl.ecs.observers.observe
-import cn.jzl.ecs.query.QueryEntityContext
+import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.query.forEach
 import cn.jzl.ecs.query.query
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class EntityServiceTest {
@@ -155,7 +154,7 @@ class EntityServiceTest {
         }
 
         val query = world.query {
-            object : QueryEntityContext(this, false) {
+            object : EntityQueryContext(this, false) {
                 val testComponent by component<TestComponent>()
                 val testComponent2 by component<TestComponent2?>()
                 val settings by sharedComponent<Settings>()

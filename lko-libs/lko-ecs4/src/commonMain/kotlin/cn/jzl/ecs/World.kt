@@ -2,7 +2,6 @@ package cn.jzl.ecs
 
 import cn.jzl.di.DI
 import cn.jzl.di.instance
-import cn.jzl.ecs.addon.AddonService
 import cn.jzl.ecs.observers.ObserveService
 import cn.jzl.ecs.query.QueryService
 import cn.jzl.ecs.system.Pipeline
@@ -43,5 +42,5 @@ class World(@PublishedApi internal val di: DI) {
     internal val pipeline: Pipeline by di.instance()
 
     @PublishedApi
-    internal val addonService by di.instance<AddonService>()
+    internal val relations by di.instance<RelationProvider>()
 }
