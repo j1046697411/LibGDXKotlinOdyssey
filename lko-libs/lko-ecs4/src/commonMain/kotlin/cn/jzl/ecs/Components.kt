@@ -11,7 +11,10 @@ class Components(componentProvider: ComponentProvider) {
         it.singleRelation()
     }
 
-    val prefab: ComponentId = componentProvider.configure<Prefab> { it.tag() }
+    val prefab: ComponentId = componentProvider.configure<Prefab> {
+        it.tag()
+        it.singleRelation()
+    }
 
     val instanceOf: ComponentId = componentProvider.configure<InstanceOf> {
         it.tag()
@@ -19,7 +22,7 @@ class Components(componentProvider: ComponentProvider) {
     }
 
     val componentId: ComponentId = componentProvider.id<ComponentOf>()
-    val shadedId: ComponentId = componentProvider.id<ShadedOf>()
+    val sharedId: ComponentId = componentProvider.id<SharedOf>()
 
     val onInserted: ComponentId = componentProvider.id<OnInserted>()
     val onRemoved: ComponentId = componentProvider.id<OnRemoved>()
@@ -32,7 +35,7 @@ class Components(componentProvider: ComponentProvider) {
     val observerId: ComponentId = componentProvider.id<Observer>()
     val eventId: ComponentId = componentProvider.configure<EventOf> { it.tag() }
 
-    sealed class ShadedOf
+    sealed class SharedOf
 
     sealed class ComponentOf
     sealed class ChildOf

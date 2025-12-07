@@ -31,7 +31,7 @@ abstract class AccessorOperations {
 
     inline fun <reified S> EntityQueryContext.sharedComponent(
         group: OptionalGroup = OptionalGroup.Ignore
-    ): RelationAccessor<S> = relation(world.componentService.components.shadedId, group)
+    ): RelationAccessor<S> = relation(world.componentService.components.sharedId, group)
 
     @PublishedApi
     internal inline fun <T : Accessor> addAccessor(create: () -> T): T {

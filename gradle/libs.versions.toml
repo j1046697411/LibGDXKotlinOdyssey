@@ -22,9 +22,9 @@ gdx = "1.13.1"
 gdx-vis="1.5.1"
 ktx="1.13.1-rc1"
 
-kotlin = "2.1.20"
+kotlin = "2.0.0"
 kotlinPoet = "2.1.0"
-ksp = "2.1.20-1.0.32"
+ksp = "2.0.0-1.0.32"
 
 junit-jupiter = "5.9.3"
 mockk = "1.13.8"
@@ -32,7 +32,13 @@ kotlinx-serialization = "1.7.0"  # 新增
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
-compose-foundation-layout = {module = "org.jetbrains.compose.foundation:foundation-layout", version.ref="compose-multiplatform"}
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-multiplatform" }
+
+#implementation "androidx.compose.ui:ui-tooling-preview:1.0.0"
+compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-multiplatform" }
+
 
 gdx-core = { module = "com.badlogicgames.gdx:gdx", version.ref = "gdx" }
 gdx-vis = { module="com.kotcrab.vis:vis-ui", version.ref="gdx-vis" }

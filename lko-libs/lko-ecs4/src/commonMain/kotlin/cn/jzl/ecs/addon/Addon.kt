@@ -74,11 +74,22 @@ fun <Configuration, Instance> createAddon(
     AddonSetup(name, it, this).init()
 }
 
+fun <Instance> createAddon(
+    name: String,
+    init: AddonSetup<Unit>.() -> Instance
+): Addon<Unit, Instance> = createAddon(name, { }, init)
+
 data class AddonSetup<Configuration>(
     val name: String,
     val configuration: Configuration,
     @PublishedApi internal val worldSetup: WorldSetup
 ) {
+
+    inline fun <reified Configuration1,reified Instance> install(
+        addon: Addon<Configuration1, Instance>,
+        noinline configuration: Configuration1.() -> Unit = {}) {
+        worldSetup.install(addon, configuration)
+    }
 
     @ECSDsl
     fun injects(configuration: DIMainBuilder.() -> Unit): AddonSetup<Configuration> = apply {

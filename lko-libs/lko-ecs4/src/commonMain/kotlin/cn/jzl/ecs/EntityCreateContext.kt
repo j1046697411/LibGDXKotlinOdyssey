@@ -17,7 +17,15 @@ open class EntityCreateContext(
         entityEditor.addRelation(this, relations.sharedComponent<T>())
     }
 
+    fun Entity.addSharedComponent(kind: ComponentId) {
+        entityEditor.addRelation(this, world.relations.sharedComponent(kind))
+    }
+
     inline fun <reified T> Entity.addTag(): Unit = entityEditor.addRelation(this, relations.component<T>())
+
+    fun Entity.addTag(kind: ComponentId) {
+        entityEditor.addRelation(this, world.relations.component(kind))
+    }
 
     @Suppress("NOTHING_TO_INLINE")
     inline fun Entity.addRelation(kind: ComponentId, target: Entity) {

@@ -1,6 +1,7 @@
 package cn.jzl.ecs.observers
 
 import cn.jzl.ecs.EntityType
+import cn.jzl.ecs.query.ECSDsl
 import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.query.Query
 
@@ -11,6 +12,7 @@ data class ObserverBuilder<Context>(
 ) : ExecutableObserver<Context> {
     override fun filter(vararg query: Query<out EntityQueryContext>): ExecutableObserver<Context> = copy(matchQueries = matchQueries + query)
 
+    @ECSDsl
     override fun exec(handle: Context.() -> Unit): Observer {
         val observer = Observer(
             matchQueries,

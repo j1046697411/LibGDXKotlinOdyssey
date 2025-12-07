@@ -6,7 +6,7 @@ import cn.jzl.ecs.observers.ObserveService
 import cn.jzl.ecs.query.QueryService
 import cn.jzl.ecs.system.Pipeline
 
-class World(@PublishedApi internal val di: DI) {
+data class World(val di: DI) {
 
     @PublishedApi
     internal val entityStore by di.instance<EntityStore>()

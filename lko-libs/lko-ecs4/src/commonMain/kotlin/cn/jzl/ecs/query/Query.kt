@@ -2,6 +2,7 @@
 
 package cn.jzl.ecs.query
 
+import cn.jzl.datastructure.list.ObjectFastList
 import cn.jzl.ecs.Archetype
 import cn.jzl.ecs.Components
 import cn.jzl.ecs.Entities
@@ -532,6 +533,8 @@ abstract class QueryAssociatedBy<K, E : EntityQueryContext>(val query: Query<E>)
 
     operator fun get(key: K): Entity? = map[key]
 
+    operator fun contains(key: K): Boolean = key in map
+
     override fun collect(collector: QueryCollector<E>) {
         map.values.forEach { entity: Entity ->
             world.entityService.runOn(entity) {
@@ -632,7 +635,7 @@ abstract class QueryGroupedBy<K, E : EntityQueryContext>(val query: Query<E>) : 
     }
 }
 
-inline fun <K, E : EntityQueryContext> Query<E>.associatedBy(crossinline associateBy: E.() -> K): QueryStream<E> {
+inline fun <K, E : EntityQueryContext> Query<E>.associatedBy(crossinline associateBy: E.() -> K): QueryAssociatedBy<K,E> {
     return object : QueryAssociatedBy<K, E>(this) {
         override fun E.associateBy(): K = associateBy()
     }
@@ -641,6 +644,38 @@ inline fun <K, E : EntityQueryContext> Query<E>.associatedBy(crossinline associa
 fun <K, E : EntityQueryContext> Query<E>.groupedBy(keySelector: E.() -> K): QueryGroupedBy<K, E> {
     return object : QueryGroupedBy<K, E>(this) {
         override fun E.keySelector(): K = keySelector()
+    }
+}
+
+class SingleQuery<E : EntityQueryContext>(private val context: E) : QueryStream<E> {
+
+    private val archetypes = ObjectFastList<Archetype>()
+
+    override val world: World get() = context.world
+
+    init {
+        context.buildArchetype(archetypes::insertLast)
+    }
+
+    override fun collect(collector: QueryCollector<E>) {
+        if (archetypes.isEmpty()) return
+        archetypes.forEach { archetype ->
+            context.updateCache(archetype)
+            for (entityIndex in 0 until archetype.table.entities.size) {
+                context.entityIndex = entityIndex
+                context.batchEntityEditor.entity = context.entity
+                val result = runCatching { collector.emit(context) }
+                check(entityIndex == context.entityIndex)
+                context.batchEntityEditor.apply(context.world)
+                if (result.exceptionOrNull() is AbortQueryException) {
+                    return
+                }
+                result.getOrThrow()
+            }
+        }
+    }
+
+    override fun close() {
     }
 }
 

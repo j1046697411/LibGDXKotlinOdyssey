@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/lko-libs/lko-di" />
             <option value="$PROJECT_DIR$/lko-libs/lko-ecs-serialization" />
             <option value="$PROJECT_DIR$/lko-libs/lko-ecs4" />
+            <option value="$PROJECT_DIR$/lko-sect" />
           </set>
         </option>
       </GradleProjectSettings>

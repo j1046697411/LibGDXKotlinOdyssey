@@ -1,15 +1,15 @@
 package cn.jzl.ecs.observers
 
 import cn.jzl.ecs.*
+import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.query.Query
-import cn.jzl.ecs.query.ShorthandQuery
 
-inline fun <reified Context, reified E : ShorthandQuery> ObserverBuilder<Context>.exec(
+inline fun <reified Context, reified E : EntityQueryContext> ExecutableObserver<Context>.exec(
     query: Query<E>,
     noinline handle: Context.(E) -> Unit
 ): Observer = filter(query).exec { handle(query.context) }
 
-inline fun <reified Context, reified E1 : ShorthandQuery, reified E2 : ShorthandQuery> ObserverBuilder<Context>.exec(
+inline fun <reified Context, reified E1 : EntityQueryContext, reified E2 : EntityQueryContext> ExecutableObserver<Context>.exec(
     query1: Query<E1>,
     query2: Query<E2>,
     noinline handle: Context.(E1, E2) -> Unit
@@ -18,7 +18,7 @@ inline fun <reified Context, reified E1 : ShorthandQuery, reified E2 : Shorthand
 inline fun <reified E> World.observe(): ObserverEventsBuilder<ObserverContext> = observe<E>(components.observerId)
 
 inline fun World.observe(
-    crossinline configure: suspend SequenceScope<ComponentId>.() -> Unit
+    crossinline configure: suspend SequenceScope<ComponentId>.(RelationProvider) -> Unit
 ): ObserverEventsBuilder<ObserverContext> = observe(components.observerId, configure)
 
 inline fun <reified E> World.observeWithData(): ObserverEventsBuilder<ObserverContextWithData<E>> = observeWithData(components.observerId)
@@ -35,8 +35,8 @@ inline fun <reified E> World.observeWithData(entity: Entity): ObserverEventsBuil
     yield(componentService.id<E>())
 }
 
-inline fun World.observe(entity: Entity, crossinline configure: suspend SequenceScope<ComponentId>.() -> Unit): ObserverEventsBuilder<ObserverContext> {
-    val listenToEvents = sequence { configure() }
+inline fun World.observe(entity: Entity, crossinline configure: suspend SequenceScope<ComponentId>.(RelationProvider) -> Unit): ObserverEventsBuilder<ObserverContext> {
+    val listenToEvents = sequence { configure(relations) }
     return ObserverWithoutData(this, listenToEvents) {
         attachObserver(entity, it)
     }

@@ -13,6 +13,7 @@ import cn.jzl.ecs.query.ECSDsl
 import cn.jzl.ecs.query.QueryService
 import cn.jzl.ecs.system.Phase
 import cn.jzl.ecs.system.PipelineImpl
+import kotlin.time.Duration
 
 typealias ComponentId = Entity
 
@@ -223,16 +224,26 @@ interface WorldOwner {
 
 class RelationProvider(@PublishedApi internal val world: World) {
     inline fun <reified C> id(): ComponentId = world.componentService.id<C>()
+
+    fun kind(kind: ComponentId): Relation = Relation(kind, world.componentService.components.any)
+    inline fun <reified K> kind(): Relation = kind(id<K>())
+
+    inline fun target(target: Entity): Relation = Relation(world.componentService.components.any, target)
+    inline fun <reified T> target(): Relation = target(id<T>())
+
     fun relation(kind: ComponentId, target: Entity): Relation = Relation(kind, target)
     inline fun <reified K> relation(target: Entity): Relation = relation(id<K>(), target)
     inline fun <reified K, reified T> relation(): Relation = relation(id<K>(), id<T>())
-
     inline fun <reified C> component(): Relation = relation(id<C>(), world.components.componentId)
-    inline fun <reified C> sharedComponent(): Relation = relation(id<C>(), world.components.shadedId)
+    inline fun component(kind: ComponentId): Relation = relation(kind, world.components.componentId)
+    inline fun <reified C> sharedComponent(): Relation = relation(id<C>(), world.components.sharedId)
+    inline fun sharedComponent(kind: ComponentId): Relation = relation(kind, world.components.sharedId)
 }
 
 inline val WorldOwner.relations: RelationProvider get() = world.relations
 inline val WorldOwner.components: Components get() = world.componentService.components
+
+inline fun World.isActive(entity: Entity): Boolean = entityService.isActive(entity)
 
 @ECSDsl
 inline fun World.entity(entity: Entity, configuration: EntityUpdateContext.(Entity) -> Unit) = entityService.configure(entity, true, configuration)
@@ -257,11 +268,25 @@ inline fun World.childOf(
 ): Entity = entityService.childOf(entity, entityId, true, configuration)
 
 @ECSDsl
+inline fun World.prefab(configuration: EntityCreateContext.(Entity) -> Unit): Entity = entity {
+    configuration(it)
+    it.addTag(components.prefab)
+}
+
+@ECSDsl
+inline fun World.prefab(entityId: Int, configuration: EntityCreateContext.(Entity) -> Unit): Entity = entity(entityId) {
+    configuration(it)
+    it.addTag(components.prefab)
+}
+
+@ECSDsl
 inline fun World.instanceOf(
     prefab: Entity,
     configuration: EntityCreateContext.(Entity) -> Unit
 ): Entity {
-    entity(prefab) { it.addTag<Components.Prefab>() }
+    entity(prefab) {
+        check(it.hasTag(components.prefab)) { "Entity $it is not a prefab" }
+    }
     return entityService.create(true) {
         configuration(it)
         it.addRelation(components.instanceOf, prefab)
@@ -274,7 +299,9 @@ inline fun World.instanceOf(
     entityId: Int,
     configuration: EntityCreateContext.(Entity) -> Unit
 ): Entity {
-    entity(prefab) { it.addTag<Components.Prefab>() }
+    entity(prefab) {
+        check(it.hasTag(components.prefab)) { "Entity $it is not a prefab" }
+    }
     return entityService.create(entityId, true) {
         configuration(it)
         it.addRelation(components.instanceOf, prefab)

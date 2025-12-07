@@ -1,7 +1,6 @@
 package cn.jzl.ecs
 
 import cn.jzl.datastructure.BitSet
-import cn.jzl.di.instance
 import kotlin.reflect.KClassifier
 
 class ComponentService(override val world: World) : ComponentProvider {
@@ -23,7 +22,7 @@ class ComponentService(override val world: World) : ComponentProvider {
 
     fun isSingleRelation(relation: Relation): Boolean = relation.kind.id in singleRelationBits
 
-    fun isShadedComponent(relation: Relation): Boolean = relation.target == components.shadedId
+    fun isShadedComponent(relation: Relation): Boolean = relation.target == components.sharedId
 
     override fun getOrRegisterEntityForClass(classifier: KClassifier): ComponentId {
         return componentIdEntities.getOrPut(classifier) { world.entityService.create(false) }

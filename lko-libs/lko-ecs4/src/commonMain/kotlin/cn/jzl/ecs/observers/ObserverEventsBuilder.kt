@@ -23,6 +23,14 @@ abstract class ObserverEventsBuilder<Context> : ExecutableObserver<Context> {
 
     override fun exec(handle: Context.() -> Unit): Observer = filter().exec(handle)
 
+    fun involving(entityType: EntityType) : ObserverBuilder<Context> {
+        return ObserverBuilder(this, entityType, emptyList())
+    }
+
+    fun involving(relations: Sequence<Relation>) : ObserverBuilder<Context> {
+        return involving(EntityType(relations.map { it.data }.toSet().toLongArray()))
+    }
+
     inline fun <reified C : Any> involving(size1: QueryShorthands.Size1? = null): ObserverBuilder<Context> {
         val component = world.componentService.component<C>()
         return ObserverBuilder(

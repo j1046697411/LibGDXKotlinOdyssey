@@ -18,7 +18,7 @@ class RelationAccessor<T>(
     override fun getValue(thisRef: EntityQueryContext, property: KProperty<*>): T {
         val componentIndex = componentIndex
         if (isMarkedNullable && componentIndex == null) return null as T
-        check(componentIndex != null) { "Component index is not set $componentIndex $relation ${archetype?.entityType}" }
+        check(componentIndex != null) { "Component index is not set $componentIndex $relation ${archetype?.archetypeType}" }
         val archetype = requireNotNull(this.archetype) { "Archetype is null" }
         return thisRef.world.relationService.getRelation(archetype, relation, thisRef.entityIndex, componentIndex) as T
     }

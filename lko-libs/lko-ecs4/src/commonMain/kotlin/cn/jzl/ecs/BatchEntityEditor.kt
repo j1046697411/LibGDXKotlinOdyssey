@@ -62,7 +62,7 @@ internal data class BatchEntityEditor(val world: World, internal var entity: Ent
         entityService.runOn(entity) {
             singleRelationOperates.forEach { operate ->
                 if (operate is AddEntityRelationOperate || operate is AddEntityRelationOperateWithData) {
-                    entityType.filter { it.kind == operate.relation.kind && it != operate.relation }.forEach {
+                    archetypeType.filter { it.kind == operate.relation.kind && it != operate.relation }.forEach {
                         operates.add(RemoveEntityRelationOperate(it))
                     }
                 }

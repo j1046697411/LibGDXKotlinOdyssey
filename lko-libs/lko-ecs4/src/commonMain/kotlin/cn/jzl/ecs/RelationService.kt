@@ -2,19 +2,18 @@ package cn.jzl.ecs
 
 import cn.jzl.datastructure.list.SortSet
 import cn.jzl.ecs.query.EntityQueryContext
-import cn.jzl.ecs.query.Query
-import cn.jzl.ecs.query.query
+import cn.jzl.ecs.query.Shorthand1Query
+import cn.jzl.ecs.query.SingleQuery
+import cn.jzl.ecs.query.singleQuery
 import kotlin.jvm.JvmInline
 
 @JvmInline
-value class RelationService(private val world: World) {
+value class RelationService(@PublishedApi internal val world: World) {
 
     @PublishedApi
     internal val entityService: EntityService get() = world.entityService
 
-    fun hasRelation(entity: Entity, relation: Relation): Boolean = entityService.runOn(entity) {
-        getComponentIndex(relation) != null
-    }
+    fun hasRelation(entity: Entity, relation: Relation): Boolean = entityService.runOn(entity) { relation in entityType }
 
     fun getRelation(entity: Entity, relation: Relation): Any? = entityService.runOn(entity) { entityIndex ->
         val componentIndex = getComponentIndex(relation) ?: return@runOn null
@@ -32,17 +31,26 @@ value class RelationService(private val world: World) {
     @PublishedApi
     internal fun getRelationUp(entity: Entity, kind: Entity): Entity? = entityService.runOn(entity) { entityIndex ->
         check(world.componentService.isSingleRelation(Relation(kind, entity)))
-        return@runOn entityType.filter { relation -> relation.kind == kind }.firstOrNull()?.target
+        return@runOn archetypeType.filter { relation -> relation.kind == kind }.firstOrNull()?.target
     }
 
     @PublishedApi
-    internal fun getRelationDown(entity: Entity, kind: Entity): Query<EntityQueryContext> {
+    internal fun getRelationDown(entity: Entity, kind: Entity): SingleQuery<EntityQueryContext> {
         val relation = Relation(kind, entity)
-        return world.query {
+        return world.singleQuery {
             object : EntityQueryContext(this) {
                 override fun FamilyMatcher.FamilyBuilder.configure() {
                     relation(relation)
                 }
+            }
+        }
+    }
+
+    @PublishedApi
+    internal inline fun <reified K> getRelationDown(entity: Entity): SingleQuery<Shorthand1Query<K>> {
+        return world.singleQuery {
+            object : Shorthand1Query<K>(this) {
+                override val component1: K by relation<K>(entity)
             }
         }
     }
@@ -66,9 +74,9 @@ value class RelationService(private val world: World) {
     ) {
         var oldRelationIndex = 0
         var newRelationIndex = 0
-        while (oldRelationIndex < oldArchetype.entityType.size || newRelationIndex < newArchetype.entityType.size) {
-            val oldRelation = oldArchetype.entityType.getOrNull(oldRelationIndex)
-            val newRelation = newArchetype.entityType.getOrNull(newRelationIndex)
+        while (oldRelationIndex < oldArchetype.archetypeType.size || newRelationIndex < newArchetype.archetypeType.size) {
+            val oldRelation = oldArchetype.archetypeType.getOrNull(oldRelationIndex)
+            val newRelation = newArchetype.archetypeType.getOrNull(newRelationIndex)
             if (oldRelation == null) {
                 if (newRelation != null) {
                     world.observeService.dispatch(entity, world.componentService.components.onInserted, null, newRelation)

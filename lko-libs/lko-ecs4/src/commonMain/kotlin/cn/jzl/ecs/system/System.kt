@@ -2,6 +2,7 @@ package cn.jzl.ecs.system
 
 import cn.jzl.ecs.World
 import cn.jzl.ecs.WorldOwner
+import cn.jzl.ecs.query.ECSDsl
 import cn.jzl.ecs.query.Query
 import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.query.forEach
@@ -71,12 +72,12 @@ class PipelineImpl(override val world: World) : Pipeline, WorldOwner {
 data class System<C : EntityQueryContext>(
     val name: String,
     val context: C,
-    val onTick: Query<C>.() -> Unit,
+    val onTick: Query<C>.(delta: Duration) -> Unit,
     val interval: Duration? = null
 )
 
 data class TrackedSystem<C : EntityQueryContext>(val system: System<C>, val query: Query<C>) {
-    fun tick(): Unit = system.run { query.onTick() }
+    fun tick(delta: Duration): Unit = system.run { query.onTick(delta) }
 }
 
 data class SystemBuilder<C : EntityQueryContext>(
@@ -90,7 +91,19 @@ data class SystemBuilder<C : EntityQueryContext>(
 
     fun every(interval: Duration): SystemBuilder<C> = copy(interval = interval)
 
-    inline fun exec(crossinline onTick: C.() -> Unit): TrackedSystem<C> = pipeline.addSystem(System(name, context, { forEach(onTick) }, interval))
+    @ECSDsl
+    inline fun exec(crossinline onTick: C.(delta: Duration) -> Unit): TrackedSystem<C> = pipeline.addSystem(System(name, context, { forEach { onTick(it) } }, interval))
 
-    fun execOnAll(onTick: Query<C>.() -> Unit): TrackedSystem<C> = pipeline.addSystem(System(name, context, onTick, interval))
+    fun execOnAll(onTick: Query<C>.(delta: Duration) -> Unit): TrackedSystem<C> = pipeline.addSystem(System(name, context, onTick, interval))
+}
+
+inline fun <reified C : EntityQueryContext> WorldOwner.system(
+    context: C,
+    name: String = "system",
+    interval: Duration? = null,
+): SystemBuilder<C> = SystemBuilder(world.pipeline, context, name, interval)
+
+fun World.update(delta: Duration) {
+    pipeline.getRepeatingInExecutionOrder().forEach { it.tick(delta) }
+    entityService.update()
 }

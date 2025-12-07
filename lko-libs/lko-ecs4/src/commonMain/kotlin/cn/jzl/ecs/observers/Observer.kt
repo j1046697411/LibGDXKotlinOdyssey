@@ -19,7 +19,7 @@ data class Observer(
         unsubscribes.add(onUnsubscribe)
     }
 
-    override fun close(): Unit {
+    override fun close() {
         unsubscribes.forEach { it() }
         unsubscribes.clear()
     }

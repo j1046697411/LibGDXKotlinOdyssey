@@ -15,8 +15,8 @@ interface FamilyMatcher {
         fun getArchetypeBits(relation: Relation): BitSet
     }
 
-    interface FamilyBuilder {
-        val world: World
+    interface FamilyBuilder : WorldOwner {
+        override val world: World
         val keys: LongFastList
         fun matcher(familyMatcher: FamilyMatcher)
     }

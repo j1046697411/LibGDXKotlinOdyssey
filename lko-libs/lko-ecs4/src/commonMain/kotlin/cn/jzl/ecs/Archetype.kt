@@ -3,7 +3,7 @@ package cn.jzl.ecs
 @ConsistentCopyVisibility
 data class Archetype internal constructor(
     val id: Int,
-    val entityType: EntityType,
+    val archetypeType: EntityType,
     val archetypeProvider: ArchetypeProvider,
     val componentService: ComponentService,
     private val entityService: EntityService
@@ -11,26 +11,18 @@ data class Archetype internal constructor(
     private val componentAddEdges = mutableMapOf<Relation, Archetype>()
     private val componentRemoveEdges = mutableMapOf<Relation, Archetype>()
 
-    val table: Table = Table(entityType.holdsData())
+    val table: Table = Table(archetypeType.holdsData())
 
-    val prefab: Entity? by lazy { entityType.firstOrNull { it.kind == componentService.components.instanceOf }?.target }
+    val prefab: Entity? by lazy { archetypeType.firstOrNull { it.kind == componentService.components.instanceOf }?.target }
 
-    val prefabEntityType: EntityType by lazy {
-        val prefabEntity = prefab
-        if (prefabEntity != null) {
-            entityService.runOn(prefabEntity) { instanceEntityType }
-        } else {
-            EntityType.ENTITY_TYPE_EMPTY
+    val entityType: EntityType by lazy {
+        val prefab = this.prefab ?: return@lazy archetypeType
+        val entityType = mutableSetOf<Long>()
+        entityType.addAll(archetypeType.map { it.data })
+        entityService.runOn(prefab) {
+            entityType.addAll(this.entityType.filter { it.kind != componentService.components.prefab }.map { it.data })
         }
-    }
-
-    val instanceEntityType: EntityType by lazy {
-        if (prefab == null) return@lazy entityType
-        val instanceEntityTypeSet = mutableSetOf<Long>()
-        instanceEntityTypeSet.addAll(entityType.map { it.data })
-        // 实例实体类型不包含预制体组件
-        instanceEntityTypeSet.addAll(prefabEntityType.filter { it.kind != componentService.components.prefab }.map { it.data })
-        EntityType(instanceEntityTypeSet.toLongArray())
+        EntityType(entityType.toLongArray())
     }
 
     private fun Relation.hasHoldsData(): Boolean = componentService.holdsData(this)
@@ -41,13 +33,13 @@ data class Archetype internal constructor(
 
     fun isShadedComponent(relation: Relation): Boolean {
         if (!componentService.isShadedComponent(relation)) return false
-        entityType.indexOf(relation).takeIf { it == -1 } ?: return true
+        archetypeType.indexOf(relation).takeIf { it == -1 } ?: return true
         val prefab = prefab ?: return false
         return entityService.runOn(prefab) { isShadedComponent(relation) }
     }
 
     fun getComponentIndex(relation: Relation): ComponentIndex? {
-        val entityType = if (componentService.isShadedComponent(relation)) entityType else table.entityType
+        val entityType = if (componentService.isShadedComponent(relation)) archetypeType else table.entityType
         val index = entityType.indexOf(relation)
         if (index != -1) {
             return ComponentIndex(Entity.ENTITY_INVALID, index)
@@ -57,7 +49,7 @@ data class Archetype internal constructor(
     }
 
     private fun getPrefabComponentIndex(entity: Entity, relation: Relation): ComponentIndex? {
-        val entityType = if (componentService.isShadedComponent(relation)) entityType else table.entityType
+        val entityType = if (componentService.isShadedComponent(relation)) archetypeType else table.entityType
         val index = entityType.indexOf(relation)
         if (index != -1) {
             return ComponentIndex(entity, index)
@@ -68,29 +60,29 @@ data class Archetype internal constructor(
 
     fun match(relation: Relation): Boolean {
         return when {
-            relation.kind == componentService.components.any -> instanceEntityType.any { it.target == relation.target }
-            relation.target == componentService.components.any -> entityType.any { it.kind == relation.kind }
-            else -> instanceEntityType.any { it == relation }
+            relation.kind == componentService.components.any -> entityType.any { it.target == relation.target }
+            relation.target == componentService.components.any -> archetypeType.any { it.kind == relation.kind }
+            else -> entityType.any { it == relation }
         }
     }
 
     operator fun contains(relation: Relation): Boolean {
-        entityType.indexOf(relation).takeIf { it == -1 } ?: return true
+        archetypeType.indexOf(relation).takeIf { it == -1 } ?: return true
         val prefab = prefab ?: return false
         return entityService.runOn(prefab) { relation in this }
     }
 
     operator fun plus(relation: Relation): Archetype {
-        if (entityType.indexOf(relation) != -1) return this
+        if (archetypeType.indexOf(relation) != -1) return this
         return componentAddEdges.getOrPut(relation) {
-            archetypeProvider.getArchetype(entityType + relation)
+            archetypeProvider.getArchetype(archetypeType + relation)
         }
     }
 
     operator fun minus(relation: Relation): Archetype {
-        if (entityType.indexOf(relation) == -1) return this
+        if (archetypeType.indexOf(relation) == -1) return this
         return componentRemoveEdges.getOrPut(relation) {
-            archetypeProvider.getArchetype(entityType - relation)
+            archetypeProvider.getArchetype(archetypeType - relation)
         }
     }
 }

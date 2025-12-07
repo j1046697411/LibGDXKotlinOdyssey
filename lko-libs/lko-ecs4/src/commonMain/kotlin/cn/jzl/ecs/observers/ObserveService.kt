@@ -32,9 +32,13 @@ internal class ObserveService(private val world: World) {
         }
     }
 
-    private fun Observer.handle(entity: Entity, event: Any?, involved: Relation ) {
+    private fun Observer.handle(entity: Entity, event: Any?, involved: Relation) {
         if (mustHoldData && event == null) return
-        if (involved != notInvolvedRelation && involvedRelations.isNotEmpty() && involved !in involvedRelations) return
+        if (involved != notInvolvedRelation && involvedRelations.isNotEmpty()) {
+            if (involved.target == world.components.any && involvedRelations.none { it.kind == involved.kind }) return
+            if (involved.kind == world.components.any && involvedRelations.none { it.target == involved.target }) return
+            if (involved !in involvedRelations) return
+        }
         if (queries.isNotEmpty()) {
             world.entityService.runOn(entity) { entityIndex ->
                 if (queries.all { query -> this in query }) {

@@ -50,6 +50,7 @@ addPluginLibs(File(rootDir, "lko-libs/lko-datastructure"))
 addPluginLibs(File(rootDir, "lko-libs/lko-di"))
 addPluginLibs(File(rootDir, "lko-libs/lko-ecs4"))
 addPluginLibs(File(rootDir, "lko-libs/lko-ecs-serialization"))
+include(":lko-sect")
 
 
 //addPluginLibs(File(rootDir, "lko-libs"))

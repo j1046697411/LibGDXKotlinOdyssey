@@ -13,10 +13,11 @@ value class Relation @PublishedApi internal constructor(@PublishedApi internal v
     operator fun compareTo(other: Relation): Int = data.compareTo(other.data)
 
     override fun toString(): String = "Relation(kind = $kind, target = $target)"
-
+    
     companion object {
         operator fun invoke(kind: ComponentId, target: Entity): Relation {
             return Relation(Long.Companion.fromLowHigh(kind.data, target.data))
         }
     }
+
 }
