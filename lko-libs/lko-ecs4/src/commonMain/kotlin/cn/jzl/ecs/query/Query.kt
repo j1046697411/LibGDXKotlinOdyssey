@@ -518,6 +518,8 @@ abstract class QueryAssociatedBy<K, E : EntityQueryContext>(val query: Query<E>)
 
     private val map = mutableMapOf<K, Entity>()
 
+    val keys: Sequence<K> get() = map.keys.asSequence()
+
     private val insertedObserver: Observer = query.world.observe<Components.OnInserted>().filter(query).exec {
         map[query.context.associateBy()] = entity
     }
@@ -535,19 +537,25 @@ abstract class QueryAssociatedBy<K, E : EntityQueryContext>(val query: Query<E>)
 
     operator fun contains(key: K): Boolean = key in map
 
-    override fun collect(collector: QueryCollector<E>) {
-        map.values.forEach { entity: Entity ->
-            world.entityService.runOn(entity) {
-                query.context.updateCache(this)
-                query.context.entityIndex = it
-                query.context.batchEntityEditor.entity = entity
-                val result = runCatching { collector.emit(query.context) }
-                query.context.batchEntityEditor.apply(world)
-                if (result.exceptionOrNull() is AbortQueryException) {
-                    return
-                }
+    fun associate(key: K, collector: QueryCollector<E>) {
+        associateEntity(map[key] ?: return, collector)
+    }
+
+    private fun associateEntity(entity: Entity, collector: QueryCollector<E>) {
+        world.entityService.runOn(entity) {
+            query.context.updateCache(this)
+            query.context.entityIndex = it
+            query.context.batchEntityEditor.entity = entity
+            val result = runCatching { collector.emit(query.context) }
+            query.context.batchEntityEditor.apply(world)
+            if (result.exceptionOrNull() is AbortQueryException) {
+                return
             }
         }
+    }
+
+    override fun collect(collector: QueryCollector<E>) {
+        map.values.forEach { entity: Entity -> associateEntity(entity, collector) }
     }
 
     override fun close() {
@@ -635,7 +643,7 @@ abstract class QueryGroupedBy<K, E : EntityQueryContext>(val query: Query<E>) : 
     }
 }
 
-inline fun <K, E : EntityQueryContext> Query<E>.associatedBy(crossinline associateBy: E.() -> K): QueryAssociatedBy<K,E> {
+inline fun <K, E : EntityQueryContext> Query<E>.associatedBy(crossinline associateBy: E.() -> K): QueryAssociatedBy<K, E> {
     return object : QueryAssociatedBy<K, E>(this) {
         override fun E.associateBy(): K = associateBy()
     }
