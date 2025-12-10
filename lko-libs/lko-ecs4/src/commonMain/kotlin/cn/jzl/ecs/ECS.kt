@@ -318,6 +318,7 @@ inline fun <reified C> World.componentId(configuration: ComponentConfigureContex
 }
 
 inline fun World.destroy(entity: Entity): Unit = entityService.destroy(entity)
+inline fun World.destroy(entities: Entities): Unit = entityService.destroy(entities)
 
 internal val codeAddon = createAddon("ECSCodeAddon", {}) {
     injects {

@@ -520,6 +520,8 @@ abstract class QueryAssociatedBy<K, E : EntityQueryContext>(val query: Query<E>)
 
     val keys: Sequence<K> get() = map.keys.asSequence()
 
+    val entities: Sequence<Entity> = map.values.asSequence()
+
     private val insertedObserver: Observer = query.world.observe<Components.OnInserted>().filter(query).exec {
         map[query.context.associateBy()] = entity
     }
@@ -694,6 +696,10 @@ class Query<E : EntityQueryContext>(@PublishedApi internal val context: E) : Que
     private val family: Family = context.build()
 
     val size: Int get() = family.size
+
+    val entities: Sequence<Entity> = sequence {
+        family.archetypes.forEach { yieldAll(it.table.entities) }
+    }
 
     internal operator fun contains(archetype: Archetype): Boolean {
         return family.familyMatcher.match(archetype)
