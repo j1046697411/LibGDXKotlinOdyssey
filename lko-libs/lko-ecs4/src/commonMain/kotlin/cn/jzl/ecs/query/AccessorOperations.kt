@@ -1,8 +1,12 @@
 package cn.jzl.ecs.query
 
+import cn.jzl.ecs.ComponentId
 import cn.jzl.ecs.Entity
 import cn.jzl.ecs.Relation
+import cn.jzl.ecs.componentId
+import cn.jzl.ecs.components
 import cn.jzl.ecs.id
+import cn.jzl.ecs.relations
 import kotlin.reflect.typeOf
 
 abstract class AccessorOperations {
@@ -17,13 +21,25 @@ abstract class AccessorOperations {
         target: Entity,
         group: OptionalGroup = OptionalGroup.Ignore
     ): RelationAccessor<K> = addAccessor {
-        val relation = Relation(world.componentService.id<K>(), target)
+        val relation = Relation(world.componentId<K>(), target)
         RelationAccessor(typeOf<K>(), relation, group) { getComponentIndex(relation) }
+    }
+
+    fun EntityQueryContext.relationUp(kind: ComponentId): RelationUpAccessor = addAccessor {
+        RelationUpAccessor(kind)
+    }
+
+    inline fun <reified K> EntityQueryContext.relationUp(): RelationUpAccessor = relationUp(world.componentId<K>())
+
+    fun EntityQueryContext.prefab(): RelationUpAccessor = relationUp(components.instanceOf)
+
+    fun EntityQueryContext.ifRelationExist(relation: Relation): IfRelationExistAccessor = addAccessor {
+        IfRelationExistAccessor(relation)
     }
 
     inline fun <reified K, reified T> EntityQueryContext.relation(
         group: OptionalGroup = OptionalGroup.Ignore
-    ): RelationAccessor<K> = relation(world.componentService.id<T>(), group)
+    ): RelationAccessor<K> = relation(world.componentId<T>(), group)
 
     inline fun <reified C> EntityQueryContext.component(
         group: OptionalGroup = OptionalGroup.Ignore

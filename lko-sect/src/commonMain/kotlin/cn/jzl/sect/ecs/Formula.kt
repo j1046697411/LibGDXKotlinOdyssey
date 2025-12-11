@@ -3,24 +3,21 @@ package cn.jzl.sect.ecs
 import cn.jzl.di.instance
 import cn.jzl.di.new
 import cn.jzl.di.singleton
-import cn.jzl.ecs.Entity
-import cn.jzl.ecs.EntityRelationContext
-import cn.jzl.ecs.FamilyMatcher
-import cn.jzl.ecs.World
+import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
-import cn.jzl.ecs.componentId
-import cn.jzl.ecs.entity
-import cn.jzl.ecs.query.EntityQueryContext
-import cn.jzl.ecs.query.associatedBy
-import cn.jzl.ecs.query.query
+import cn.jzl.ecs.query.*
 import cn.jzl.sect.ecs.core.Named
+import cn.jzl.sect.ecs.core.OwnedBy
 import cn.jzl.sect.ecs.core.coreAddon
 import cn.jzl.sect.ecs.item.itemAddon
 
 sealed class Formula
+interface FormulaChecker {
+    fun check(provider: Entity, receiver: Entity, formula: Entity): Boolean
+}
 
 @JvmInline
-value class FormulaMaterial(val count: Int)
+value class Material(val count: Int)
 
 @JvmInline
 value class Product(val count: Int)
@@ -33,105 +30,97 @@ val formulaAddon = createAddon("formula") {
     injects { this bind singleton { new(::FormulaService) } }
     components {
         world.componentId<Formula> { it.tag() }
-        world.componentId<FormulaMaterial>()
+        world.componentId<Material>()
         world.componentId<Product>()
+        world.componentId<FormulaChecker>()
     }
 }
 
 class FormulaService(world: World) : EntityRelationContext(world) {
 
     private val inventoryService by world.di.instance<InventoryService>()
-    private val formulas = world.query { EntityFormulaContext(this) }.associatedBy { named }
 
-    fun createFormula(named: Named, block: FormulaContext.() -> Unit): Entity {
-        // 检查重复名称
-        require(named !in formulas) { "配方${named.name}已存在" }
+    private val materials = world.query { EntityMaterialContext(this) }.groupedBy { formula }
+    private val products = world.query { EntityProductContext(this) }.groupedBy { formula }
 
-        val materialList = mutableListOf<Pair<Entity, Int>>()
-        val productList = mutableListOf<Pair<Entity, Int>>()
+    fun executeFormula(provider: Entity, receiver: Entity, formula: Entity) {
+        require(formula.hasTag<Formula>())
+        val formulaChecker = formula.getComponent<FormulaChecker>()
+        require(formulaChecker.check(provider, receiver, formula)) {
+            "配方${formula.id}验证失败：提供者${provider.id}或接收者${receiver.id}不满足配方要求"
+        }
+        val materialGroup = materials[formula]
+        val productGroup = products[formula]
+        require(materialGroup != null) { "配方${formula.id}没有材料" }
+        require(productGroup != null) { "配方${formula.id}没有产品" }
+        // 检查用户是否有足够的材料
+        require(materialGroup.all { inventoryService.hasEnoughItems(provider, itemPrefab, material.count) }) {
+            "提供者${provider.id}材料不足，无法执行配方${formula.id}"
+        }
+        // 消耗材料
+        materialGroup.forEach {
+            inventoryService.removeItem(provider, itemPrefab, material.count)
+        }
+        // 添加产品
+        productGroup.forEach {
+            inventoryService.addItem(receiver, itemPrefab, product.count)
+        }
+    }
 
-        val entityFormulaContext = object : FormulaContext {
+    @ECSDsl
+    fun createFormula(named: Named, formulaChecker: FormulaChecker, block: FormulaContext.() -> Unit): Entity {
+        val materials = mutableMapOf<Entity, Int>()
+        val products = mutableMapOf<Entity, Int>()
+        val formulaContext = object : FormulaContext {
             override fun material(itemPrefab: Entity, count: Int) {
-                require(count > 0) { "材料数量必须大于0" }
-                materialList.add(itemPrefab to count)
+                require(count >= 1) { "材料数量必须大于0，当前值: $count" }
+                require(itemPrefab !in materials) { "材料物品预制体${itemPrefab.id}已存在于配方中，不能重复添加" }
+                materials[itemPrefab] = count
             }
 
             override fun product(itemPrefab: Entity, count: Int) {
-                require(count > 0) { "产品数量必须大于0" }
-                productList.add(itemPrefab to count)
+                require(count >= 1) { "产品数量必须大于0，当前值: $count" }
+                require(itemPrefab !in products) { "产品物品预制体${itemPrefab.id}已存在于配方中，不能重复添加" }
+                products[itemPrefab] = count
             }
         }
-        entityFormulaContext.block()
-
-        // 验证配方至少有一个材料和至少有一个产品
-        require(materialList.isNotEmpty()) { "配方${named.name}必须至少有一个材料" }
-        require(productList.isNotEmpty()) { "配方${named.name}必须至少有一个产品" }
-
-        return world.entity {
-            // 添加材料和产品关系
-            materialList.forEach { (itemPrefab, count) ->
-                it.addRelation(itemPrefab, FormulaMaterial(count))
-            }
-            productList.forEach { (itemPrefab, count) ->
-                it.addRelation(itemPrefab, Product(count))
-            }
+        formulaContext.block()
+        require(materials.isNotEmpty()) { "配方必须至少包含一种材料" }
+        require(products.isNotEmpty()) { "配方必须至少包含一种产品" }
+        val formula = world.entity {
             it.addTag<Formula>()
             it.addComponent(named)
+            it.addComponent(formulaChecker)
         }
-    }
-
-    /**
-     * 执行配方，消耗玩家的材料并生成产品
-     * @param player 玩家实体
-     * @param formulaEntity 配方实体
-     */
-    fun executeFormula(player: Entity, formulaEntity: Entity) {
-        // 验证配方实体
-        require(formulaEntity.hasTag<Formula>()) { "实体${formulaEntity.id}不是有效的配方" }
-
-        // 获取材料需求（通过 FormulaMaterial 关系）
-        val materialRequirements = formulaEntity.getRelationsWithData<FormulaMaterial>().toList()
-        require(materialRequirements.isNotEmpty()) { "配方${formulaEntity.id}没有材料需求" }
-
-        // 使用 InventoryService 验证材料是否足够
-        materialRequirements.forEach { (relation, requirement) ->
-            val itemPrefab = relation.target
-            require(inventoryService.hasEnoughItems(player, itemPrefab, requirement.count)) {
-                "玩家${player.id}材料不足，需要: ${requirement.count}, 拥有: ${inventoryService.getItemCount(player, itemPrefab)}"
+        materials.forEach { (itemPrefab, count) ->
+            world.childOf(formula) {
+                it.addComponent(Material(count))
+                it.addRelation<OwnedBy>(itemPrefab)
             }
         }
-
-        // 使用 InventoryService 批量消耗材料
-        val materialsToConsume = materialRequirements.associate { it.relation.target to it.data.count }
-        inventoryService.consumeItems(player, materialsToConsume)
-
-        // 获取产品列表（通过 Product 关系）
-        val products = formulaEntity.getRelationsWithData<Product>().toList()
-        require(products.isNotEmpty()) { "配方${formulaEntity.id}没有产品定义" }
-
-        // 使用 InventoryService 添加所有产品
-        products.forEach { (relation, product) ->
-            val itemPrefab = relation.target
-            inventoryService.addItem(player, itemPrefab, product.count)
+        products.forEach { (itemPrefab, count) ->
+            world.childOf(formula) {
+                it.addComponent(Product(count))
+                it.addRelation<OwnedBy>(itemPrefab)
+            }
         }
+        return formula
     }
-
-    fun getFormula(named: Named): Entity? = formulas[named]
-
-    fun getAllFormulas(): Sequence<Entity> = formulas.entities
 
     interface FormulaContext {
         fun material(itemPrefab: Entity, count: Int)
         fun product(itemPrefab: Entity, count: Int)
     }
 
-    class EntityFormulaContext(world: World) : EntityQueryContext(world) {
-        val named by component<Named>()
-        val materials get() = getRelations<FormulaMaterial>()
-        val products get() = getRelations<Product>()
+    class EntityMaterialContext(world: World) : EntityQueryContext(world) {
+        val material by component<Material>()
+        val formula by relationUp(components.childOf)
+        val itemPrefab by relationUp<OwnedBy>()
+    }
 
-        override fun FamilyMatcher.FamilyBuilder.configure() {
-            component<Formula>()
-        }
+    class EntityProductContext(world: World) : EntityQueryContext(world) {
+        val product by component<Product>()
+        val formula by relationUp(components.childOf)
+        val itemPrefab by relationUp<OwnedBy>()
     }
 }

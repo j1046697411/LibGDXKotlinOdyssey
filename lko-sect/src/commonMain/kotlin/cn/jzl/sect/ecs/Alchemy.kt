@@ -1,55 +1,81 @@
 package cn.jzl.sect.ecs
 
+import cn.jzl.di.instance
 import cn.jzl.di.new
 import cn.jzl.di.singleton
-import cn.jzl.ecs.Entity
-import cn.jzl.ecs.EntityCreateContext
-import cn.jzl.ecs.EntityRelationContext
-import cn.jzl.ecs.FamilyMatcher
-import cn.jzl.ecs.World
+import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
-import cn.jzl.ecs.componentId
-import cn.jzl.ecs.entity
-import cn.jzl.ecs.query.*
+import cn.jzl.ecs.observers.emit
+import cn.jzl.ecs.observers.exec
+import cn.jzl.ecs.observers.observe
+import cn.jzl.ecs.query.ECSDsl
+import cn.jzl.ecs.query.EntityQueryContext
+import cn.jzl.ecs.query.query
 import cn.jzl.sect.ecs.core.Named
 import cn.jzl.sect.ecs.core.OwnedBy
+import cn.jzl.sect.ecs.core.UsedBy
+import kotlin.time.Duration.Companion.seconds
 
 sealed class AlchemyFurnace
-sealed class Idle
+data class OnAlchemyCompleteEvent(val alchemyFurnace: Entity, val user: Entity)
 
 val alchemyAddon = createAddon("alchemy", {}) {
+    install(formulaAddon)
+    install(countdownAddon)
     injects {
         this bind singleton { new(::AlchemyService) }
     }
-    components { world.componentId<AlchemyFurnace> { it.tag() } }
+    components {
+        world.componentId<AlchemyFurnace> { it.tag() }
+        world.componentId<OnAlchemyCompleteEvent>()
+    }
 }
 
 class AlchemyService(world: World) : EntityRelationContext(world) {
-    private val alchemyFurnaces = world.query {
-        object : EntityQueryContext(this) {
-            val owner: Entity get() = requireNotNull(getRelationUp<OwnedBy>()) {}
-            override fun FamilyMatcher.FamilyBuilder.configure() {
-                component<Idle>()
-                component<AlchemyFurnace>()
-            }
+
+    private val formulaService by world.di.instance<FormulaService>()
+    private val inventoryService by world.di.instance<InventoryService>()
+
+    private val alchemyFurnaces = world.query { EntityAlchemyContext(this) }
+
+    init {
+        world.observe<OnCountdownComplete>().exec(alchemyFurnaces) {
+            onAlchemyComplete(entity, it.user)
         }
-    }.groupedBy { owner }
+    }
+
+    private fun onAlchemyComplete(alchemyFurnace: Entity, user: Entity) {
+        inventoryService.getAllItems(alchemyFurnace).forEach { entity ->
+            world.entity(entity) { it.addRelation<OwnedBy>(user) }
+        }
+        world.entity(alchemyFurnace) { it.removeRelation<UsedBy>(user) }
+        world.emit(alchemyFurnace, OnAlchemyCompleteEvent(alchemyFurnace, user))
+    }
 
     @ECSDsl
-    fun createAlchemyFurnace(named: Named, sect: Entity, block: EntityCreateContext.(Entity) -> Unit): Entity = world.entity {
+    fun createAlchemyFurnace(named: Named, block: EntityCreateContext.(Entity) -> Unit): Entity = world.entity {
         it.addTag<AlchemyFurnace>()
-        it.addRelation<OwnedBy>(sect)
         it.addComponent(named)
-        it.addTag<Idle>()
         block(it)
     }
 
-    fun getIdleAlchemyFurnace(sect: Entity): Entity? {
-        return alchemyFurnaces[sect]?.map { entity }?.firstOrNull()
+    fun alchemy(alchemyFurnace: Entity, user: Entity, formula: Entity) {
+        require(alchemyFurnace.hasTag<AlchemyFurnace>())
+        require(alchemyFurnace.getRelationUp<UsedBy>() == null)
+        formulaService.executeFormula(user, alchemyFurnace, formula)
+        world.entity(alchemyFurnace) {
+            it.addRelation<UsedBy>(user)
+            it.addComponent(Countdown(5.seconds))
+        }
     }
 
-    fun alchemy(sect: Entity, player: Entity, formula: Entity) {
-        val alchemy = getIdleAlchemyFurnace(sect) ?: return
+    private class EntityAlchemyContext(world: World) : EntityQueryContext(world) {
 
+        val user by relationUp<UsedBy>()
+
+        override fun FamilyMatcher.FamilyBuilder.configure() {
+            relation(relations.component<AlchemyFurnace>())
+        }
     }
 }
+

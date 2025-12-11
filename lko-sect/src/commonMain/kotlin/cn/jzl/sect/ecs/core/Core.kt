@@ -11,10 +11,16 @@ value class Description(val description: String)
 
 sealed class OwnedBy
 
+sealed class UsedBy
+
 val coreAddon = createAddon("core", {}) {
     components {
         world.componentId<Named>()
         world.componentId<OwnedBy> {
+            it.singleRelation()
+            it.tag()
+        }
+        world.componentId<UsedBy> {
             it.singleRelation()
             it.tag()
         }

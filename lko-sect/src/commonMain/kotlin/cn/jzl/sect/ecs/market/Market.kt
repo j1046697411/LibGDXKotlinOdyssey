@@ -286,36 +286,3 @@ class MarketService(world: World) : EntityRelationContext(world) {
         fun addItem(item: Entity, count: Int, unitPrice: Int)
     }
 }
-
-fun test(world: World) {
-    val player = world.entity { } // 玩家
-    val itemPrefab1 = world.prefab { } // 物品模板
-    val itemPrefab2 = world.prefab { } // 物品模板2
-    val market = world.entity { it.addTag<Market>() } // 市场
-
-    val item1 = world.instanceOf(itemPrefab1) { // 物品1
-        it.addRelation<OwnedBy>(player)
-    }
-    val item2 = world.instanceOf(itemPrefab2) { // 物品2
-        it.addRelation<OwnedBy>(player)
-    }
-
-    val consignmentOrder = world.entity { // 寄售订单
-        it.addRelation<ConsignmentOrder>(market)
-        it.addRelation<OwnedBy>(player)
-    }
-    world.entity(item1) { // 寄售订单-物品1
-        it.addRelation(consignmentOrder, ConsignmentItemData(20))
-    }
-    world.entity(item2) { // 寄售订单-物品2
-        it.addRelation(consignmentOrder, ConsignmentItemData(20))
-    }
-
-    val acquisitionOrder = world.entity { // 收购订单
-        it.addRelation<AcquisitionOrder>(market)
-        it.addRelation<OwnedBy>(player)
-
-        it.addRelation(itemPrefab1, AcquisitionItemData(20, 1)) // 收购订单-物品1
-        it.addRelation(itemPrefab2, AcquisitionItemData(20, 1)) // 收购订单-物品2
-    }
-}
