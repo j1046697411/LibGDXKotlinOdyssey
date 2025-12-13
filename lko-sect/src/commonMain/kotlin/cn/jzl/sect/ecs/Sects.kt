@@ -12,6 +12,10 @@ import cn.jzl.ecs.query.query
 import cn.jzl.sect.ecs.core.Named
 import cn.jzl.sect.ecs.core.OwnedBy
 import cn.jzl.sect.ecs.core.coreAddon
+import cn.jzl.sect.ecs.sect.MemberQuota
+import cn.jzl.sect.ecs.sect.SectResourceService
+import cn.jzl.sect.ecs.sect.SectMemberService
+import cn.jzl.sect.ecs.sect.SectConfig
 
 /**
  * 宗门
@@ -34,9 +38,10 @@ value class Contribution(val value: Int)
  * 成员角色
  */
 enum class MemberRole {
-    LEADER,    // 宗主
-    ELDER,     // 长老
-    DISCIPLE   // 弟子
+    LEADER,          // 宗主：全权限
+    ELDER,           // 长老：管理权限
+    INNER_DISCIPLE,  // 内门弟子：任务发布权限
+    OUTER_DISCIPLE   // 外门弟子：仅参与权限
 }
 
 /**
@@ -45,7 +50,8 @@ enum class MemberRole {
 data class MemberData(
     val player: Entity,
     val role: MemberRole,
-    val contribution: Contribution
+    val contribution: Contribution,
+    val joinTime: Long = 0L  // 加入时间戳
 )
 
 /**
@@ -68,13 +74,18 @@ val sectAddon = createAddon("sect") {
     install(levelingAddon)
     install(moneyAddon)
     install(characterAddon)
+    install(inventoryAddon)
     injects {
         this bind singleton { new(::SectService) }
+        this bind singleton { new(::SectResourceService) }
+        this bind singleton { new(::SectMemberService) }
     }
     components {
         world.componentId<Sect> { it.tag() }
         world.componentId<SectReputation>()
         world.componentId<MemberData>()
+        world.componentId<MemberQuota>()
+        world.componentId<SectConfig>()
         world.componentId<Building> { it.tag() }
         world.componentId<AlchemyHall> { it.tag() }
         world.componentId<Library> { it.tag() }
