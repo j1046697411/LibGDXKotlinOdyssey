@@ -28,9 +28,18 @@
 
 ## 章程检查
 
-*门控: 必须在阶段 0 研究前通过. 阶段 1 设计后重新检查. *
+*门控: 必须在阶段 0 研究前通过. 阶段 1 设计后重新检查.*
 
-[基于章程文件确定的门控条件]
+**核心原则验证** (参考 `.specify/memory/constitution.md`):
+
+- [ ] **I. ECS 优先**: 游戏逻辑是否使用 lko-ecs4 的 ECS 模式实现？
+- [ ] **II. 服务复用优先**: 是否检查并复用了已有服务（MoneyService、LevelingService、ItemService 等）？
+- [ ] **III. 框架一致性**: 是否遵循 lko-sect 的 Addon 模式和服务类规范？
+
+**技术约束验证**:
+- [ ] 使用 Kotlin Multiplatform
+- [ ] 使用 lko-di 进行依赖注入
+- [ ] 代码组织符合项目结构规范
 
 ## 项目结构
 
