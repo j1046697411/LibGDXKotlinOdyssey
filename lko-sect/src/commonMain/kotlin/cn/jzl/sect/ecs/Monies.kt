@@ -41,10 +41,12 @@ fun EntityCreateContext.getMoney(entity: Entity): Int = entity.getComponent<Mone
 
 fun EntityCreateContext.increaseMoney(entity: Entity, money: Int) {
     val currentMoney = entity.getComponent<Money?>()
-    entity.addComponent(Money(currentMoney?.value ?: money))
+    val newValue = (currentMoney?.value ?: 0) + money
+    entity.addComponent(Money(newValue))
 }
 
 fun EntityCreateContext.decreaseMoney(entity: Entity, money: Int) {
     val currentMoney = entity.getComponent<Money?>()
-    entity.addComponent(Money(currentMoney?.value ?: -money))
+    val newValue = (currentMoney?.value ?: 0) - money
+    entity.addComponent(Money(newValue))
 }
