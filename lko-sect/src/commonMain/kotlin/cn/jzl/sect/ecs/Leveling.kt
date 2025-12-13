@@ -43,12 +43,15 @@ class LevelingService(world: World) : EntityRelationContext(world) {
         val experienceFormula = entity.getComponent<ExperienceFormula?>() ?: experienceFormula
         var remainingExp = currentExp.value + exp
         var currentLevel = level.value
+        println("[Leveling] addExperience entity=${entity.id} level=${level.value} currentExp=${currentExp.value} add=${exp}")
         while (true) {
             val upgradeExperience = experienceFormula.getExperienceForLevel(currentLevel + 1)
+            println("[Leveling] checking level=${currentLevel+1} need=$upgradeExperience remaining=$remainingExp")
             if (upgradeExperience > remainingExp) break
             currentLevel++
             remainingExp -= upgradeExperience
         }
+        println("[Leveling] result newLevel=$currentLevel remaining=$remainingExp")
         val upgrade = currentLevel != level.value
         world.entity(entity) {
             if (upgrade) it.addRelation(attributeLevel, AttributeValue(currentLevel))
