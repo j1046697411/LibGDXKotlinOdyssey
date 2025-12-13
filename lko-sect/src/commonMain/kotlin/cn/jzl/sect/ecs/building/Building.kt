@@ -1,18 +1,5 @@
 package cn.jzl.sect.ecs.building
 
-import cn.jzl.sect.ecs.Building
-
-/**
- * 练功房
- * 提升弟子修炼效率
- */
-sealed class TrainingHall : Building()
-
-/**
- * 藏宝阁
- * 存储珍贵物品，提供额外存储空间
- */
-sealed class TreasureVault : Building()
 
 /**
  * 建筑类型组件

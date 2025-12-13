@@ -61,7 +61,7 @@ fun calculateUpgradeCost(
     currentLevel: Long,
     multiplier: Float = 1.5f
 ): Map<Entity, Int> {
-    val factor = kotlin.math.pow(multiplier.toDouble(), (currentLevel - 1).toDouble()).toFloat()
+    val factor = calculateUpgradeFactor(multiplier, currentLevel)
     val result = mutableMapOf<Entity, Int>()
 
     // 计算材料消耗
@@ -80,7 +80,16 @@ fun calculateUpgradeSpiritStoneCost(
     currentLevel: Long,
     multiplier: Float = 1.5f
 ): Int {
-    val factor = kotlin.math.pow(multiplier.toDouble(), (currentLevel - 1).toDouble()).toFloat()
+    val factor = calculateUpgradeFactor(multiplier, currentLevel)
     return (baseCost.spiritStones * factor).toInt()
+}
+
+/**
+ * 计算倍率因子
+ */
+private fun calculateUpgradeFactor(multiplier: Float, currentLevel: Long): Float {
+    var factor = 1.0f
+    repeat((currentLevel - 1).toInt()) { factor *= multiplier }
+    return factor
 }
 

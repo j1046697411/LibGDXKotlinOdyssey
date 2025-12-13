@@ -4,6 +4,8 @@ import cn.jzl.di.new
 import cn.jzl.di.singleton
 import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.componentId
+import cn.jzl.sect.ecs.TrainingHall
+import cn.jzl.sect.ecs.TreasureVault
 import cn.jzl.sect.ecs.levelingAddon
 import cn.jzl.sect.ecs.moneyAddon
 import cn.jzl.sect.ecs.sectAddon

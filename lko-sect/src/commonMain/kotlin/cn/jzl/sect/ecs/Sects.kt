@@ -69,6 +69,16 @@ sealed class AlchemyHall : Building()
  */
 sealed class Library : Building()
 
+/**
+ * 练功房
+ */
+sealed class TrainingHall : Building()
+
+/**
+ * 藏宝阁
+ */
+sealed class TreasureVault : Building()
+
 val sectAddon = createAddon("sect") {
     install(coreAddon)
     install(levelingAddon)

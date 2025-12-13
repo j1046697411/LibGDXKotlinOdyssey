@@ -32,29 +32,4 @@ val taskAddon = createAddon("task") {
     }
 }
 
-/**
- * 任务接受事件
- */
-data class OnTaskAccepted(
-    val task: cn.jzl.ecs.Entity,
-    val disciple: cn.jzl.ecs.Entity
-)
-
-/**
- * 任务完成事件
- */
-data class OnTaskCompleted(
-    val task: cn.jzl.ecs.Entity,
-    val disciple: cn.jzl.ecs.Entity,
-    val reward: TaskReward
-)
-
-/**
- * 任务失败事件
- */
-data class OnTaskFailed(
-    val task: cn.jzl.ecs.Entity,
-    val disciple: cn.jzl.ecs.Entity,
-    val reason: TaskFailReason
-)
 

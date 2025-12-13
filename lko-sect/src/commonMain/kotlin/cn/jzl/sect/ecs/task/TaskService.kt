@@ -4,12 +4,12 @@ import cn.jzl.di.instance
 import cn.jzl.ecs.Entity
 import cn.jzl.ecs.EntityCreateContext
 import cn.jzl.ecs.EntityRelationContext
+import cn.jzl.ecs.FamilyMatcher
 import cn.jzl.ecs.World
+import cn.jzl.ecs.entity
 import cn.jzl.ecs.observers.emit
 import cn.jzl.ecs.query.ECSDsl
 import cn.jzl.ecs.query.EntityQueryContext
-import cn.jzl.ecs.query.FamilyMatcher
-import cn.jzl.ecs.query.forEach
 import cn.jzl.ecs.query.query
 import cn.jzl.sect.ecs.*
 import cn.jzl.sect.ecs.core.Description
@@ -29,12 +29,13 @@ class TaskService(world: World) : EntityRelationContext(world) {
     private val levelingService by world.di.instance<LevelingService>()
     private val inventoryService by world.di.instance<InventoryService>()
     private val sectResourceService by world.di.instance<SectResourceService>()
+    private val attributeService by world.di.instance<AttributeService>()
 
     /**
      * 创建宗门任务
      */
     @ECSDsl
-    inline fun createTask(
+    fun createTask(
         sect: Entity,
         named: Named,
         type: TaskType,
@@ -42,7 +43,7 @@ class TaskService(world: World) : EntityRelationContext(world) {
         rewardConfig: TaskRewardConfig,
         limit: TaskLimit = TaskLimit(),
         description: Description? = null,
-        block: EntityCreateContext.(Entity) -> Unit
+        block: EntityCreateContext.(Entity) -> Unit = {}
     ): Entity {
         require(sect.hasTag<Sect>()) { "实体${sect.id}不是宗门" }
         return world.entity {
@@ -65,7 +66,7 @@ class TaskService(world: World) : EntityRelationContext(world) {
         require(task.hasTag<SectTask>()) { "实体${task.id}不是任务" }
 
         // 获取任务所属宗门
-        val sect = task.getRelation<OwnedBy>()?.relation?.target
+        val sect = task.getRelationUp<OwnedBy>()
             ?: return TaskAcceptError.TaskNotAvailable
 
         // 检查弟子是否是宗门成员
@@ -80,7 +81,7 @@ class TaskService(world: World) : EntityRelationContext(world) {
         }
 
         // 检查等级要求
-        val discipleLevel = levelingService.getLevel(disciple)
+        val discipleLevel = getEntityLevel(disciple)
         if (discipleLevel < limit.minLevel) {
             return TaskAcceptError.LevelTooLow(limit.minLevel, discipleLevel)
         }
@@ -199,8 +200,7 @@ class TaskService(world: World) : EntityRelationContext(world) {
 
         val requirement = task.getComponent<TaskRequirement?>() ?: TaskRequirement()
 
-        // 检查是否满足完成条件
-        // 检查物品
+        // 检查是否满足完成条件 - 检查物品
         requirement.requiredItems.forEach { (itemPrefab, required) ->
             val submitted = progress.submittedItems[itemPrefab] ?: 0
             if (submitted < required) {
@@ -210,22 +210,26 @@ class TaskService(world: World) : EntityRelationContext(world) {
 
         // 检查击杀
         if (progress.killedCount < requirement.requiredKills) {
-            return Result.failure(IllegalStateException("击杀数量不足: 需要 ${requirement.requiredKills}, 已击杀 ${progress.killedCount}"))
+            return Result.failure(IllegalStateException("击杀数量不足"))
         }
 
         // 检查修炼时长
         requirement.requiredDuration?.let { required ->
-            val current = Duration.parse("${progress.cultivationDuration}ms")
-            if (current < required) {
+            val current = progress.cultivationDuration
+            if (current < required.inWholeMilliseconds) {
                 return Result.failure(IllegalStateException("修炼时长不足"))
             }
         }
 
         // 计算奖励
         val rewardConfig = task.getComponent<TaskRewardConfig?>() ?: TaskRewardConfig(0, 0L)
-        val completionTime = Duration.parse("${currentTimeMillis() - progress.startTime}ms")
-        val discipleLevel = levelingService.getLevel(disciple)
-        val bonusMultiplier = rewardConfig.bonusFormula?.calculate(completionTime, discipleLevel, 1.0f) ?: 1.0f
+        val completionTime = currentTimeMillis() - progress.startTime
+        val discipleLevel = getEntityLevel(disciple)
+        val bonusMultiplier = rewardConfig.bonusFormula?.calculate(
+            Duration.parse("${completionTime}ms"),
+            discipleLevel,
+            1.0f
+        ) ?: 1.0f
 
         val reward = TaskReward(
             contribution = (rewardConfig.baseContribution * bonusMultiplier).toInt(),
@@ -234,7 +238,7 @@ class TaskService(world: World) : EntityRelationContext(world) {
         )
 
         // 发放奖励
-        val sect = task.getRelation<OwnedBy>()!!.relation.target
+        val sect = task.getRelationUp<OwnedBy>()!!
         sectService.addContribution(sect, disciple, reward.contribution)
         levelingService.addExperience(disciple, reward.experience)
         reward.items.forEach { (itemPrefab, amount) ->
@@ -257,7 +261,7 @@ class TaskService(world: World) : EntityRelationContext(world) {
     fun getTasksBySect(sect: Entity): Sequence<Entity> {
         require(sect.hasTag<Sect>()) { "实体${sect.id}不是宗门" }
         return world.query { TaskQueryContext(this) }.entities.filter { task ->
-            task.getRelation<OwnedBy>()?.relation?.target == sect
+            task.getRelationUp<OwnedBy>() == sect
         }
     }
 
@@ -296,10 +300,9 @@ class TaskService(world: World) : EntityRelationContext(world) {
      * 检查弟子是否可以领取任务
      */
     fun canAcceptTask(task: Entity, disciple: Entity): TaskAcceptError? {
-        // 复用 acceptTask 的验证逻辑，但不实际执行
         require(task.hasTag<SectTask>()) { "实体${task.id}不是任务" }
 
-        val sect = task.getRelation<OwnedBy>()?.relation?.target
+        val sect = task.getRelationUp<OwnedBy>()
             ?: return TaskAcceptError.TaskNotAvailable
 
         val memberData = sectService.getMemberData(sect, disciple)
@@ -311,7 +314,7 @@ class TaskService(world: World) : EntityRelationContext(world) {
             return TaskAcceptError.RoleNotAllowed(memberData.role)
         }
 
-        val discipleLevel = levelingService.getLevel(disciple)
+        val discipleLevel = getEntityLevel(disciple)
         if (discipleLevel < limit.minLevel) {
             return TaskAcceptError.LevelTooLow(limit.minLevel, discipleLevel)
         }
@@ -369,12 +372,10 @@ class TaskService(world: World) : EntityRelationContext(world) {
         }
     }
 
-    private fun LevelingService.getLevel(entity: Entity): Long {
-        val levelAttribute = attributeService.attribute(ATTRIBUTE_LEVEL)
+    private fun getEntityLevel(entity: Entity): Long {
+        val levelAttribute = attributeService.attribute(Named("level"))
         return entity.getRelation<AttributeValue?>(levelAttribute)?.value ?: 1L
     }
-
-    private val attributeService by world.di.instance<AttributeService>()
 
     @PublishedApi
     internal class TaskQueryContext(world: World) : EntityQueryContext(world) {
@@ -384,8 +385,6 @@ class TaskService(world: World) : EntityRelationContext(world) {
     }
 
     companion object {
-        // 简单的时间获取，实际应该使用平台时间服务
         private fun currentTimeMillis(): Long = System.currentTimeMillis()
     }
 }
-

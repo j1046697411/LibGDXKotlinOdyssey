@@ -123,12 +123,12 @@ class SectServiceTest {
         }
 
         // 添加弟子
-        sectService.addMember(sect, disciple, MemberRole.DISCIPLE)
+        sectService.addMember(sect, disciple, MemberRole.OUTER_DISCIPLE)
 
         // 验证成员已添加
         val memberData = sectService.getMemberData(sect, disciple)
         assertNotNull(memberData)
-        assertEquals(MemberRole.DISCIPLE, memberData.role)
+        assertEquals(MemberRole.OUTER_DISCIPLE, memberData.role)
         assertEquals(0, memberData.contribution.value)
     }
 
@@ -146,11 +146,11 @@ class SectServiceTest {
             it.addComponent(Named("弟子1"))
         }
 
-        sectService.addMember(sect, disciple, MemberRole.DISCIPLE)
+        sectService.addMember(sect, disciple, MemberRole.OUTER_DISCIPLE)
 
         // 尝试再次添加相同成员应该失败
         try {
-            sectService.addMember(sect, disciple, MemberRole.DISCIPLE)
+            sectService.addMember(sect, disciple, MemberRole.OUTER_DISCIPLE)
             assertTrue(false, "Should have thrown exception for duplicate member")
         } catch (e: IllegalArgumentException) {
             assertTrue(true, "Expected exception for duplicate member")
@@ -171,7 +171,7 @@ class SectServiceTest {
             it.addComponent(Named("弟子1"))
         }
 
-        sectService.addMember(sect, disciple, MemberRole.DISCIPLE)
+        sectService.addMember(sect, disciple, MemberRole.OUTER_DISCIPLE)
         assertNotNull(sectService.getMemberData(sect, disciple))
 
         // 移除成员
@@ -195,7 +195,7 @@ class SectServiceTest {
             it.addComponent(Named("弟子1"))
         }
 
-        sectService.addMember(sect, disciple, MemberRole.DISCIPLE)
+        sectService.addMember(sect, disciple, MemberRole.OUTER_DISCIPLE)
 
         // 升级为长老
         sectService.changeMemberRole(sect, disciple, MemberRole.ELDER)
@@ -219,7 +219,7 @@ class SectServiceTest {
             it.addComponent(Named("弟子1"))
         }
 
-        sectService.addMember(sect, disciple, MemberRole.DISCIPLE)
+        sectService.addMember(sect, disciple, MemberRole.OUTER_DISCIPLE)
 
         // 增加贡献度
         sectService.addContribution(sect, disciple, 100)
@@ -253,15 +253,15 @@ class SectServiceTest {
             it.addComponent(Named("弟子2"))
         }
 
-        sectService.addMember(sect, disciple1, MemberRole.DISCIPLE)
-        sectService.addMember(sect, disciple2, MemberRole.DISCIPLE)
+        sectService.addMember(sect, disciple1, MemberRole.OUTER_DISCIPLE)
+        sectService.addMember(sect, disciple2, MemberRole.OUTER_DISCIPLE)
 
         // 获取所有成员 (包括掌门)
         val members = sectService.getMembers(sect).toList()
 
         assertEquals(3, members.size)
         assertTrue(members.any { it.second.role == MemberRole.LEADER })
-        assertTrue(members.count { it.second.role == MemberRole.DISCIPLE } == 2)
+        assertTrue(members.count { it.second.role == MemberRole.OUTER_DISCIPLE } == 2)
     }
 
     /**
@@ -320,8 +320,9 @@ class SectServiceTest {
             assertEquals("长生殿", named.name)
 
             // 验证建筑属于宗门
-            val ownedBySect = it.getRelation<OwnedBy?>(sect)
+            val ownedBySect = it.getRelationUp<OwnedBy>()
             assertNotNull(ownedBySect)
+            assertEquals(sect, ownedBySect)
         }
     }
 
