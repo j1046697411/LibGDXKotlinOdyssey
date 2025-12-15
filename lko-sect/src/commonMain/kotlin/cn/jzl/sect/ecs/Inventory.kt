@@ -23,7 +23,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     private val inventories = mutableMapOf<Entity, QueryGroupedBy<Entity, EntityInventoryContext>>()
 
-    private fun getGroupedByItemPrefab(owner: Entity): QueryGroupedBy<Entity, EntityInventoryContext> {
+    private fun getOwnerItems(owner: Entity): QueryGroupedBy<Entity, EntityInventoryContext> {
         return inventories.getOrPut(owner) {
             world.query {
                 EntityInventoryContext(this, owner)
@@ -31,7 +31,13 @@ class InventoryService(world: World) : EntityRelationContext(world) {
         }
     }
 
-    fun getAllItems(owner: Entity): Sequence<Entity> = getGroupedByItemPrefab(owner).query.entities
+    private fun getOwnerItemByItemPrefab(owner: Entity, itemPrefab: Entity): QueryGroupedBy.QueryGroup<Entity, EntityInventoryContext>? {
+        return getOwnerItems(owner)[itemPrefab]
+    }
+
+    fun getAllItems(owner: Entity): Sequence<Entity> = getOwnerItems(owner).query.entities
+
+    fun getAllQueryItems(owner: Entity): QueryStream<EntityInventoryContext> = getOwnerItems(owner).query
 
     /**
      * 获取玩家拥有的特定物品数量（按预制体统计）
@@ -40,7 +46,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
      * @return 该物品的总数量
      */
     fun getItemCount(owner: Entity, itemPrefab: Entity): Int {
-        return getGroupedByItemPrefab(owner)[itemPrefab]?.sumBy { amount?.value ?: 1 } ?: 0
+        return getOwnerItemByItemPrefab(owner, itemPrefab)?.sumBy { amount?.value ?: 1 } ?: 0
     }
 
     /**
@@ -86,7 +92,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
      */
     fun removeItem(owner: Entity, itemPrefab: Entity, count: Int) {
         require(count > 0) { "移除物品数量必须大于0" }
-        val items = getGroupedByItemPrefab(owner)[itemPrefab]
+        val items = getOwnerItems(owner)[itemPrefab]
         require(items != null) { "玩家${owner.id}没有物品预制体${itemPrefab.id}" }
         val itemTotalCount = items.sumBy { amount?.value ?: 1 }
         require(itemTotalCount >= count) { "玩家${owner.id}物品不足，需要: $count, 拥有: $itemTotalCount" }
@@ -123,8 +129,66 @@ class InventoryService(world: World) : EntityRelationContext(world) {
         }
     }
 
-    private class EntityInventoryContext(world: World, private val owner: Entity) : EntityQueryContext(world) {
+    /**
+     * 转移物品到另一个玩家（按物品实体转移）
+     * @param receiver 接收物品的玩家实体
+     * @param item 要转移的物品实体
+     * @param count 转移的数量
+     */
+    @ECSDsl
+    fun transferItem(receiver: Entity, item: Entity, count: Int, block: EntityCreateContext.(Entity) -> Unit = {}) {
+        val itemPrefab = item.prefab
+        require(itemPrefab != null) { "物品${item.id}没有预制体" }
+        require(item.getRelationUp<OwnedBy>() == receiver) { "物品${item.id}不是玩家${receiver.id}所有" }
+        val amount = item.getComponent<Amount?>()?.value ?: 1
+        require(amount >= count) { "玩家${receiver.id}物品不足，需要: $count, 拥有: $amount" }
+        if (amount == count) {
+            world.entity(item) {
+                it.addRelation<OwnedBy>(receiver)
+                block(it)
+            }
+            return
+        }
+        world.entity(item) { it.addComponent(Amount(amount - count)) }
+        itemService.item(itemPrefab) {
+            it.addRelation<OwnedBy>(receiver)
+            it.addComponent(Amount(count))
+            block(it)
+        }
+    }
 
+    /**
+     * 转移物品到另一个玩家（按预制体和数量转移）
+     * @param provider 提供物品的玩家实体
+     * @param receiver 接收物品的玩家实体
+     * @param itemPrefab 物品预制体
+     * @param count 转移的数量
+     */
+    fun transferItem(provider: Entity, receiver: Entity, itemPrefab: Entity, count: Int) {
+        val items = getOwnerItemByItemPrefab(provider, itemPrefab)
+        require(items != null) { "玩家${provider.id}没有物品预制体${itemPrefab.id}" }
+        require(items.sumBy { amount?.value ?: 1 } >= count) { "玩家${provider.id}物品不足，需要: $count, 拥有: ${items.sumBy { amount?.value ?: 1 }}" }
+        var remaining = count
+        items.collectWhile {
+            val itemAmount = amount?.value ?: 1
+            val transferAmount = min(itemAmount, remaining)
+            if (isStackable && itemAmount > transferAmount) {
+                itemService.item(itemPrefab) {
+                    it.addRelation<OwnedBy>(receiver)
+                    it.addComponent(Amount(transferAmount))
+                }
+                amount = Amount(itemAmount - transferAmount)
+            } else {
+                world.entity(entity) {
+                    it.addRelation<OwnedBy>(receiver)
+                }
+            }
+            remaining -= transferAmount
+            remaining <= 0
+        }
+    }
+
+    class EntityInventoryContext(world: World, val owner: Entity) : EntityQueryContext(world) {
         var amount by component<Amount?>()
         val isStackable by ifRelationExist(relations.component<Stackable>())
         val itemPrefab by prefab()

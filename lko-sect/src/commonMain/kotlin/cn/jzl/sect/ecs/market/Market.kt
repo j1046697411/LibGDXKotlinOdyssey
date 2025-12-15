@@ -1,6 +1,6 @@
 package cn.jzl.sect.ecs.market
 
-import cn.jzl.di.instance
+ import cn.jzl.di.instance
 import cn.jzl.di.new
 import cn.jzl.di.singleton
 import cn.jzl.ecs.*
@@ -9,20 +9,13 @@ import cn.jzl.ecs.observers.emit
 import cn.jzl.ecs.observers.exec
 import cn.jzl.ecs.observers.observe
 import cn.jzl.ecs.query.EntityQueryContext
-import cn.jzl.ecs.query.count
 import cn.jzl.ecs.query.forEach
 import cn.jzl.ecs.query.query
-import cn.jzl.ecs.query.singleQuery
-import cn.jzl.sect.ecs.Countdown
-import cn.jzl.sect.ecs.Money
-import cn.jzl.sect.ecs.MoneyService
-import cn.jzl.sect.ecs.OnCountdownComplete
+import cn.jzl.sect.ecs.*
 import cn.jzl.sect.ecs.core.Named
 import cn.jzl.sect.ecs.core.OwnedBy
-import cn.jzl.sect.ecs.countdownAddon
 import cn.jzl.sect.ecs.item.Amount
 import cn.jzl.sect.ecs.item.Item
-import cn.jzl.sect.ecs.item.ItemService
 import cn.jzl.sect.ecs.item.itemAddon
 import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
@@ -47,6 +40,12 @@ sealed class AcquisitionOrder
  */
 @JvmInline
 value class ConsignmentItemData(val unitPrice: Int)
+
+/**
+ * 物品的收购单价
+ */
+@JvmInline
+value class UnitPrice(val value: Int)
 
 /**
  * 物品的收购单
@@ -86,8 +85,8 @@ class MarketService(world: World) : EntityRelationContext(world) {
     private val consignmentOrderCountdown = Countdown(5.seconds)
     private val acquisitionOrderCountdown = Countdown(5.seconds)
 
-    private val itemService by world.di.instance<ItemService>()
     private val moneyService by world.di.instance<MoneyService>()
+    private val inventoryService by world.di.instance<InventoryService>()
 
     init {
         val acquisitionOrderQuery = world.query {
@@ -139,15 +138,6 @@ class MarketService(world: World) : EntityRelationContext(world) {
         }
     }
 
-    fun addConsignItems(consignmentOrder: Entity, item: Entity, unitPrice: Int) {
-        require(consignmentOrder.getRelationUp<ConsignmentOrder>() != null) {
-            "订单${consignmentOrder.id}不是寄售订单"
-        }
-        val owner = consignmentOrder.getRelationUp<OwnedBy>()
-        require(item.getRelationUp<OwnedBy>() == owner) { "物品${item.id}不是玩家${owner?.id}所有" }
-        world.entity(item) { item.addRelation(consignmentOrder, ConsignmentItemData(unitPrice)) }
-    }
-
     /**
      * 寄售物品
      * @param market 市场实体
@@ -159,7 +149,9 @@ class MarketService(world: World) : EntityRelationContext(world) {
         val consignmentOrder = createConsignmentOrder(market, player)
         val context = MarketContext { item: Entity, count: Int, unitPrice: Int ->
             require(item.getRelationUp<OwnedBy>() == player) { "物品${item.id}不是玩家${player.id}所有" }
-            addConsignItems(consignmentOrder, itemService.splitItem(item, count), unitPrice)
+            inventoryService.transferItem(consignmentOrder, item, count) {
+                it.addComponent(UnitPrice(unitPrice))
+            }
         }
         context.block(consignmentOrder)
         return consignmentOrder
@@ -168,15 +160,9 @@ class MarketService(world: World) : EntityRelationContext(world) {
     fun cancelConsignment(market: Entity, player: Entity, consignmentOrder: Entity) {
         require(consignmentOrder.getRelationUp<OwnedBy>() == player) { "订单${consignmentOrder.id}不是玩家${player.id}所有" }
         require(consignmentOrder.getRelationUp<ConsignmentOrder>() == market) { "订单${consignmentOrder.id}不是市场${market.id}的寄售订单" }
-        val items = world.singleQuery {
-            object : EntityQueryContext(this) {
-                override fun FamilyMatcher.FamilyBuilder.configure() {
-                    relation<ConsignmentItemData>(consignmentOrder)
-                }
-            }
+        inventoryService.getAllQueryItems(consignmentOrder).forEach {
+            inventoryService.transferItem(player, entity, amount?.value ?: 1)
         }
-        items.use { it.forEach { removeRelation(relations.relation<ConsignmentItemData>(consignmentOrder)) } }
-        world.destroy(consignmentOrder)
     }
 
     fun createAcquisitionOrder(market: Entity, player: Entity, block: MarketContext.() -> Unit): Unit = world.entity(player) {
@@ -211,40 +197,33 @@ class MarketService(world: World) : EntityRelationContext(world) {
         require(acquisitionOrder.getRelationUp<OwnedBy>() == player) { "订单${acquisitionOrder.id}不是玩家${player.id}所有" }
         require(acquisitionOrder.getRelationUp<AcquisitionOrder>() == market) { "订单${acquisitionOrder.id}不是市场${market.id}的收购订单" }
         val money = acquisitionOrder.getComponent<Money>()
-        moneyService.transferMoney(acquisitionOrder, player, money.value) {
-            world.destroy(acquisitionOrder)
-        }
+        moneyService.transferMoney(acquisitionOrder, player, money.value)
+        world.destroy(acquisitionOrder)
     }
 
     /**
      * 购买物品
-     * @param consignmentOrder 寄售订单实体
      * @param buyer 购买物品的玩家实体
      * @param item 购买的物品实体
      * @param count 购买的物品数量，默认购买所有物品
      */
-    fun buyItems(consignmentOrder: Entity, buyer: Entity, item: Entity, count: Int? = null) = world.entity(consignmentOrder) {
-        val market = it.getRelationUp<ConsignmentOrder>()
-        require(market != null) { "订单${it.id}不是市场的收购订单" }
-        val owner = it.getRelationUp<OwnedBy>()
-        require(owner != null && owner != buyer) { "玩家${buyer.id}不能购买自己的收购订单" }
-        val itemData = item.getRelation<ConsignmentItemData?>(consignmentOrder)
-        require(itemData != null) { "订单${consignmentOrder.id}没有物品${item.id}" }
+    fun buyItems(buyer: Entity, item: Entity, count: Int? = null) {
+        val consignmentOrder = item.getRelationUp<ConsignmentOrder>()
+        require(consignmentOrder != null) { "物品${item.id}不是寄售订单的物品" }
+        require(consignmentOrder.getRelationUp<ConsignmentOrder>() != null) { "订单${consignmentOrder.id}不是市场的寄售订单" }
+        val market = consignmentOrder.getRelationUp<OwnedBy>()
+        require(market != null) { "订单${market?.id}不是市场的寄售订单" }
+        val unitPrice = item.getComponent<UnitPrice>()
         val amount = item.getComponent<Amount?>()?.value ?: 1
-        val buyCount = count ?: amount
-        require(amount >= buyCount) { "物品${item.id}数量不足" }
-        moneyService.transferMoney(buyer, owner, buyCount * itemData.unitPrice) {
-            itemService.transferItem(buyer, item, buyCount)
+        val buyCount = min(count ?: amount, amount)
+        require(amount >= buyCount)
+        require(moneyService.hasEnoughMoney(buyer, buyCount * unitPrice.value)) {
+            "玩家${buyer.id}货币不足，购买物品${item.id}需要: ${buyCount * unitPrice.value}"
         }
-        // 买家购买了所有物品，移除寄售订单关系
-        if (item.getRelationUp<OwnedBy>() == buyer) {
-            world.entity(item) { item.removeRelation<ConsignmentItemData>(consignmentOrder) }
-            return@entity
+        inventoryService.transferItem(buyer, item, buyCount) {
+            it.addComponent<UnitPrice>(unitPrice)
         }
-        if (it.getRelationDown<ConsignmentItemData>().count() > 0) {
-            return@entity
-        }
-        world.destroy(it)
+        moneyService.transferMoney(buyer, consignmentOrder, buyCount * unitPrice.value)
         world.emit<OnConsignmentOrderCompleted>(market)
     }
 
@@ -268,9 +247,8 @@ class MarketService(world: World) : EntityRelationContext(world) {
         require(itemData != null) { "订单${acquisitionOrder.id}没有物品${item.id}" }
         val amount = item.getComponent<Amount?>()?.value ?: 1
         val supplyCount = min(count ?: itemData.count, amount)
-        moneyService.transferMoney(it, supplier, itemData.unitPrice * supplyCount) {
-            itemService.transferItem(it, item, supplyCount)
-        }
+        moneyService.transferMoney(it, supplier, itemData.unitPrice * supplyCount)
+        inventoryService.transferItem(supplier, owner, item, supplyCount)
         if (itemData.count > supplyCount) {
             it.addRelation(itemPrefab, itemData.copy(count = itemData.count - supplyCount))
             return@entity

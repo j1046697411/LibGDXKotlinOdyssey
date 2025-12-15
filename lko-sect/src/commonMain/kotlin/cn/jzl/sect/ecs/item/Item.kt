@@ -90,14 +90,14 @@ class ItemService(world: World) : EntityRelationContext(world) {
     }
 
     @ECSDsl
-    inline fun itemPrefab(named: Named, block: EntityCreateContext.(Entity) -> Unit): Entity = world.prefab {
+    inline fun itemPrefab(named: Named, block: EntityCreateContext.(Entity) -> Unit = {}): Entity = world.prefab {
         block(it)
         it.addTag<Item>()
         it.addComponent(named)
     }
 
     @ECSDsl
-    inline fun itemPrefab(name: String, block: EntityCreateContext.(Entity) -> Unit): Entity = itemPrefab(Named(name), block)
+    inline fun itemPrefab(name: String, block: EntityCreateContext.(Entity) -> Unit = {}): Entity = itemPrefab(Named(name), block)
 
     @ECSDsl
     inline fun item(named: Named, block: EntityCreateContext.(Entity) -> Unit): Entity {
@@ -108,10 +108,8 @@ class ItemService(world: World) : EntityRelationContext(world) {
 
     @ECSDsl
     inline fun item(itemPrefab: Entity, block: EntityCreateContext.(Entity) -> Unit): Entity {
-        world.entity(itemPrefab) {
-            require(it.hasTag<Item>()) { "Entity $itemPrefab is not an item" }
-            require(it.hasPrefab()) { "Entity $itemPrefab is not a prefab of item" }
-        }
+        require(itemPrefab.hasTag<Item>()) { "Entity $itemPrefab is not an item" }
+        require(itemPrefab.hasPrefab()) { "Entity $itemPrefab is not a prefab of item" }
         return world.instanceOf(itemPrefab, block)
     }
 
