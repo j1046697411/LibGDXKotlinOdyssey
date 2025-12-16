@@ -9,7 +9,6 @@ import cn.jzl.sect.ecs.core.Named
 class ItemActionProvider(world: World) : ActionProvider, EntityRelationContext(world) {
 
     private val inventoryService by world.di.instance<InventoryService>()
-    private val goapService by world.di.instance<PlanningService>()
     private val itemService by world.di.instance<ItemService>()
 
     private val actions = mutableMapOf<Entity, UseItemAction>()
@@ -18,7 +17,7 @@ class ItemActionProvider(world: World) : ActionProvider, EntityRelationContext(w
         return itemService.itemPrefabs().filter {
             itemService.isUsable(it) && stateProvider.getValue(agent, ItemAmountKey(it)) >= 1
         }.map {
-            actions.getOrPut(it) { UseItemAction(world, it, inventoryService, goapService) }
+            actions.getOrPut(it) { UseItemAction(world, it, inventoryService) }
         }
     }
 
@@ -26,7 +25,6 @@ class ItemActionProvider(world: World) : ActionProvider, EntityRelationContext(w
         world: World,
         private val itemPrefab: Entity,
         private val inventoryService: InventoryService,
-        private val goapService: PlanningService
     ) : Action, EntityRelationContext(world) {
 
         override val name: String by lazy {

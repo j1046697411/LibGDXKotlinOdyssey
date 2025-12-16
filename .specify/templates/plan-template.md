@@ -35,6 +35,7 @@
 - [ ] **I. ECS 优先**: 游戏逻辑是否使用 lko-ecs4 的 ECS 模式实现？
 - [ ] **II. 服务复用优先**: 是否检查并复用了已有服务（MoneyService、LevelingService、ItemService 等）？
 - [ ] **III. 框架一致性**: 是否遵循 lko-sect 的 Addon 模式和服务类规范？
+- [ ] **VI. 质量保证优先**: 是否计划了足够的测试以满足 80% 覆盖率和 100% 通过率？
 
 **技术约束验证**:
 - [ ] 使用 Kotlin Multiplatform
