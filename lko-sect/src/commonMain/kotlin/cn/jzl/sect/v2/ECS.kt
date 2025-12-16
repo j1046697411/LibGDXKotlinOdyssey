@@ -27,7 +27,7 @@ class ItemActionProvider(world: World) : ActionProvider, EntityRelationContext(w
         private val itemPrefab: Entity,
         private val inventoryService: InventoryService,
         private val goapService: PlanningService
-    ) : Action , EntityRelationContext(world) {
+    ) : Action, EntityRelationContext(world) {
 
         override val name: String by lazy {
             val itemName = inventoryService.run { itemPrefab.getComponent<Named>().name }
@@ -37,20 +37,21 @@ class ItemActionProvider(world: World) : ActionProvider, EntityRelationContext(w
         private val itemAmountKey by lazy { ItemAmountKey(itemPrefab) }
         private val healthService by world.di.instance<HealthService>()
 
-        override val preconditions: WorldState by lazy {
-            goapService.createWorldState(mapOf(itemAmountKey to 1))
-        }
-
-        override val effects: WorldState by lazy {
-            val healingAmount = itemPrefab.getComponent<HealingAmount?>()
-            val map = buildMap<StateKey<*>, Any> {
-                healingAmount?.let {
-                    this[AttributeKey(healthService.attributeCurrentHealth)] = it.value
-                }
-                this[itemAmountKey] = 1
+        override val preconditions: Sequence<Precondition> = sequenceOf(
+            Precondition { stateProvider, agent ->
+                stateProvider.getValue(agent, itemAmountKey) >= 1
             }
-            goapService.createWorldState(map)
-        }
+        )
+
+        override val effects: Sequence<ActionEffect> = sequenceOf(
+            ActionEffect { stateProvider, agent ->
+                val healingAmount = itemPrefab.getComponent<HealingAmount?>()
+                healingAmount?.let {
+                    stateProvider.increase(agent, AttributeKey(healthService.attributeCurrentHealth), it.value)
+                }
+                stateProvider.decrease(agent, itemAmountKey, 1)
+            }
+        )
 
         override val cost: Double = 1.0
 
@@ -73,17 +74,6 @@ class ItemAmountStateResolver(world: World) : StateResolver<ItemAmountKey, Int> 
     override fun EntityRelationContext.getWorldState(agent: Entity, key: ItemAmountKey): Int {
         return inventoryService.getItemCount(agent, key.itemPrefab)
     }
-
-    override fun EntityRelationContext.merge(agent: Entity, key: ItemAmountKey, current: Int?, effect: Int): Int {
-        val actualCurrent = current ?: getWorldState(agent, key)
-        val result = actualCurrent - effect
-        return if (result < 0) 0 else result
-    }
-
-    override fun EntityRelationContext.satisfies(agent: Entity, key: ItemAmountKey, current: Int?, condition: Int): Boolean {
-        val actualCurrent = current ?: getWorldState(agent, key)
-        return actualCurrent >= condition
-    }
 }
 
 class ItemStateResolverRegistry(world: World) : StateResolverRegistry {
@@ -105,14 +95,6 @@ class AttributeStateResolver(world: World) : StateResolver<AttributeKey, Long> {
 
     override fun EntityRelationContext.getWorldState(agent: Entity, key: AttributeKey): Long {
         return attributeService.getAttributeValue(agent, key.attribute)?.value ?: 0
-    }
-
-    override fun EntityRelationContext.merge(agent: Entity, key: AttributeKey, current: Long?, effect: Long): Long {
-        return (current ?: 0) + effect
-    }
-
-    override fun EntityRelationContext.satisfies(agent: Entity, key: AttributeKey, current: Long?, condition: Long): Boolean {
-        return (current ?: 0) < condition
     }
 }
 

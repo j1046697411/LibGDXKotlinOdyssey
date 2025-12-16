@@ -16,15 +16,14 @@ import java.util.PriorityQueue
 import kotlin.collections.plus
 import kotlin.getValue
 
-
 interface WorldState : WorldStateReader {
     val stateKeys: Sequence<StateKey<*>>
 }
 
 interface AgentState : WorldState {
     fun copy(): AgentState
-    fun mergeEffects(other: WorldState): AgentState
-    fun satisfiesConditions(conditions: WorldState): Boolean
+    fun mergeEffects(effects: Sequence<ActionEffect>): AgentState
+    fun satisfiesConditions(conditions: Sequence<Precondition>): Boolean
 }
 
 @JvmInline
@@ -41,8 +40,6 @@ interface StateKey<T>
 
 interface StateResolver<K : StateKey<T>, T> {
     fun EntityRelationContext.getWorldState(agent: Entity, key: K): T
-    fun EntityRelationContext.merge(agent: Entity, key: K, current: T?, effect: T): T
-    fun EntityRelationContext.satisfies(agent: Entity, key: K, current: T?, condition: T): Boolean
 }
 
 interface StateResolverRegistry {
@@ -53,8 +50,36 @@ interface WorldStateReader {
     fun <K : StateKey<T>, T> getValue(agent: Entity, key: K): T
 }
 
+interface WorldStateWriter : WorldStateReader {
+    fun <K : StateKey<T>, T> setValue(key: K, value: T)
+}
+
+fun WorldStateWriter.increase(agent: Entity, key: StateKey<Int>, value: Int) {
+    setValue(key, getValue(agent, key) + value)
+}
+
+fun WorldStateWriter.decrease(agent: Entity, key: StateKey<Int>, value: Int) {
+    setValue(key, getValue(agent, key) - value)
+}
+
+fun WorldStateWriter.increase(agent: Entity, key: StateKey<Long>, value: Long) {
+    setValue(key, getValue(agent, key) + value)
+}
+
+fun WorldStateWriter.decrease(agent: Entity, key: StateKey<Long>, value: Long) {
+    setValue(key, getValue(agent, key) - value)
+}
+
 interface ActionProvider {
     fun getActions(stateProvider: WorldStateReader, agent: Entity): Sequence<Action>
+}
+
+fun interface Precondition {
+    fun satisfiesCondition(stateProvider: WorldStateReader, agent: Entity): Boolean
+}
+
+fun interface ActionEffect {
+    fun apply(stateWriter: WorldStateWriter, agent: Entity)
 }
 
 interface GoalProvider {
@@ -78,14 +103,15 @@ fun AddonSetup<*>.planning(block: PlanningRegistry.() -> Unit) = install(plannin
 interface GOAPGoal {
     val name: String
     val priority: Double
-    fun isSatisfied(worldState: WorldState, agent: Entity): Boolean
-    fun calculateDesirability(worldState: WorldState, agent: Entity): Double
+    fun isSatisfied(worldState: WorldStateReader, agent: Entity): Boolean
+    fun calculateDesirability(worldState: WorldStateReader, agent: Entity): Double
+    fun calculateHeuristic(worldState: WorldStateReader, agent: Entity): Double
 }
 
 interface Action {
     val name: String
-    val preconditions: WorldState
-    val effects: WorldState
+    val preconditions: Sequence<Precondition>
+    val effects: Sequence<ActionEffect>
     val cost: Double
     val task: suspend World.(Entity) -> Unit
 }
@@ -125,38 +151,29 @@ class AgentWorldState(
     private val planningService: PlanningService,
     private val agent: Entity,
     private val states: MutableMap<StateKey<*>, Any?> = mutableMapOf()
-) : AgentState, EntityRelationContext(planningService.world) {
+) : AgentState, EntityRelationContext(planningService.world), WorldStateWriter {
 
     override val stateKeys: Sequence<StateKey<*>> = states.keys.asSequence()
 
     override fun copy(): AgentState = AgentWorldState(planningService, agent, states.toMutableMap())
 
-    @Suppress("UNCHECKED_CAST")
-    override fun mergeEffects(other: WorldState): AgentState {
+    override fun mergeEffects(effects: Sequence<ActionEffect>): AgentState {
         val newWorldState = AgentWorldState(planningService, agent, states.toMutableMap())
-        for (key in other.stateKeys) {
-            key as StateKey<Any?>
-            val stateHandler = planningService.getStateHandler(key)
-            val current = newWorldState.states[key]
-            val effect = other.getValue(agent, key)
-            val mergedValue = stateHandler.run { merge(agent, key, current, effect) }
-            newWorldState.states[key] = mergedValue
-        }
+        effects.forEach { it.apply(newWorldState, agent) }
         return newWorldState
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun satisfiesConditions(conditions: WorldState): Boolean = conditions.stateKeys.all { key ->
-        key as StateKey<Any?>
-        val stateHandler = planningService.getStateHandler(key)
-        val current = states[key]
-        val condition = conditions.getValue(agent, key)
-        stateHandler.run { satisfies(agent, key, current, condition) }
-    }
+    override fun satisfiesConditions(
+        conditions: Sequence<Precondition>
+    ): Boolean = conditions.all { it.satisfiesCondition(this, agent) }
 
     @Suppress("UNCHECKED_CAST")
     override fun <K : StateKey<T>, T> getValue(agent: Entity, key: K): T {
         return states.getOrPut(key) { planningService.getValue(agent, key) } as T
+    }
+
+    override fun <K : StateKey<T>, T> setValue(key: K, value: T) {
+        states[key] = value
     }
 }
 
@@ -200,11 +217,10 @@ class PlanningService(world: World) : EntityRelationContext(world), WorldStateRe
             .mapNotNull { planner.plan(agent, it.first) }.firstOrNull()
     }
 
-    internal fun <K : StateKey<T>, T> getStateHandler(key: K): StateResolver<K, T> {
+    fun <K : StateKey<T>, T> getStateHandler(key: K): StateResolver<K, T> {
         return stateHandlerProviders.asSequence().mapNotNull { it.getStateHandler(key) }.first()
     }
 }
-
 
 class AStarPlanner(private val goapService: PlanningService, private val maxSearchDepth: Int = 50) : Planner {
 
@@ -279,15 +295,8 @@ class AStarPlanner(private val goapService: PlanningService, private val maxSear
     }
 
     private fun calculateHeuristic(state: WorldState, goal: GOAPGoal, agent: Entity): Double {
-        return if (goal.isSatisfied(state, agent)) {
-            0.0
-        } else {
-            // 简单的启发式：计算不满足的条件数量
-            var unsatisfiedCount = 0
-            // 这里可以改进为更精确的启发式计算
-            // 例如：计算需要改变的状态键数量
-            1.0
-        }
+        if (goal.isSatisfied(state, agent)) return 0.0
+        return goal.calculateHeuristic(state, agent)
     }
 
     private fun getStateHash(state: WorldState, agent: Entity): String {
