@@ -30,5 +30,9 @@ value class Entities(private val entities: IntFastList = IntFastList()) : Sequen
         return Entity(entities[index])
     }
 
+    fun getOrNull(index: Int): Entity? {
+        return entities.getOrNull(index)?.let { Entity(it) }
+    }
+
     override fun iterator(): Iterator<Entity> = entities.map { Entity(it) }.iterator()
 }
