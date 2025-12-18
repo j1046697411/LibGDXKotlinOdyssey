@@ -84,20 +84,23 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     fun hasEnoughItems(owner: Entity, itemPrefab: Entity, count: Int): Boolean = getItemCount(owner, itemPrefab) >= count
 
-    fun addItem(owner: Entity, itemPrefab: Entity, count: Int) {
+    fun addItem(owner: Entity, itemPrefab: Entity, count: Int) : Sequence<Entity> {
         checkItemPrefab(itemPrefab)
         require(count > 0)
-        if (itemService.isStackable(itemPrefab)) {
-            itemService.item(itemPrefab) {
+        return if (itemService.isStackable(itemPrefab)) {
+            val entity = itemService.item(itemPrefab) {
                 it.addRelation<OwnedBy>(owner)
                 it.addComponent(Amount(count))
             }
+            sequenceOf(entity)
         } else {
+            val entities = mutableListOf<Entity>()
             repeat(count) {
-                itemService.item(itemPrefab) {
+                entities += itemService.item(itemPrefab) {
                     it.addRelation<OwnedBy>(owner)
                 }
             }
+            entities.asSequence()
         }
     }
 
