@@ -8,7 +8,9 @@ import cn.jzl.ecs.query.count
 import cn.jzl.ecs.query.first
 import cn.jzl.ecs.query.map
 import cn.jzl.ecs.world
+import cn.jzl.sect.ecs.InventoryService
 import cn.jzl.sect.ecs.Money
+import cn.jzl.sect.ecs.MoneyService
 import cn.jzl.sect.ecs.core.Named
 import cn.jzl.sect.ecs.core.OwnedBy
 import cn.jzl.sect.ecs.item.*
@@ -25,6 +27,8 @@ class MarketServiceTest {
 
     private val marketService by world.di.instance<MarketService>()
     private val itemService by world.di.instance<ItemService>()
+    private val inventoryService by world.di.instance<InventoryService>()
+    private val moneyService by world.di.instance<MoneyService>()
 
     // 测试创建市场
     @Test
@@ -56,45 +60,24 @@ class MarketServiceTest {
     // 测试寄售物品
     @Test
     fun testConsignItems() {
-        // 创建玩家、市场和物品
-        val player = world.entity {
-            it.addComponent(Named("Player"))
-            it.addComponent(Money(500))
-        }
+        val player = world.entity { }
         val market = marketService.createMarket(player, Named("Test Market"))
-        
-        // 创建物品预制体
-        val itemPrefab = itemService.itemPrefab(Named("Test Item")) {}
+
+        val itemPrefab = itemService.itemPrefab(Named("Test Item")) { }
         val item = world.instanceOf(itemPrefab) {
             it.addRelation<OwnedBy>(player)
         }
 
-        // 寄售物品
-        val consignmentOrder = marketService.consignItems(market, player) { order ->
+        val consignmentOrder = marketService.consignItems(market, player) {
             addItem(item, 1, 100)
         }
 
-        // 验证寄售成功
         assertNotNull(consignmentOrder)
-        
-        // 验证寄售订单
-        world.entity(consignmentOrder) {
-            // 验证订单所有者
-            val owner = it.getRelationUp<OwnedBy>()
-            assertNotNull(owner)
-            assertEquals(player, owner)
-            // 验证订单所属市场
-            val orderMarket = it.getRelationUp<ConsignmentOrder>()
-            assertNotNull(orderMarket)
-            assertEquals(market, orderMarket)
-        }
-        
-        // 验证物品被正确寄售
+
+        // Item should now be owned by the consignment order and carry UnitPrice
         world.entity(item) {
-            // 验证物品与寄售订单的关系
-            val consignmentData = it.getRelation<ConsignmentItemData>(consignmentOrder)
-            assertNotNull(consignmentData)
-            assertEquals(100, consignmentData.unitPrice)
+            assertEquals(consignmentOrder, it.getRelationUp<OwnedBy>())
+            assertEquals(100, it.getComponent<UnitPrice>().value)
         }
     }
 
@@ -168,58 +151,49 @@ class MarketServiceTest {
     // 测试购买寄售物品
     @Test
     fun testPurchaseConsignment() {
-        // 创建卖家、买家、市场和物品
-        val seller = world.entity {
-            it.addComponent(Money(1000))
+        val seller = world.entity { }
+        val buyer = world.entity { }
+
+        // Seed currency as spirit stones (MoneyService uses spirit stone items as currency)
+        val spiritStonePrefab = itemService.getOrCreateItemPrefab(MoneyService.ATTRIBUTE_SPIRIT_STONE) {
+            it.addTag<Stackable>()
         }
-        val buyer = world.entity {
-            it.addComponent(Money(2000))
-        }
+        inventoryService.addItem(buyer, spiritStonePrefab, 2000)
+        inventoryService.addItem(seller, spiritStonePrefab, 1000)
+
         val market = marketService.createMarket(seller, Named("Test Market"))
         val itemPrefab = itemService.itemPrefab(Named("name")) {}
         val item = world.instanceOf(itemPrefab) {
             it.addRelation<OwnedBy>(seller)
         }
 
-        val consignmentOrder: Entity = marketService.consignItems(market, seller) { order ->
+        val consignmentOrder: Entity = marketService.consignItems(market, seller) {
             addItem(item, 1, 100)
         }
 
-        // 购买寄售物品
         marketService.buyItems(buyer, item, 1)
 
-        // 验证购买成功
-        // 验证买家货币减少
-        world.entity(buyer) {
-            val buyerMoney = it.getComponent<Money>()
-            assertNotNull(buyerMoney)
-            assertEquals(1900, buyerMoney.value) // 2000 - 100 = 1900
-        }
-        
-        // 验证物品所有权转移
+        // Buyer spent 100 spirit stones
+        assertEquals(1900, moneyService.getSpiritStone(buyer))
+        // Seller's stones unchanged; payment is sent to the consignment order entity
+        assertEquals(1000, moneyService.getSpiritStone(seller))
+        assertEquals(100, moneyService.getSpiritStone(consignmentOrder))
+
         world.entity(item) {
             val owner = it.getRelationUp<OwnedBy>()
             assertNotNull(owner)
             assertEquals(buyer, owner)
-        }
-        
-        // 验证物品不再与寄售订单关联
-        world.entity(item) {
-            val consignmentData = it.getRelation<ConsignmentItemData?>(consignmentOrder)
-            assertNull(consignmentData)
+            val unitPrice = it.getComponent<UnitPrice>()
+            assertEquals(100, unitPrice.value)
         }
     }
 
     // 测试寄售堆叠物品
     @Test
     fun testConsignStackableItem() {
-        // 创建玩家、市场和堆叠物品
-        val player = world.entity {
-            it.addComponent(Named("Player"))
-            it.addComponent(Money(500))
-        }
+        val player = world.entity { }
         val market = marketService.createMarket(player, Named("Test Market"))
-        val itemPrefab =itemService.itemPrefab(Named("itemPrefab")) {
+        val itemPrefab = itemService.itemPrefab(Named("itemPrefab")) {
             it.addTag<Stackable>()
         }
         val item = world.instanceOf(itemPrefab) {
@@ -227,26 +201,26 @@ class MarketServiceTest {
             it.addComponent(Amount(10))
         }
 
-        // 寄售部分堆叠物品（5个，单价100）
-        val consignmentOrder = marketService.consignItems(market, player) { order ->
+        val consignmentOrder = marketService.consignItems(market, player) {
             addItem(item, 5, 100)
         }
 
-        // 验证寄售成功
         assertNotNull(consignmentOrder)
-        
-        // 验证物品剩余数量（应剩余5个）
+
+        // Original stack reduced
         world.entity(item) {
             val remainingAmount = it.getComponent<Amount>()
-            assertNotNull(remainingAmount)
-            assertEquals(5, remainingAmount.value) // 10 - 5 = 5
+            assertEquals(5, remainingAmount.value)
+            assertEquals(player, it.getRelationUp<OwnedBy>())
         }
 
-        world.entity(consignmentOrder) {
-            val items = it.getRelationDown<ConsignmentItemData>()
-            assertEquals(1, items.count())
-            val item = items.map { entity }.first()
-            assertEquals(5, item.getComponent<Amount?>()?.value ?: 0)
+        // Consignment order should now own a new stack with Amount(5) and UnitPrice(100)
+        val consignedItems = inventoryService.getAllItems(consignmentOrder).toList()
+        assertEquals(1, consignedItems.size)
+        world.entity(consignedItems.first()) {
+            assertEquals(consignmentOrder, it.getRelationUp<OwnedBy>())
+            assertEquals(5, it.getComponent<Amount?>()?.value ?: 0)
+            assertEquals(100, it.getComponent<UnitPrice>().value)
         }
     }
 

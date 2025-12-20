@@ -1,0 +1,96 @@
+﻿To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+C:\Users\CC\Desktop\projects\LibGDXKotlinOdyssey\lko-libs\lko-datastructure lko-datastructure
+C:\Users\CC\Desktop\projects\LibGDXKotlinOdyssey\lko-libs\lko-di lko-di
+C:\Users\CC\Desktop\projects\LibGDXKotlinOdyssey\lko-libs\lko-ecs4 lko-ecs4
+C:\Users\CC\Desktop\projects\LibGDXKotlinOdyssey\lko-libs\lko-ecs-serialization lko-ecs-serialization
+Type-safe project accessors is an incubating feature.
+> Task :build-logic:checkKotlinGradlePluginConfigurationErrors
+> Task :build-logic:generateExternalPluginSpecBuilders UP-TO-DATE
+> Task :build-logic:extractPrecompiledScriptPluginPlugins UP-TO-DATE
+> Task :build-logic:compilePluginsBlocks UP-TO-DATE
+> Task :build-logic:generatePrecompiledScriptPluginAccessors UP-TO-DATE
+> Task :build-logic:generateScriptPluginAdapters UP-TO-DATE
+> Task :build-logic:compileKotlin UP-TO-DATE
+> Task :build-logic:compileJava NO-SOURCE
+> Task :build-logic:pluginDescriptors UP-TO-DATE
+> Task :build-logic:processResources UP-TO-DATE
+> Task :build-logic:classes UP-TO-DATE
+> Task :build-logic:jar UP-TO-DATE
+
+> Configure project :lko-datastructure
+w: Please choose a JavaScript environment to build distributions and run tests.
+Not choosing any of them will be an error in the future releases.
+kotlin {
+    js {
+        // To build distributions for and run tests on browser or Node.js use one or both of:
+        browser()
+        nodejs()
+    }
+}
+
+
+> Task :lko-datastructure:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :lko-datastructure:desktopProcessResources NO-SOURCE
+> Task :lko-datastructure:desktopTestProcessResources NO-SOURCE
+> Task :lko-datastructure:compileKotlinDesktop
+> Task :lko-datastructure:desktopMainClasses
+> Task :lko-datastructure:compileTestKotlinDesktop UP-TO-DATE
+> Task :lko-datastructure:desktopTestClasses UP-TO-DATE
+
+> Task :lko-datastructure:desktopTest FAILED
+
+MatrixsTestNew[desktop] > testMatrix4BasicOps[desktop] FAILED
+    java.lang.AssertionError at MatrixsTestNew.kt:24
+.\gradlew.bat : 
+所在位置 行:1 字符: 54
++ ... linOdyssey; .\gradlew.bat :lko-datastructure:desktopTest --no-daemon  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+483 tests completed, 1 failed
+
+
+
+
+FAILURE: 
+Build failed with an exception.
+
+
+
+
+* What went wrong:
+
+
+Execution failed for task ':lko-datastructure:desktopTest'.
+
+
+> 
+There were failing tests. See the report at: file:///C:/Users/CC/Desktop/projects/LibGDXKotlinOdyssey/lko-libs/lko-datastructure/build/reports/tests/desktopTest/index.html
+
+
+
+
+* Try:
+
+
+> 
+Run with 
+--scan
+ to get full insights.
+
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+
+BUILD FAILED
+ in 39s
+
+
+13 actionable tasks: 3 executed, 10 up-to-date

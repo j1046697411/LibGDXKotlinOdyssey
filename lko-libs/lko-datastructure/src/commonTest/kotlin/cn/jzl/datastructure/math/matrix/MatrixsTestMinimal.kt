@@ -17,8 +17,8 @@ class MatrixsTestMinimal {
         
         val t = Matrix4.identity().translation(1f, 2f, 3f)
         assertEquals(1f, t.v00, EPS)
-        assertEquals(2f, t.v31, EPS)
-        
+        assertEquals(2f, t.v13, EPS)
+
         val v = Vector3(0f, 0f, 0f)
         val tv = t.transform(v)
         assertEquals(1f, tv.x, EPS)

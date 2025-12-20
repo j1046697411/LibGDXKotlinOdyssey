@@ -9,21 +9,30 @@ plugins {
 
 // Provide a stable :module:test task for Kotlin Multiplatform modules.
 // In KMP, the default test tasks are per-target (e.g., desktopTest). Some gates expect `test`.
-tasks.matching { it.name == "test" }.configureEach {
+// Not every module has a desktop target/task, so guard this wiring.
+val desktopTestTask = tasks.matching { it.name == "desktopTest" }
+
+if (!desktopTestTask.isEmpty()) {
+    val desktopTest = tasks.named("desktopTest")
+
     // If the plugin already created `test`, keep it.
+    // Otherwise, create an alias task.
+    if (tasks.names.contains("test")) {
+        tasks.named("test").configure {
+            dependsOn(desktopTest)
+        }
+    } else {
+        tasks.register("test") {
+            group = "verification"
+            description = "Alias for desktopTest to make gates consistent across modules."
+            dependsOn(desktopTest)
+        }
+    }
 }
 
-val desktopTest = tasks.named("desktopTest")
-
-val testAlias = tasks.register("test") {
-    group = "verification"
-    description = "Alias for desktopTest to make gates consistent across modules."
-    dependsOn(desktopTest)
-}
-
-// Ensure JUnit Platform for desktop tests.
+// Ensure JUnit Platform for desktop tests (only when a desktop target exists).
 kotlin {
-    targets.named<KotlinJvmTarget>("desktop") {
+    targets.withType<KotlinJvmTarget>().matching { it.name == "desktop" }.configureEach {
         tasks.named<Test>("desktopTest") {
             useJUnitPlatform()
             // Keep existing ByteBuddy workaround; don't force it on other targets.
@@ -49,11 +58,11 @@ kover {
                 // Line coverage >= 60%
                 bound {
                     minValue = 60
-                    metric = kotlinx.kover.gradle.plugin.dsl.MetricType.LINE
-                    aggregation = kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE
+                    // Kover 0.8.x DSL
+                    coverageUnits = kotlinx.kover.gradle.plugin.dsl.CoverageUnit.LINE
+                    aggregationForGroup = kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE
                 }
             }
         }
     }
 }
-

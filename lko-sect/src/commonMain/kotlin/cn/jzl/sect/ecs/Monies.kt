@@ -27,7 +27,11 @@ class MoneyService(@PublishedApi internal val world: World) {
     private val itemService by world.di.instance<ItemService>()
     private val inventoryService by world.di.instance<InventoryService>()
 
-    private val spiritStone: Entity by lazy { itemService.itemPrefab(ATTRIBUTE_SPIRIT_STONE) }
+    private val spiritStone: Entity by lazy {
+        itemService.getOrCreateItemPrefab(ATTRIBUTE_SPIRIT_STONE) {
+            it.addTag<cn.jzl.sect.ecs.item.Stackable>()
+        }
+    }
 
     fun transferMoney(buyer: Entity, seller: Entity, money: Int) {
         inventoryService.transferItem(buyer, seller, spiritStone, money)

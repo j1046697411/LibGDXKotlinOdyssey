@@ -139,9 +139,14 @@ class InventoryService(world: World) : EntityRelationContext(world) {
     fun transferItem(receiver: Entity, item: Entity, count: Int, block: EntityCreateContext.(Entity) -> Unit = {}) {
         val itemPrefab = item.prefab
         require(itemPrefab != null) { "物品${item.id}没有预制体" }
-        require(item.getRelationUp<OwnedBy>() == receiver) { "物品${item.id}不是玩家${receiver.id}所有" }
+
+        val owner = item.getRelationUp<OwnedBy>()
+        require(owner != null) { "物品${item.id}没有所有者" }
+        if (owner == receiver) return
+
         val amount = item.getComponent<Amount?>()?.value ?: 1
-        require(amount >= count) { "玩家${receiver.id}物品不足，需要: $count, 拥有: $amount" }
+        require(amount >= count) { "物品${item.id}数量不足，需要: $count, 拥有: $amount" }
+
         if (amount == count) {
             world.entity(item) {
                 it.addRelation<OwnedBy>(receiver)
@@ -149,6 +154,8 @@ class InventoryService(world: World) : EntityRelationContext(world) {
             }
             return
         }
+
+        // Split stack
         world.entity(item) { it.addComponent(Amount(amount - count)) }
         itemService.item(itemPrefab) {
             it.addRelation<OwnedBy>(receiver)

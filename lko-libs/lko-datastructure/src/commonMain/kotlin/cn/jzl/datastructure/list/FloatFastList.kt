@@ -7,7 +7,7 @@ import kotlin.math.max
  * - 使用 `FloatArray` 顺序存储，扩容策略为两倍或刚好满足需要。
  * - 提供尾部/指定位置批量插入、`ensureCapacity`/`fill`、以及基于 `FloatArray` 的高效拼接。
  */
-class FloatFastList(capacity: Int = 7, val order: Boolean = false) : AbstractMutableFastList<Float>(), FloatMutableFastList {
+class FloatFastList(capacity: Int = 7, val order: Boolean = true) : AbstractMutableFastList<Float>(), FloatMutableFastList {
     private var data = FloatArray(capacity)
 
     override var size: Int = 0

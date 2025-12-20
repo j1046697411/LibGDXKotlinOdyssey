@@ -2,19 +2,20 @@ package cn.jzl.sect.v2
 
 import cn.jzl.di.instance
 import cn.jzl.ecs.entity
+import cn.jzl.ecs.system.update
 import cn.jzl.ecs.world
 import cn.jzl.sect.ecs.core.Named
 import cn.jzl.sect.ecs.core.OwnedBy
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.time.Duration.Companion.milliseconds
 
 class InventoryServiceTest {
 
     @Test
     fun addAndRemoveStackableItem_updatesCountsAndKeepsEntity() {
         val world = world {
-            install(itemAddon)
             install(inventoryAddon)
         }
 
@@ -36,13 +37,13 @@ class InventoryServiceTest {
 
         // Removing remainder should delete the entity.
         inventoryService.removeItem(owner, potionPrefab, 1)
+        world.update(16.milliseconds)
         assertEquals(0, inventoryService.getItemCount(owner, potionPrefab))
     }
 
     @Test
     fun addNonStackableCreatesMultipleEntitiesAndConsumeRemoves() {
         val world = world {
-            install(itemAddon)
             install(inventoryAddon)
         }
 
@@ -60,13 +61,13 @@ class InventoryServiceTest {
         assertEquals(2, inventoryService.getItemCount(owner, applePrefab))
 
         inventoryService.consumeItems(owner, mapOf(applePrefab to 2))
+        world.update(16.milliseconds)
         assertEquals(0, inventoryService.getItemCount(owner, applePrefab))
     }
 
     @Test
     fun transferItem_splitsStackWhenPartialTransfer() {
         val world = world {
-            install(itemAddon)
             install(inventoryAddon)
         }
 
@@ -94,7 +95,6 @@ class InventoryServiceTest {
     @Test
     fun consumeItems_throwsWhenNotEnough() {
         val world = world {
-            install(itemAddon)
             install(inventoryAddon)
         }
 

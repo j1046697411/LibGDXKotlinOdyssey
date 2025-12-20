@@ -11,12 +11,12 @@ import cn.jzl.datastructure.math.vector.Vector3
  */
 fun Matrix4.translation(x: Float, y: Float, z: Float): Matrix4 {
     val result = this.copy()
-    // 在4x4变换矩阵中，平移分量存储在最后一列
-    // 先获取当前矩阵的平移分量
+    // Row-major, column-vector convention: translation stored in last column.
+    // Apply translation in local space (consistent with previous intent).
     val currX = result[0, 3]
     val currY = result[1, 3]
     val currZ = result[2, 3]
-    // 应用平移（考虑当前矩阵的旋转缩放）
+
     result[0, 3] = currX + x * result[0, 0] + y * result[0, 1] + z * result[0, 2]
     result[1, 3] = currY + x * result[1, 0] + y * result[1, 1] + z * result[1, 2]
     result[2, 3] = currZ + x * result[2, 0] + y * result[2, 1] + z * result[2, 2]

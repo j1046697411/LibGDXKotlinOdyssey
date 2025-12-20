@@ -53,7 +53,8 @@ value class UnitPrice(val value: Int)
 data class AcquisitionItemData(val count: Int, val unitPrice: Int)
 
 val marketAddon = createAddon("market", {}) {
-    install(itemAddon)
+    // MarketService depends on inventory/money via ItemService.
+    install(inventoryAddon)
     install(countdownAddon)
     injects {
         this bind singleton { new(::MarketService) }
@@ -208,11 +209,16 @@ class MarketService(world: World) : EntityRelationContext(world) {
      * @param count 购买的物品数量，默认购买所有物品
      */
     fun buyItems(buyer: Entity, item: Entity, count: Int? = null) {
-        val consignmentOrder = item.getRelationUp<ConsignmentOrder>()
-        require(consignmentOrder != null) { "物品${item.id}不是寄售订单的物品" }
-        require(consignmentOrder.getRelationUp<ConsignmentOrder>() != null) { "订单${consignmentOrder.id}不是市场的寄售订单" }
-        val market = consignmentOrder.getRelationUp<OwnedBy>()
-        require(market != null) { "订单${market?.id}不是市场的寄售订单" }
+        // Consigned items are owned by the consignment order entity.
+        val consignmentOrder = item.getRelationUp<OwnedBy>()
+        require(consignmentOrder != null) { "物品${item.id}没有所有者" }
+        val market = consignmentOrder.getRelationUp<ConsignmentOrder>()
+        require(market != null) { "订单${consignmentOrder.id}不是市场的寄售订单" }
+
+        val seller = consignmentOrder.getRelationUp<OwnedBy>()
+        require(seller != null) { "订单${consignmentOrder.id}没有所有者" }
+        require(seller != buyer) { "玩家${buyer.id}不能购买自己的寄售订单" }
+
         val unitPrice = item.getComponent<UnitPrice>()
         val amount = item.getComponent<Amount?>()?.value ?: 1
         val buyCount = min(count ?: amount, amount)
@@ -220,9 +226,13 @@ class MarketService(world: World) : EntityRelationContext(world) {
         require(moneyService.hasEnoughMoney(buyer, buyCount * unitPrice.value)) {
             "玩家${buyer.id}货币不足，购买物品${item.id}需要: ${buyCount * unitPrice.value}"
         }
+
+        // Transfer item from order to buyer.
         inventoryService.transferItem(buyer, item, buyCount) {
             it.addComponent<UnitPrice>(unitPrice)
         }
+
+        // Transfer payment to the consignment order (seller can later withdraw via cancel/complete).
         moneyService.transferMoney(buyer, consignmentOrder, buyCount * unitPrice.value)
         world.emit<OnConsignmentOrderCompleted>(market)
     }

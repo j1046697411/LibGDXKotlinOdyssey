@@ -9,20 +9,15 @@ import kotlin.test.*
 
 class MoneyServiceTest {
 
-    private val world by lazy {
-        world {
-            install(inventoryAddon)
-            install(moneyAddon)
-        }
+    private fun newWorld() = world {
+        install(inventoryAddon)
+        install(moneyAddon)
     }
-
-    private val moneyService by world.di.instance<MoneyService>()
-    private val itemService by world.di.instance<ItemService>()
-    private val inventoryService by world.di.instance<InventoryService>()
 
     // 测试货币组件
     @Test
     fun testMoneyComponent() {
+        val world = newWorld()
         val entity = world.entity {
             it.addComponent(Money(100))
         }
@@ -37,10 +32,17 @@ class MoneyServiceTest {
     // 测试货币转移
     @Test
     fun testTransferMoney() {
+        val world = newWorld()
+        val moneyService by world.di.instance<MoneyService>()
+        val itemService by world.di.instance<ItemService>()
+        val inventoryService by world.di.instance<InventoryService>()
+
         val buyer = world.entity {}
         val seller = world.entity {}
 
-        val spiritStonePrefab = itemService.itemPrefab(MoneyService.ATTRIBUTE_SPIRIT_STONE) {}
+        val spiritStonePrefab = itemService.getOrCreateItemPrefab(MoneyService.ATTRIBUTE_SPIRIT_STONE) {
+            it.addTag<cn.jzl.sect.ecs.item.Stackable>()
+        }
 
         inventoryService.addItem(buyer, spiritStonePrefab, 200)
         inventoryService.addItem(seller, spiritStonePrefab, 100)
@@ -54,10 +56,17 @@ class MoneyServiceTest {
     // 测试货币转移时余额不足
     @Test
     fun testTransferMoneyWithInsufficientBalance() {
+        val world = newWorld()
+        val moneyService by world.di.instance<MoneyService>()
+        val itemService by world.di.instance<ItemService>()
+        val inventoryService by world.di.instance<InventoryService>()
+
         val buyer = world.entity {}
         val seller = world.entity {}
 
-        val spiritStonePrefab = itemService.itemPrefab(MoneyService.ATTRIBUTE_SPIRIT_STONE) {}
+        val spiritStonePrefab = itemService.getOrCreateItemPrefab(MoneyService.ATTRIBUTE_SPIRIT_STONE) {
+            it.addTag<cn.jzl.sect.ecs.item.Stackable>()
+        }
 
         inventoryService.addItem(buyer, spiritStonePrefab, 50)
         inventoryService.addItem(seller, spiritStonePrefab, 100)
@@ -71,6 +80,7 @@ class MoneyServiceTest {
     // 测试 hasEnoughMoney 扩展函数
     @Test
     fun testHasEnoughMoney() {
+        val world = newWorld()
         val entity = world.entity {
             it.addComponent(Money(100))
         }
@@ -88,6 +98,7 @@ class MoneyServiceTest {
     // 测试 getMoney 扩展函数
     @Test
     fun testGetMoney() {
+        val world = newWorld()
         val entity = world.entity {
             it.addComponent(Money(100))
         }
@@ -102,6 +113,7 @@ class MoneyServiceTest {
     // 测试 increaseMoney 扩展函数
     @Test
     fun testIncreaseMoney() {
+        val world = newWorld()
         val entity = world.entity {
             it.addComponent(Money(100))
         }
@@ -131,6 +143,7 @@ class MoneyServiceTest {
     // 测试 decreaseMoney 扩展函数
     @Test
     fun testDecreaseMoney() {
+        val world = newWorld()
         val entity = world.entity {
             it.addComponent(Money(100))
         }
@@ -160,10 +173,17 @@ class MoneyServiceTest {
     // 测试货币转移与业务逻辑结合
     @Test
     fun testTransferMoneyWithBusinessLogic() {
+        val world = newWorld()
+        val moneyService by world.di.instance<MoneyService>()
+        val itemService by world.di.instance<ItemService>()
+        val inventoryService by world.di.instance<InventoryService>()
+
         val buyer = world.entity {}
         val seller = world.entity {}
 
-        val spiritStonePrefab = itemService.itemPrefab(MoneyService.ATTRIBUTE_SPIRIT_STONE) {}
+        val spiritStonePrefab = itemService.getOrCreateItemPrefab(MoneyService.ATTRIBUTE_SPIRIT_STONE) {
+            it.addTag<cn.jzl.sect.ecs.item.Stackable>()
+        }
 
         inventoryService.addItem(buyer, spiritStonePrefab, 200)
         inventoryService.addItem(seller, spiritStonePrefab, 100)

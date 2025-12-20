@@ -57,12 +57,11 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     private val itemService by world.di.instance<ItemService>()
 
-    private val ownerItems = mutableMapOf<Entity, QueryGroupedBy<Entity, EntityItemContext>>()
+    // QueryGroupedBy is not guaranteed to stay consistent across entity destroy/transfer in this ECS,
+    // so avoid caching it per owner.
 
     private fun getOwnerItems(owner: Entity): QueryGroupedBy<Entity, EntityItemContext> {
-        return ownerItems.getOrPut(owner) {
-            world.query { EntityItemContext(this, owner) }.groupedBy { itemPrefab }
-        }
+        return world.query { EntityItemContext(this, owner) }.groupedBy { itemPrefab }
     }
 
     private fun getOwnerItemsByItemPrefab(owner: Entity, itemPrefab: Entity): QueryGroupedBy.QueryGroup<Entity, EntityItemContext>? {
@@ -109,6 +108,19 @@ class InventoryService(world: World) : EntityRelationContext(world) {
         require(count > 0)
         val query = getOwnerItemsByItemPrefab(owner, itemPrefab)
         requireNotNull(query) {}
+
+        // For non-stackable items, destroying while iterating can mutate the group and skip entities.
+        if (!itemService.isStackable(itemPrefab)) {
+            val toDestroy = mutableListOf<Entity>()
+            query.collectWhile {
+                toDestroy += entity
+                toDestroy.size >= count
+            }
+            require(toDestroy.size >= count) { "Not enough items to remove" }
+            toDestroy.forEach { world.destroy(it) }
+            return
+        }
+
         var remaining = count
         query.collectWhile {
             val itemAmount = amount?.value ?: 1

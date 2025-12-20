@@ -118,6 +118,20 @@ class ItemService(world: World) : EntityRelationContext(world) {
 
     operator fun get(name: String): Entity? = nameToItemPrefabs[Named(name)]
 
+    /**
+     * Returns an existing item prefab by name, or creates it if missing.
+     * This prevents duplicate-prefab bugs when multiple callers use the same [Named] key.
+     */
+    @ECSDsl
+    inline fun getOrCreateItemPrefab(named: Named, block: EntityCreateContext.(Entity) -> Unit = {}): Entity {
+        val existing = nameToItemPrefabs[named]
+        if (existing != null) {
+            world.entity(existing) { block(it) }
+            return existing
+        }
+        return itemPrefab(named) { block(it) }
+    }
+
     fun splitItem(item: Entity, count: Int): Entity {
         if (!item.hasTag<Stackable>()) return item
         val amount = item.getComponent<Amount?>() ?: return item

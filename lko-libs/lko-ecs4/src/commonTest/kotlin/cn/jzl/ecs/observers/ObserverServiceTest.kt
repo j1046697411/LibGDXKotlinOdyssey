@@ -99,6 +99,7 @@ class ObserverServiceTest {
 
         // 取消订阅
         observer.close()
+        world.entityService.update()
 
         // 第二次发布事件
         world.emit(entity, TestEvent(2))
@@ -129,6 +130,7 @@ class ObserverServiceTest {
         } finally {
             // 手动关闭观察者
             observer.close()
+            world.entityService.update()
         }
 
         // 再次发布事件

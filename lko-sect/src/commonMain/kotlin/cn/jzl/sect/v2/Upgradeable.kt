@@ -44,12 +44,16 @@ class LevelingService(world: World) : EntityRelationContext(world) {
         require(entity.hasTag<Upgradeable>())
     }
 
+    private fun defaultFormula(): ExperienceFormula = object : ExperienceFormula {
+        override fun getExperienceForLevel(level: Long): Long = 100
+    }
+
     fun addExperience(entity: Entity, exp: Long) {
         require(exp > 0) {}
         require(entity.hasTag<Upgradeable>()) {}
         val level = attributeService.getAttributeValue(entity, attributeLevel) ?: AttributeValue.one
         val remainingExperience = attributeService.getAttributeValue(entity, attributeExperience) ?: AttributeValue.zero
-        val experienceFormula = entity.getComponent<ExperienceFormula>()
+        val experienceFormula = entity.getComponent<ExperienceFormula?>() ?: defaultFormula()
         var remaining = remainingExperience.value + exp
         var currentLevel = level.value
         while (true) {
@@ -60,9 +64,9 @@ class LevelingService(world: World) : EntityRelationContext(world) {
         }
         val upgrade = currentLevel != level.value
         world.entity(entity) {
-            attributeService.setAttributeValue(this, it, attributeExperience, AttributeValue(remaining))
+            attributeService.setAttributeValue(this, entity, attributeExperience, AttributeValue(remaining))
             if (upgrade) {
-                attributeService.setAttributeValue(this, it, attributeLevel, AttributeValue(currentLevel))
+                attributeService.setAttributeValue(this, entity, attributeLevel, AttributeValue(currentLevel))
             }
         }
         if (upgrade) world.emit(entity, OnUpgradeEvent(level.value, currentLevel))
@@ -88,8 +92,8 @@ class LevelingService(world: World) : EntityRelationContext(world) {
         checkUpgrade(entity)
         val level = attributeService.getAttributeValue(entity, attributeLevel)?.value ?: 1
         world.entity(entity) {
-            attributeService.setAttributeValue(this, it, attributeExperience, AttributeValue.zero)
-            attributeService.setAttributeValue(this, it, attributeLevel, AttributeValue(level + 1))
+            attributeService.setAttributeValue(this, entity, attributeExperience, AttributeValue.zero)
+            attributeService.setAttributeValue(this, entity, attributeLevel, AttributeValue(level + 1))
         }
     }
 

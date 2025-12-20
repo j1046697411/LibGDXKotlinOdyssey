@@ -15,7 +15,7 @@ value class Angle(val radians: Float) : Interpolable<Angle> {
 
     companion object {
         val ZERO: Angle = Angle(0f)
-        val PI: Angle = Angle(3.1415925f)
+        val PI: Angle = Angle(kotlin.math.PI.toFloat())
         val HALF_PI: Angle = PI / 2f
         val TWO_PI: Angle = PI * 2f
     }

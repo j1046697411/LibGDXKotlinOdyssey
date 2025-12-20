@@ -1,8 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="lko-ecs-serialization-desktop">
     <output-path>$PROJECT_DIR$/lko-libs/lko-ecs-serialization/build/libs</output-path>
-    <root id="archive" name="lko-ecs-serialization-desktop.jar">
-      <element id="module-output" name="LibGDXKotlinOdyssey.lko-ecs-serialization.desktopMain" />
-    </root>
+    <root id="archive" name="lko-ecs-serialization-desktop.jar" />
   </artifact>
 </component>
