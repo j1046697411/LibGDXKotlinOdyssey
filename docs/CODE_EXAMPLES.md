@@ -8,22 +8,22 @@
 
 ### ✓ 正确做法：清晰的命名与注释
 
-```kotlin
+```text
 package cn.jzl.sect.ecs.sect
 
 /**
- * Sect construction logic: validates and executes facility construction.
- * 
- * This module handles validation of sect resources against construction
- * requirements, and executes state transitions upon successful validation.
- * 
+ * 宗门建设逻辑：用于校验并执行设施建造。
+ *
+ * 本模块负责校验宗门资源是否满足建造需求，
+ * 并在校验通过后执行相应的状态转换。
+ *
  * @see SectConstruction.validateConstruction
  * @see SectConstruction.executeConstruction
  */
 object SectConstruction {
     
     /**
-     * Represents a sect construction request with type and resource requirements.
+     * 表示一次宗门建造请求，包含建筑类型与资源需求。
      */
     data class ConstructionRequest(
         val facilityType: String,
@@ -31,13 +31,13 @@ object SectConstruction {
     )
 
     /**
-     * Validates a construction request against sect resources.
-     * 
-     * @param sectResources current sect resources (funds, materials)
-     * @param request construction request with type and requirements
-     * @return Result.success if resources are sufficient, Result.failure otherwise
-     * @throws IllegalArgumentException if request is invalid
-     * 
+     * 根据宗门资源校验建造请求是否可执行。
+     *
+     * @param sectResources 当前宗门资源（资金、材料等）
+     * @param request 建造请求（类型与资源需求）
+     * @return 若资源足够则返回 Result.success，否则返回 Result.failure
+     * @throws IllegalArgumentException 当请求参数无效时抛出
+     *
      * @see SectResources
      */
     fun validateConstruction(
@@ -57,13 +57,13 @@ object SectConstruction {
     }
 
     /**
-     * Executes construction by deducting resources from the sect.
-     * 
-     * Assumes [validateConstruction] has been called and passed.
-     * 
-     * @param sectResources current sect resources
-     * @param request construction request (for logging/audit)
-     * @return updated sect resources with deducted amounts
+     * 执行建造操作，扣除宗门相应资源。
+     *
+     * 假设 [validateConstruction] 已被调用且通过。
+     *
+     * @param sectResources 当前宗门资源
+     * @param request 建造请求（用于日志/审计）
+     * @return 扣除资源后的更新宗门资源
      */
     fun executeConstruction(
         sectResources: SectResources,
@@ -99,8 +99,7 @@ fun execute(sectResources: SectResources, request: ConstructionRequest): SectRes
 
 ### ✓ 正确做法：通过 Addon 解耦
 
-```kotlin
-// ✓ 好: 通过 Addon 系统隔离模块
+```text
 package cn.jzl.sect.ecs.sect
 
 class SectAddon {
@@ -185,7 +184,7 @@ fun gatherResources(disciple: DiscipleInfo): Int {
 
 ### ✓ 正确做法：完整的 AAA 模式
 
-```kotlin
+```text
 package cn.jzl.sect.ecs.sect
 
 import kotlin.test.Test
@@ -195,7 +194,7 @@ import kotlin.test.assertFalse
 class SectConstructionTest {
     
     /**
-     * Test that construction validation passes with sufficient resources.
+     * 测试：当资源充足时，建造校验应当通过。
      */
     @Test
     fun testValidateConstructionWhenSufficientResourcesExpectSuccess() {
@@ -214,7 +213,7 @@ class SectConstructionTest {
     }
 
     /**
-     * Test that construction validation fails when funds are insufficient.
+     * 测试：当资金不足时，建造校验应当失败。
      */
     @Test
     fun testValidateConstructionWhenInsufficientFundsExpectFailure() {
@@ -234,7 +233,7 @@ class SectConstructionTest {
     }
 
     /**
-     * Test that construction execution properly deducts resources.
+     * 测试：执行建造后应正确扣除资源。
      */
     @Test
     fun testExecuteConstructionDeductsResourcesCorrectly() {
@@ -381,5 +380,4 @@ fun showSect(sect: SectInfo) {
 ✓ **高效** - 避免重复查询、批量操作而非逐个  
 ✓ **一致** - 统一的界面规范、命名约定、交互流程  
 
-详见 [`constitution.md`](../../specs/003-sect-simulation-game/constitution.md) 获得完整的项目规则。
-
+详见 [`.specify/memory/constitution.md`](../.specify/memory/constitution.md) 获得完整的项目规则。

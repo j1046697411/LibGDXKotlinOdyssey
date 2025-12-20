@@ -25,6 +25,9 @@ pluginManagement {
     }
 }
 
+// Enable reusable convention plugins.
+includeBuild("build-logic")
+
 dependencyResolutionManagement {
     repositories {
         maven("https://maven.aliyun.com/repository/central")

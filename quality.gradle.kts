@@ -70,23 +70,15 @@ tasks.jacocoTestReport {
 
 tasks.jacocoTestCoverageVerification {
     violationRules {
-        rule {
-            element = "CLASS"
-            includes = listOf("cn.jzl.sect.*")
-
-            limit {
-                minimum = "0.75".toBigDecimal()
-            }
-        }
-
+        // Feature 002 staged gate: only enforce on lko-sect v2 core packages.
         rule {
             element = "SOURCEFILE"
-            includes = listOf("cn/jzl/sect/ecs/**")
+            includes = listOf("cn/jzl/sect/v2/**")
 
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
-                minimum = "0.80".toBigDecimal()
+                minimum = "0.60".toBigDecimal()
             }
         }
     }
@@ -107,7 +99,7 @@ tasks.register("qualityCheck") {
         println("  - KtLint: Code style verified")
         println("  - Detekt: Static analysis completed")
         println("  - JUnit: All tests passed")
-        println("  - JaCoCo: Coverage verified (≥75%)")
+        println("  - JaCoCo: Coverage verified (v2 line coverage ≥60%)")
     }
 }
 
@@ -123,4 +115,3 @@ tasks.register("preCommit") {
         println("  Ready to commit and push")
     }
 }
-

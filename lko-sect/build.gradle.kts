@@ -4,7 +4,11 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
+    id("cn.jzl.sect-module-conventions")
 }
+
+// NOTE: quality gates are configured via Gradle build logic (see root build scripts).
+// (Do not apply `quality.gradle.kts` directly here; it's a Kotlin DSL script that isn't compatible as an applied script.)
 
 kotlin {
 
@@ -45,4 +49,3 @@ kotlin {
         }
     }
 }
-

@@ -43,3 +43,12 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Logs / temp ###
+*.log
+*.tmp
+*.swp
+Thumbs.db
+
+### Env files (keep secrets out of VCS) ###
+.env*

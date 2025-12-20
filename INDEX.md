@@ -25,7 +25,7 @@
    - ✗ 错误的代码
    - 学会最佳实践
 
-4. **20 min** - [`specs/003-sect-simulation-game/constitution.md`](specs/003-sect-simulation-game/constitution.md) (核心部分)
+4. **20 min** - [`.specify/memory/constitution.md`](.specify/memory/constitution.md) (核心部分)
    - 详细规则
    - 检查清单
 
@@ -37,8 +37,8 @@
 
 **推荐阅读** (1.5 小时):
 
-1. [`specs/003-sect-simulation-game/constitution.md`](specs/003-sect-simulation-game/constitution.md) (45 min)
-   - 四大原则的完整定义
+1. [`.specify/memory/constitution.md`](.specify/memory/constitution.md) (45 min)
+   - 核心原则的完整定义
    - 详细规则和检查清单
    - 技术栈一致性
 
@@ -60,7 +60,7 @@
 **快速检查清单**:
 
 1. **参考**: [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md) - 代码审查 Checklist
-2. **规则**: [`constitution.md`](specs/003-sect-simulation-game/constitution.md) - 1.1 代码质量
+2. **规则**: [`.specify/memory/constitution.md`](.specify/memory/constitution.md) - 核心原则
 3. **示例**: [`CODE_EXAMPLES.md`](docs/CODE_EXAMPLES.md) - 对比示例 (✓ vs ✗)
 4. **工具**: [`GOVERNANCE.md`](GOVERNANCE.md) - 工具链 & 阈值
 
@@ -81,11 +81,11 @@
 
 **推荐阅读** (1 小时):
 
-1. [`specs/003-sect-simulation-game/constitution.md`](specs/003-sect-simulation-game/constitution.md)
-   - 2. 技术栈一致性
-   - 3. 工作流程与检查点
+1. [`.specify/memory/constitution.md`](.specify/memory/constitution.md)
+   - 核心原则
+   - 工作流程与检查点
 
-2. [`specs/003-sect-simulation-game/plan.md`](specs/003-sect-simulation-game/plan.md)
+2. `specs/` 下对应 feature 的 `plan.md`
    - 项目结构
    - 技术决策
 
@@ -103,9 +103,9 @@
    - 编译、测试、代码质量、性能 4 个维度
    - 工具及其失败后果
 
-2. [`constitution.md`](specs/003-sect-simulation-game/constitution.md)
-   - 1.2 测试标准 - 覆盖率目标
-   - 1.4 性能要求 - 性能目标
+2. `.specify/memory/constitution.md`
+   - 测试纪律 - 覆盖率目标
+   - 性能预算 - 性能目标
 
 3. [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md)
    - 质量门槛总结

@@ -44,16 +44,18 @@ cd LibGDXKotlinOdyssey
 
 ## 项目规则 (宪法)
 
-项目的核心原则定义在 [`specs/003-sect-simulation-game/constitution.md`](specs/003-sect-simulation-game/constitution.md) 中。
+项目的核心原则定义在 `.specify/memory/constitution.md` 中。
 
 ### 关键原则
 
-1. **卓越代码质量** — 遵循 Kotlin 最佳实践、清晰命名、充分注释
-2. **严格测试标准** — ≥80% 覆盖率、单元/集成/性能测试齐全
-3. **用户体验一致性** — 统一界面设计、清晰交互流程
-4. **高性能要求** — 60 FPS、低延迟、≤500MB 内存占用
+1. **ECS-first 架构** — 领域逻辑优先使用 ECS（组件/系统/关系）表达
+2. **服务复用优先** — 优先复用 Inventory/Leveling/Money/Countdown 等已存在能力
+3. **框架一致性** — 遵循 Addon + DI 约定、保持模块化与一致性
+4. **质量门禁** — ktlint/detekt 必须通过，测试必须 100% 通过
+5. **测试覆盖率** — 覆盖率目标 **≥80%**（对 in-scope 包），新增功能必须带测试
+6. **性能预算** — 关键路径按 60 FPS 预算优化
 
-详细规则请阅读 [`constitution.md`](specs/003-sect-simulation-game/constitution.md)。
+详细规则请阅读 `.specify/memory/constitution.md`。
 
 ---
 
@@ -82,18 +84,30 @@ git checkout -b feature/your-feature-name
 
 ### 3. 本地质量检查
 
-在提交前运行完整的质量检查:
+在提交前运行完整的质量门禁（**唯一推荐入口**）:
 
 ```bash
-# 自动格式化代码 + 运行所有检查
+# 自动格式化 + 静态检查 + 单测 + 覆盖率门禁（仅 lko-sect v2）
 ./gradlew preCommit
-
-# 或者分步检查:
-./gradlew ktlintFormat          # 自动修复代码风格
-./gradlew detekt                # 静态分析
-./gradlew test                  # 单元测试
-./gradlew jacocoTestReport      # 覆盖率报告
 ```
+
+也可以在迭代时使用模块级命令（更快）:
+
+```bash
+./gradlew :lko-sect:check
+./gradlew :lko-sect:ktlintCheck :lko-sect:detekt
+./gradlew :lko-sect:test
+./gradlew :lko-sect:koverHtmlReport :lko-sect:koverVerify
+```
+
+门禁顺序（概念口径，实际由 `preCommit` 统一编排）:
+
+1) format (`ktlintFormat`)
+2) lint (`ktlintCheck`, `detekt`)
+3) tests (`test`)
+4) coverage verify (**merge blocker only for `cn.jzl.sect.v2.*`**, LINE covered % >= 60%)
+
+> 注意：本轮覆盖率阈值是阶段性门槛，后续会提升到 75% 并向章程 80% 收敛。
 
 ### 4. 提交代码
 
@@ -158,18 +172,22 @@ Detekt 检查代码中的设计问题、复杂度过高等问题:
 | `LongParameterList` | 参数 > 6 个，使用数据类封装 |
 | `TooManyFunctions` | 类 > 11 个函数，拆分为多个类 |
 
-### 代码覆盖率 (JaCoCo)
+### 代码覆盖率 (Kover)
 
-生成并检查测试覆盖率:
+生成并检查测试覆盖率（本轮 feature 的 merge blocker 仅作用于 `lko-sect` v2）：
 
 ```bash
-./gradlew jacocoTestReport
-# 报告位置: build/reports/jacoco/test/html/index.html
+./gradlew :lko-sect:koverHtmlReport
+./gradlew :lko-sect:koverVerify
 ```
 
-最小要求:
-- 核心业务逻辑: ≥ 90%
-- 系统集成: ≥ 80%
+本轮门禁口径（见 `specs/002-constitution-alignment/spec.md` Audit notes）：
+
+- Scope: `cn.jzl.sect.v2.*`
+- Metric: LINE covered percentage
+- Threshold: >= 60%
+
+> 其他模块当前不启用覆盖率阈值门禁（仍需通过 ktlint/detekt/tests）。
 
 ---
 
@@ -326,9 +344,8 @@ A: **不能**。所有检查都是必需项:
 - **Issue**: 在 GitHub Issues 中提问或报告问题
 - **Discussion**: 在 GitHub Discussions 中讨论设计
 - **Slack/Discord**: 加入项目开发频道 (如有)
-- **文档**: 查看 [`constitution.md`](specs/003-sect-simulation-game/constitution.md) 和 [`plan.md`](specs/003-sect-simulation-game/plan.md)
+- **文档**: 查看 `.specify/memory/constitution.md` 和 `specs/` 下对应 feature 的 `plan.md`
 
 ---
 
 感谢你的贡献！🎉
-

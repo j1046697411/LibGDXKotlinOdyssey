@@ -186,7 +186,7 @@ class MarketServiceTest {
         }
 
         // 购买寄售物品
-        marketService.buyItems(consignmentOrder, buyer, item, 1)
+        marketService.buyItems(buyer, item, 1)
 
         // 验证购买成功
         // 验证买家货币减少
@@ -302,7 +302,7 @@ class MarketServiceTest {
 
         // 尝试购买，应该失败
         assertFailsWith<IllegalArgumentException> {
-            marketService.buyItems(consignmentOrder, buyer, item, 1)
+            marketService.buyItems(buyer, item, 1)
         }
     }
 
@@ -349,7 +349,7 @@ class MarketServiceTest {
         // 尝试购买6个物品，应该失败
 
         assertFailsWith<IllegalArgumentException> {
-            marketService.buyItems(consignmentOrder, buyer, item, 6)
+            marketService.buyItems(buyer, item, 6)
         }
     }
 
@@ -372,7 +372,7 @@ class MarketServiceTest {
             addItem(item, 1, 100)
         }
         assertFailsWith<IllegalArgumentException> {
-            marketService.buyItems(consignmentOrder, player, item, 1)
+            marketService.buyItems(player, item, 1)
         }
     }
 }
