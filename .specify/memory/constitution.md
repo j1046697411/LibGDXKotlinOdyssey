@@ -1,50 +1,57 @@
-# [PROJECT_NAME] 项目章程
-<!-- 示例: Spec 章程, TaskFlow 章程等 -->
+# LibGDXKotlinOdyssey 项目章程
 
 ## 核心原则
 
-### [PRINCIPLE_1_NAME]
-<!-- 示例: I. 库优先 -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- 示例: 每个功能都从独立的库开始; 库必须是自包含的、可独立测试的、有文档的; 需要明确的目的 - 不允许仅用于组织的库 -->
+### I. 多模块架构优先
+每个功能都从独立的模块开始; 模块必须是自包含的、可独立测试的、有文档的; 需要明确的目的 - 不允许仅用于组织的模块
 
-### [PRINCIPLE_2_NAME]
-<!-- 示例: II. CLI 接口 -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- 示例: 每个库都通过 CLI 暴露功能; 文本输入/输出协议: stdin/args → stdout, 错误 → stderr; 支持 JSON + 人类可读格式 -->
+### II. 质量门控强制执行
+所有代码必须通过质量门控检查，包括ktlint、detekt、测试和覆盖率检查; 质量门控在本地和CI环境保持一致
 
-### [PRINCIPLE_3_NAME]
-<!-- 示例: III. 测试优先(不可协商) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- 示例: TDD 强制要求: 编写测试 → 用户批准 → 测试失败 → 然后实现; 严格执行红-绿-重构循环 -->
+### III. 测试优先开发
+所有功能必须有相应的测试; 严格执行测试驱动开发流程; 测试必须覆盖核心业务逻辑
 
-### [PRINCIPLE_4_NAME]
-<!-- 示例: IV. 集成测试 -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- 示例: 需要集成测试的重点领域: 新库契约测试、契约变更、服务间通信、共享模式 -->
+### IV. 代码覆盖率要求
+cn.jzl.sect.v2.* 包的代码覆盖率必须达到60%以上; 其他模块也应保持合理的覆盖率
 
-### [PRINCIPLE_5_NAME]
-<!-- 示例: V. 可观测性, VI. 版本控制和破坏性变更, VII. 简单性 -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- 示例: 文本 I/O 确保可调试性; 需要结构化日志; 或者: MAJOR.MINOR.BUILD 格式; 或者: 从简单开始, YAGNI 原则 -->
+### V. 技术栈一致性
+统一使用Kotlin Multiplatform、Compose Multiplatform等技术栈; 遵循模块约定插件(cn.jzl.sect-module-conventions)的规范
 
-## [SECTION_2_NAME]
-<!-- 示例: 附加约束、安全要求、性能标准等 -->
+## 附加约束
 
-[SECTION_2_CONTENT]
-<!-- 示例: 技术栈要求、合规标准、部署策略等 -->
+### 技术栈要求
+- Kotlin Multiplatform作为主要开发语言
+- Compose Multiplatform用于UI开发
+- ECS(实体组件系统)架构用于核心功能
+- JUnit Platform用于测试
 
-## [SECTION_3_NAME]
-<!-- 示例: 开发工作流程、审查流程、质量门禁等 -->
+### 构建配置
+- 使用Gradle Kotlin DSL进行构建配置
+- 质量门控通过根构建脚本配置
+- 不直接应用quality.gradle.kts脚本
 
-[SECTION_3_CONTENT]
-<!-- 示例: 代码审查要求、测试门禁、部署审批流程等 -->
+## 开发工作流程
+
+### 本地开发
+- 使用 `./gradlew preCommit` 进行全项目质量检查
+- 对于SECT v2模块，使用快速迭代命令: `./gradlew :lko-sect:check`, `./gradlew :lko-sect:ktlintCheck :lko-sect:detekt`, `./gradlew :lko-sect:test`, `./gradlew :lko-sect:koverHtmlReport :lko-sect:koverVerify`
+
+### CI/CD
+- 所有PR必须通过CI环境的质量门控
+- 代码合并前必须经过代码审查
 
 ## 治理
-<!-- 示例: 章程优先于所有其他实践; 修正需要文档化、批准、迁移计划 -->
 
-[GOVERNANCE_RULES]
-<!-- 示例: 所有 PR/审查必须验证合规性; 复杂性必须得到证明; 使用 [GUIDANCE_FILE] 进行运行时开发指导 -->
+### 章程优先
+章程优先于所有其他实践; 任何与章程冲突的实践都必须进行调整
 
-**版本**: [CONSTITUTION_VERSION] | **批准日期**: [RATIFICATION_DATE] | **最后修正**: [LAST_AMENDED_DATE]
-<!-- 示例: 版本: 2.1.1 | 批准日期: 2025-06-13 | 最后修正: 2025-07-16 -->
+### 修正流程
+章程的修正需要文档化、批准和迁移计划; 修正后必须更新版本号
+
+### 版本控制
+遵循语义化版本控制规则:
+- MAJOR(主版本): 向后不兼容的治理/原则删除或重新定义
+- MINOR(次版本): 新原则/部分添加或实质性扩展指导
+- PATCH(补丁版本): 澄清、措辞、拼写错误修复、非语义优化
+
+**版本**: 1.0.0 | **批准日期**: 2025-12-21 | **最后修正**: 2025-12-21

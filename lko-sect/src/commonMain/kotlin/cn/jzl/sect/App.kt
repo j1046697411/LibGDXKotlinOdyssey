@@ -8,6 +8,7 @@ import cn.jzl.ecs.system.update
 import cn.jzl.ecs.world
 import cn.jzl.sect.ecs.market.marketAddon
 import cn.jzl.sect.ecs.sectAddon
+import cn.jzl.sect.ui.MainUI
 import cn.jzl.sect.ui.market.MarketPreview
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -42,7 +43,8 @@ internal fun MainWorld(context: @Composable () -> Unit) {
 @Preview
 @Composable
 fun App(): Unit = PlatformApplication {
-    MaterialTheme {
-        MainWorld { MarketPreview() }
-    }
+//    MaterialTheme {
+//        MainWorld { MarketPreview() }
+//    }
+    MainUI()
 }
