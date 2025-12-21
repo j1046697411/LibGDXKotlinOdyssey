@@ -226,7 +226,8 @@ class AStarPlanner(private val goapService: PlanningService, private val maxSear
 
     override fun plan(agent: Entity, goal: GOAPGoal): Plan? {
         val startState = goapService.createAgentState(agent)
-        val allActions = goapService.getAllActions(agent)
+        // Materialize once; `Sequence` may be one-shot and can't be safely iterated repeatedly.
+        val allActions: List<Action> = goapService.getAllActions(agent).toList()
 
         // 如果目标已经满足，返回空计划
         if (goal.isSatisfied(startState, agent)) {
