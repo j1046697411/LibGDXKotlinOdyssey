@@ -26,12 +26,12 @@ fun Matrix4.transform(vector: Vector3): Vector3 {
     val x = vector.x
     val y = vector.y
     val z = vector.z
-    
-    // 矩阵乘法计算：M * [x, y, z, 1]^T
-    val nx = this[0, 0] * x + this[0, 1] * y + this[0, 2] * z + this[0, 3] * 1f
-    val ny = this[1, 0] * x + this[1, 1] * y + this[1, 2] * z + this[1, 3] * 1f
-    val nz = this[2, 0] * x + this[2, 1] * y + this[2, 2] * z + this[2, 3] * 1f
-    
+
+    // Matrix multiplication: M * [x, y, z, 1]^T
+    val nx = this[0, 0] * x + this[0, 1] * y + this[0, 2] * z + this[0, 3]
+    val ny = this[1, 0] * x + this[1, 1] * y + this[1, 2] * z + this[1, 3]
+    val nz = this[2, 0] * x + this[2, 1] * y + this[2, 2] * z + this[2, 3]
+
     return Vector3(nx, ny, nz)
 }
 

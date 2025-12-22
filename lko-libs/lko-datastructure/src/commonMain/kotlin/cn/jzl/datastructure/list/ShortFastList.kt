@@ -7,7 +7,7 @@ import kotlin.math.max
  * - 使用 `ShortArray` 顺序存储，扩容策略为两倍或刚好满足需要。
  * - 支持批量插入、`ensureCapacity`/`fill`、以及与 `ShortArray` 的高效互操作。
  */
-class ShortFastList(capacity: Int = 7, val order: Boolean = false) : AbstractMutableFastList<Short>(), ShortMutableFastList {
+class ShortFastList(capacity: Int = 7, val order: Boolean = true) : AbstractMutableFastList<Short>(), ShortMutableFastList {
     private var data = ShortArray(capacity)
 
     override var size: Int = 0

@@ -1,6 +1,7 @@
 package cn.jzl.ecs
 
 import cn.jzl.ecs.observers.observe
+import cn.jzl.ecs.query.forEach
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -36,21 +37,29 @@ class RelationServiceTest {
         val child2 = world.childOf(parent2) {
         }
         world.entity(parent1) {
-            assertEquals(it.children.size, 1, "Parent1 should have 1 child")
+            var count = 0
+            it.children.forEach { count++ }
+            assertEquals(1, count, message = "Parent1 should have 1 child")
         }
         world.entity(parent2) {
-            assertEquals(it.children.size, 1, "Parent2 should have 1 child")
+            var count = 0
+            it.children.forEach { count++ }
+            assertEquals(1, count, message = "Parent2 should have 1 child")
         }
         world.entity(child2) {
             it.parentOf(parent1)
         }
 
         world.entity(parent1) {
-            assertEquals(it.children.size, 2, "Child2 should have parent1")
+            var count = 0
+            it.children.forEach { count++ }
+            assertEquals(2, count, message = "Child2 should have parent1")
         }
 
         world.entity(parent2) {
-            assertEquals(it.children.size, 0, "Parent2 should have no parent")
+            var count = 0
+            it.children.forEach { count++ }
+            assertEquals(0, count, message = "Parent2 should have no parent")
         }
     }
 

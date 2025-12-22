@@ -1,12 +1,13 @@
 package cn.jzl.ecs.observers
 
+import cn.jzl.ecs.ComponentId
 import cn.jzl.ecs.Entity
 import cn.jzl.ecs.Relation
 import cn.jzl.ecs.World
 
 data class ObserverWithData<E>(
     override val world: World,
-    override val listenToEvents: Sequence<Entity>,
+    override val listenToEvents: Sequence<ComponentId>,
     override val onBuild: (Observer) -> Entity
 ) : ObserverEventsBuilder<ObserverContextWithData<E>>() {
 

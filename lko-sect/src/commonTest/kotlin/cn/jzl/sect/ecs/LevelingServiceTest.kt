@@ -180,8 +180,8 @@ class LevelingServiceTest {
             assertEquals(100L, comp.getExperienceForLevel(2))
         }
 
-        // 1->2级需要50经验
-        levelingService.addExperience(entity, 50)
+        // 1->2级需要100经验 (level * 50, with next level = 2)
+        levelingService.addExperience(entity, 100)
 
         world.entity(entity) {
             val level = it.getRelation<AttributeValue?>(attributeLevel)
@@ -189,8 +189,8 @@ class LevelingServiceTest {
             assertEquals(2L, level.value)
         }
 
-        // 2->3级需要100经验 (level * 50 = 2 * 50)
-        levelingService.addExperience(entity, 100)
+        // 2->3级需要150经验 (next level = 3)
+        levelingService.addExperience(entity, 150)
 
         world.entity(entity) {
             val level2 = it.getRelation<AttributeValue?>(attributeLevel)

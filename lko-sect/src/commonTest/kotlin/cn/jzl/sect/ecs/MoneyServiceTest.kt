@@ -1,25 +1,23 @@
 package cn.jzl.sect.ecs
 
 import cn.jzl.di.instance
-import cn.jzl.ecs.Entity
 import cn.jzl.ecs.entity
 import cn.jzl.ecs.world
+import cn.jzl.sect.ecs.item.ItemService
 import cn.jzl.sect.ecs.core.Named
 import kotlin.test.*
 
 class MoneyServiceTest {
 
-    private val world by lazy {
-        world {
-            install(moneyAddon)
-        }
+    private fun newWorld() = world {
+        install(inventoryAddon)
+        install(moneyAddon)
     }
-
-    private val moneyService by world.di.instance<MoneyService>()
 
     // 测试货币组件
     @Test
     fun testMoneyComponent() {
+        val world = newWorld()
         val entity = world.entity {
             it.addComponent(Money(100))
         }
@@ -34,50 +32,55 @@ class MoneyServiceTest {
     // 测试货币转移
     @Test
     fun testTransferMoney() {
-        val buyer = world.entity {
-            it.addComponent(Money(200))
-        }
-        val seller = world.entity {
-            it.addComponent(Money(100))
+        val world = newWorld()
+        val moneyService by world.di.instance<MoneyService>()
+        val itemService by world.di.instance<ItemService>()
+        val inventoryService by world.di.instance<InventoryService>()
+
+        val buyer = world.entity {}
+        val seller = world.entity {}
+
+        val spiritStonePrefab = itemService.getOrCreateItemPrefab(MoneyService.ATTRIBUTE_SPIRIT_STONE) {
+            it.addTag<cn.jzl.sect.ecs.item.Stackable>()
         }
 
-        // 转移货币
-        moneyService.transferMoney(buyer, seller, 50) {}
+        inventoryService.addItem(buyer, spiritStonePrefab, 200)
+        inventoryService.addItem(seller, spiritStonePrefab, 100)
 
-        // 验证买家货币减少
-        world.entity(buyer) {
-            val buyerMoney = it.getComponent<Money>()
-            assertNotNull(buyerMoney)
-            assertEquals(150, buyerMoney.value)
-        }
+        moneyService.transferMoney(buyer, seller, 50)
 
-        // 验证卖家货币增加
-        world.entity(seller) {
-            val sellerMoney = it.getComponent<Money>()
-            assertNotNull(sellerMoney)
-            assertEquals(150, sellerMoney.value)
-        }
+        assertEquals(150, moneyService.getSpiritStone(buyer))
+        assertEquals(150, moneyService.getSpiritStone(seller))
     }
 
     // 测试货币转移时余额不足
     @Test
     fun testTransferMoneyWithInsufficientBalance() {
-        val buyer = world.entity {
-            it.addComponent(Money(50))
+        val world = newWorld()
+        val moneyService by world.di.instance<MoneyService>()
+        val itemService by world.di.instance<ItemService>()
+        val inventoryService by world.di.instance<InventoryService>()
+
+        val buyer = world.entity {}
+        val seller = world.entity {}
+
+        val spiritStonePrefab = itemService.getOrCreateItemPrefab(MoneyService.ATTRIBUTE_SPIRIT_STONE) {
+            it.addTag<cn.jzl.sect.ecs.item.Stackable>()
         }
-        val seller = world.entity {
-            it.addComponent(Money(100))
-        }
+
+        inventoryService.addItem(buyer, spiritStonePrefab, 50)
+        inventoryService.addItem(seller, spiritStonePrefab, 100)
 
         // 尝试转移超过余额的货币，应该失败
         assertFailsWith<IllegalArgumentException> {
-            moneyService.transferMoney(buyer, seller, 100) {}
+            moneyService.transferMoney(buyer, seller, 100)
         }
     }
 
     // 测试 hasEnoughMoney 扩展函数
     @Test
     fun testHasEnoughMoney() {
+        val world = newWorld()
         val entity = world.entity {
             it.addComponent(Money(100))
         }
@@ -95,6 +98,7 @@ class MoneyServiceTest {
     // 测试 getMoney 扩展函数
     @Test
     fun testGetMoney() {
+        val world = newWorld()
         val entity = world.entity {
             it.addComponent(Money(100))
         }
@@ -109,6 +113,7 @@ class MoneyServiceTest {
     // 测试 increaseMoney 扩展函数
     @Test
     fun testIncreaseMoney() {
+        val world = newWorld()
         val entity = world.entity {
             it.addComponent(Money(100))
         }
@@ -138,6 +143,7 @@ class MoneyServiceTest {
     // 测试 decreaseMoney 扩展函数
     @Test
     fun testDecreaseMoney() {
+        val world = newWorld()
         val entity = world.entity {
             it.addComponent(Money(100))
         }
@@ -167,33 +173,28 @@ class MoneyServiceTest {
     // 测试货币转移与业务逻辑结合
     @Test
     fun testTransferMoneyWithBusinessLogic() {
-        val buyer = world.entity {
-            it.addComponent(Money(200))
+        val world = newWorld()
+        val moneyService by world.di.instance<MoneyService>()
+        val itemService by world.di.instance<ItemService>()
+        val inventoryService by world.di.instance<InventoryService>()
+
+        val buyer = world.entity {}
+        val seller = world.entity {}
+
+        val spiritStonePrefab = itemService.getOrCreateItemPrefab(MoneyService.ATTRIBUTE_SPIRIT_STONE) {
+            it.addTag<cn.jzl.sect.ecs.item.Stackable>()
         }
-        val seller = world.entity {
-            it.addComponent(Money(100))
-        }
+
+        inventoryService.addItem(buyer, spiritStonePrefab, 200)
+        inventoryService.addItem(seller, spiritStonePrefab, 100)
 
         var businessLogicExecuted = false
 
-        // 转移货币并执行业务逻辑
-        moneyService.transferMoney(buyer, seller, 50) {
-            businessLogicExecuted = true
-        }
+        moneyService.transferMoney(buyer, seller, 50)
+        businessLogicExecuted = true
 
-        // 验证业务逻辑被执行
         assertTrue(businessLogicExecuted)
-
-        // 验证货币转移成功
-        world.entity(buyer) {
-            val buyerMoney = it.getComponent<Money>()
-            assertNotNull(buyerMoney)
-            assertEquals(150, buyerMoney.value)
-        }
-        world.entity(seller) {
-            val sellerMoney = it.getComponent<Money>()
-            assertNotNull(sellerMoney)
-            assertEquals(150, sellerMoney.value)
-        }
+        assertEquals(150, moneyService.getSpiritStone(buyer))
+        assertEquals(150, moneyService.getSpiritStone(seller))
     }
 }

@@ -671,9 +671,11 @@ class SingleQuery<E : EntityQueryContext>(private val context: E) : QueryStream<
         if (archetypes.isEmpty()) return
         archetypes.forEach { archetype ->
             context.updateCache(archetype)
-            for (entityIndex in 0 until archetype.table.entities.size) {
+            var entityIndex = 0
+            while (entityIndex < archetype.table.entities.size) {
                 context.entityIndex = entityIndex
-                context.batchEntityEditor.entity = context.entity
+                val oldEntity = context.entity
+                context.batchEntityEditor.entity = oldEntity
                 val result = runCatching { collector.emit(context) }
                 check(entityIndex == context.entityIndex)
                 context.batchEntityEditor.apply(context.world)
@@ -681,6 +683,7 @@ class SingleQuery<E : EntityQueryContext>(private val context: E) : QueryStream<
                     return
                 }
                 result.getOrThrow()
+                if (archetype.table.entities.getOrNull(entityIndex) == oldEntity) entityIndex++
             }
         }
     }
@@ -709,9 +712,11 @@ class Query<E : EntityQueryContext>(@PublishedApi internal val context: E) : Que
         if (family.archetypes.isEmpty()) return
         family.archetypes.forEach { archetype ->
             context.updateCache(archetype)
-            for (entityIndex in 0 until archetype.table.entities.size) {
+            var entityIndex = 0
+            while (entityIndex < archetype.table.entities.size) {
                 context.entityIndex = entityIndex
-                context.batchEntityEditor.entity = context.entity
+                 val oldEntity = context.entity
+                context.batchEntityEditor.entity = oldEntity
                 val result = runCatching { collector.emit(context) }
                 check(entityIndex == context.entityIndex)
                 context.batchEntityEditor.apply(context.world)
@@ -719,6 +724,7 @@ class Query<E : EntityQueryContext>(@PublishedApi internal val context: E) : Que
                     return
                 }
                 result.getOrThrow()
+                if (archetype.table.entities.getOrNull(entityIndex) == oldEntity) entityIndex++
             }
         }
     }

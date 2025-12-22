@@ -54,8 +54,8 @@
 
 ### ✓ 正确的方法
 
-```kotlin
-/**
+```text
+/*
  * Validates construction against sect resources.
  * @param resources current sect resources
  * @return Result.success if valid
@@ -179,10 +179,11 @@ git commit -m "docs: update architecture guide"
 - [ ] 编译: 0 errors
 - [ ] 单元测试: 100% pass
 - [ ] 集成测试: 100% pass
+- [ ] ktlintCheck: 通过
+- [ ] detekt: 通过（配置为 maxIssues = 0）
 
 ### ⚠️ 需要审查 (可协商)
-- [ ] 覆盖率 ≥ 75%
-- [ ] detekt 警告 < 5 个
+- [ ] 覆盖率 ≥ 80%（若低于阈值，需要说明原因或补测）
 - [ ] 性能 ≤ 10% 下降
 
 ---
@@ -199,7 +200,7 @@ git commit -m "docs: update architecture guide"
 
 ## 📞 快速链接
 
-- 📋 **Constitution**: `specs/003-sect-simulation-game/constitution.md`
+- 📋 **Constitution**: `.specify/memory/constitution.md`
 - 📖 **Contributing**: `CONTRIBUTING.md`  
 - 🎯 **Governance**: `GOVERNANCE.md`
 - 💡 **Code Examples**: `docs/CODE_EXAMPLES.md`
@@ -208,4 +209,3 @@ git commit -m "docs: update architecture guide"
 ---
 
 **打印并贴在你的显示器上! 📌**
-

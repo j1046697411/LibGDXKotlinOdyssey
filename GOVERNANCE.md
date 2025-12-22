@@ -7,25 +7,23 @@
 ## 📋 核心文档
 
 ### 项目宪法 (Constitution)
-**位置**: `specs/003-sect-simulation-game/constitution.md`
+**位置**: `.specify/memory/constitution.md`
 
-定义项目的四大核心原则:
-1. **卓越代码质量** - Kotlin 最佳实践、清晰命名、充分注释
-2. **严格测试标准** - ≥80% 覆盖率、单元/集成/性能测试
-3. **用户体验一致性** - 统一的纯文字界面设计与交互
-4. **高性能要求** - 60 FPS、≤500MB 内存、低延迟
+定义项目的核心原则:
+1. **ECS-first 架构**
+2. **服务复用优先**
+3. **框架一致性 (Addon + DI)**
+4. **质量门禁 (ktlint/detekt, tests=100%)**
+5. **测试覆盖率目标 (≥80%)**
+6. **性能预算 (60 FPS)**
 
 👉 **所有开发者必读**
 
 ### 项目计划 (Plan)
-**位置**: `specs/003-sect-simulation-game/plan.md`
-
-技术栈、项目结构、工作流程、质量门槛。
+**位置**: 参见 `specs/` 下对应 feature 的 `plan.md`
 
 ### 任务清单 (Tasks)
-**位置**: `specs/003-sect-simulation-game/tasks.md`
-
-按阶段和用户故事组织的实施任务，标注依赖关系和并行机会。
+**位置**: `specs/` 下对应 feature 的 `tasks.md`
 
 ---
 
@@ -47,7 +45,7 @@ cd LibGDXKotlinOdyssey
 
 ### 检查清单：开始开发前
 
-- [ ] 阅读 [`constitution.md`](specs/003-sect-simulation-game/constitution.md)
+- [ ] 阅读 `.specify/memory/constitution.md`
 - [ ] 阅读 [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - [ ] 配置 IDE (Kotlin 插件、代码风格)
 - [ ] 运行 `./gradlew preCommit` 验证环境
@@ -150,7 +148,7 @@ cd LibGDXKotlinOdyssey
 
 所有 public API 必须有 KDoc:
 
-```kotlin
+```text
 /**
  * Brief description (1 line).
  *
@@ -188,7 +186,7 @@ cn/jzl/sect/ecs/{module}/
 
 遵循 "test[Function]When[Condition]Expect[Result]" 模式:
 
-```kotlin
+```text
 @Test
 fun testValidateConstructionWhenInsufficientFundsExpectFailure() { ... }
 
@@ -319,7 +317,7 @@ A:
 - **Kotlin 编码规范**: https://kotlinlang.org/docs/coding-conventions.html
 - **ECS 框架**: `lko-libs/lko-ecs4/` (项目内)
 - **CI/CD 配置**: `.github/workflows/ci.yml`
-- **项目计划**: `specs/003-sect-simulation-game/plan.md`
+- **项目计划**: 参见 `specs/` 下对应 feature 的 `plan.md`
 - **代码示例**: `docs/CODE_EXAMPLES.md`
 
 ---
@@ -335,7 +333,7 @@ A:
 
 ## ✅ 检查清单：第一次贡献
 
-- [ ] 阅读 [`constitution.md`](specs/003-sect-simulation-game/constitution.md)
+- [ ] 阅读 `.specify/memory/constitution.md`
 - [ ] 阅读 [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - [ ] 阅读 [`CODE_EXAMPLES.md`](docs/CODE_EXAMPLES.md)
 - [ ] 本地运行 `./gradlew preCommit`
@@ -347,4 +345,3 @@ A:
 ---
 
 **感谢你的贡献！让我们一起构建高质量的宗门模拟游戏。** 🎮
-

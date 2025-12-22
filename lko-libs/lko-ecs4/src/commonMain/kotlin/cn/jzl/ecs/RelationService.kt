@@ -133,6 +133,7 @@ value class RelationService(@PublishedApi internal val world: World) {
                     val newNextData = nextData ?: return@forEachIndexed
                     if (relation == newNextData.relation) {
                         table[oldEntityIndex, index] = newNextData.data
+                        nextData = null
                     }
                 }
             }

@@ -2,7 +2,6 @@ package cn.jzl.ecs.addon
 
 import cn.jzl.di.DIMainBuilder
 import cn.jzl.di.singleton
-import cn.jzl.ecs.World
 import cn.jzl.ecs.WorldOwner
 import cn.jzl.ecs.query.ECSDsl
 import cn.jzl.ecs.system.Phase
@@ -28,13 +27,10 @@ class WorldSetup(
         noinline configuration: Configuration.() -> Unit = {}
     ) {
         val addonInstaller = addonInstallers.getOrPut(addon) {
-            val addonInstaller = AddonInstaller(addon)
+            val config = addon.run { defaultConfiguration() }
+            val addonInstaller = AddonInstaller(addon, config)
             injector.inject {
-                val instances = addonInstaller.addon.run {
-                    val config = defaultConfiguration()
-                    addonInstaller.configs.forEach { config.it() }
-                    onInstall(config)
-                }
+                val instances = addonInstaller.addon.run { onInstall(config) }
                 if (instances != null && instances != Unit) {
                     val bindInstances: Instances & Any = instances
                     this bind singleton(tag = addon) { bindInstances }
@@ -44,7 +40,7 @@ class WorldSetup(
         }
         @Suppress("UNCHECKED_CAST")
         addonInstaller as AddonInstaller<Configuration, Instances>
-        addonInstaller.configs.add(configuration)
+        addonInstaller.config.configuration()
     }
 
     @ECSDsl
@@ -59,7 +55,7 @@ class WorldSetup(
 
     data class AddonInstaller<Configuration, Instance>(
         val addon: Addon<Configuration, Instance>,
-        val configs: MutableList<Configuration.() -> Unit> = mutableListOf(),
+        val config: Configuration
     )
 }
 
@@ -85,9 +81,10 @@ data class AddonSetup<Configuration>(
     @PublishedApi internal val worldSetup: WorldSetup
 ) {
 
-    inline fun <reified Configuration1,reified Instance> install(
+    inline fun <reified Configuration1, reified Instance> install(
         addon: Addon<Configuration1, Instance>,
-        noinline configuration: Configuration1.() -> Unit = {}) {
+        noinline configuration: Configuration1.() -> Unit = {}
+    ) {
         worldSetup.install(addon, configuration)
     }
 

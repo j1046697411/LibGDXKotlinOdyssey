@@ -90,14 +90,14 @@ class ItemService(world: World) : EntityRelationContext(world) {
     }
 
     @ECSDsl
-    inline fun itemPrefab(named: Named, block: EntityCreateContext.(Entity) -> Unit): Entity = world.prefab {
+    inline fun itemPrefab(named: Named, block: EntityCreateContext.(Entity) -> Unit = {}): Entity = world.prefab {
         block(it)
         it.addTag<Item>()
         it.addComponent(named)
     }
 
     @ECSDsl
-    inline fun itemPrefab(name: String, block: EntityCreateContext.(Entity) -> Unit): Entity = itemPrefab(Named(name), block)
+    inline fun itemPrefab(name: String, block: EntityCreateContext.(Entity) -> Unit = {}): Entity = itemPrefab(Named(name), block)
 
     @ECSDsl
     inline fun item(named: Named, block: EntityCreateContext.(Entity) -> Unit): Entity {
@@ -108,10 +108,8 @@ class ItemService(world: World) : EntityRelationContext(world) {
 
     @ECSDsl
     inline fun item(itemPrefab: Entity, block: EntityCreateContext.(Entity) -> Unit): Entity {
-        world.entity(itemPrefab) {
-            require(it.hasTag<Item>()) { "Entity $itemPrefab is not an item" }
-            require(it.hasPrefab()) { "Entity $itemPrefab is not a prefab of item" }
-        }
+        require(itemPrefab.hasTag<Item>()) { "Entity $itemPrefab is not an item" }
+        require(itemPrefab.hasPrefab()) { "Entity $itemPrefab is not a prefab of item" }
         return world.instanceOf(itemPrefab, block)
     }
 
@@ -119,6 +117,20 @@ class ItemService(world: World) : EntityRelationContext(world) {
     inline fun item(name: String, block: EntityCreateContext.(Entity) -> Unit): Entity = item(Named(name), block)
 
     operator fun get(name: String): Entity? = nameToItemPrefabs[Named(name)]
+
+    /**
+     * Returns an existing item prefab by name, or creates it if missing.
+     * This prevents duplicate-prefab bugs when multiple callers use the same [Named] key.
+     */
+    @ECSDsl
+    inline fun getOrCreateItemPrefab(named: Named, block: EntityCreateContext.(Entity) -> Unit = {}): Entity {
+        val existing = nameToItemPrefabs[named]
+        if (existing != null) {
+            world.entity(existing) { block(it) }
+            return existing
+        }
+        return itemPrefab(named) { block(it) }
+    }
 
     fun splitItem(item: Entity, count: Int): Entity {
         if (!item.hasTag<Stackable>()) return item

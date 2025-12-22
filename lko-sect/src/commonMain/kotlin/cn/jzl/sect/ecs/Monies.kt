@@ -1,10 +1,13 @@
 package cn.jzl.sect.ecs
 
+import cn.jzl.di.instance
 import cn.jzl.di.new
 import cn.jzl.di.singleton
 import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
+import cn.jzl.sect.ecs.core.Named
 import cn.jzl.sect.ecs.core.coreAddon
+import cn.jzl.sect.ecs.item.ItemService
 
 @JvmInline
 value class Money(val value: Int)
@@ -21,14 +24,27 @@ val moneyAddon = createAddon("Money", {}) {
 
 class MoneyService(@PublishedApi internal val world: World) {
 
-    inline fun transferMoney(buyer: Entity, seller: Entity, money: Int, block: ()-> Unit): Unit = world.entity(buyer) {
-        val buyerMoney = it.getComponent<Money>()
-        val sellerMoney = seller.getComponent<Money>()
-        require(buyerMoney.value >= money) { "buyer $buyer has not enough money $money" }
-        block()
+    private val itemService by world.di.instance<ItemService>()
+    private val inventoryService by world.di.instance<InventoryService>()
 
-        it.addComponent(Money(buyerMoney.value - money))
-        world.entity(seller) { seller -> seller.addComponent(Money(sellerMoney.value + money)) }
+    private val spiritStone: Entity by lazy {
+        itemService.getOrCreateItemPrefab(ATTRIBUTE_SPIRIT_STONE) {
+            it.addTag<cn.jzl.sect.ecs.item.Stackable>()
+        }
+    }
+
+    fun transferMoney(buyer: Entity, seller: Entity, money: Int) {
+        inventoryService.transferItem(buyer, seller, spiritStone, money)
+    }
+
+    fun getSpiritStone(entity: Entity): Int = inventoryService.getItemCount(entity, spiritStone)
+
+    fun hasEnoughMoney(entity: Entity, money: Int): Boolean {
+        return inventoryService.hasEnoughItems(entity, spiritStone, money)
+    }
+
+    companion object {
+        val ATTRIBUTE_SPIRIT_STONE = Named("spirit stone")
     }
 }
 

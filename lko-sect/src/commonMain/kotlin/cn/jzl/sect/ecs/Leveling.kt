@@ -8,9 +8,10 @@ import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.observers.emit
 import cn.jzl.sect.ecs.core.Named
 
-
 sealed class Upgradeable
+
 data class OnUpgradeEvent(val oldLevel: Long, val newLevel: Long)
+
 fun interface ExperienceFormula {
     fun getExperienceForLevel(level: Long): Long
 }
@@ -46,7 +47,7 @@ class LevelingService(world: World) : EntityRelationContext(world) {
         println("[Leveling] addExperience entity=${entity.id} level=${level.value} currentExp=${currentExp.value} add=${exp}")
         while (true) {
             val upgradeExperience = experienceFormula.getExperienceForLevel(currentLevel + 1)
-            println("[Leveling] checking level=${currentLevel+1} need=$upgradeExperience remaining=$remainingExp")
+            println("[Leveling] checking level=${currentLevel + 1} need=$upgradeExperience remaining=$remainingExp")
             if (upgradeExperience > remainingExp) break
             currentLevel++
             remainingExp -= upgradeExperience
@@ -67,6 +68,16 @@ class LevelingService(world: World) : EntityRelationContext(world) {
         entity.addRelation(attributeLevel, AttributeValue.ONE)
         entity.addRelation(attributeExperience, AttributeValue.ZERO)
         entity.addComponent(formula ?: experienceFormula)
+    }
+
+    fun getLevel(entity: Entity): Long {
+        require(entity.hasTag<Upgradeable>()) { "实体${entity.id}不是可升级对象" }
+        return entity.getRelation<AttributeValue?>(attributeLevel)?.value ?: 0
+    }
+
+    fun getExperience(entity: Entity): Long {
+        require(entity.hasTag<Upgradeable>()) { "实体${entity.id}不是可升级对象" }
+        return entity.getRelation<AttributeValue?>(attributeExperience)?.value ?: 0
     }
 
     companion object {
