@@ -4,11 +4,7 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import cn.jzl.sect.ui.components.BottomStatusBar
 import cn.jzl.sect.ui.components.CentralContentArea
@@ -23,7 +19,7 @@ fun MainUI() {
     
     // 当前选中菜单状态
     var currentMenu by remember { mutableStateOf(MenuOption.ZONGMEN_OVERVIEW) }
-    
+
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {

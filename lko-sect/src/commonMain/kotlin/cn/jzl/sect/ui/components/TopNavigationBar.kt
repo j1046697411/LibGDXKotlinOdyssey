@@ -9,6 +9,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import cn.jzl.sect.ui.viewmodel.SectViewModel
 
 /**
  * 顶部导航栏组件
@@ -18,7 +20,7 @@ fun TopNavigationBar(modifier: Modifier) {
     val backgroundColor = Color(0xFF2C3E50)
     val textColor = Color.White
     val highlightColor = Color(0xFFFFA500)
-    
+    val sectViewModel = viewModel<SectViewModel>()
     Column(
         modifier = modifier
             .background(backgroundColor)
@@ -41,18 +43,18 @@ fun TopNavigationBar(modifier: Modifier) {
                 fontSize = 14.sp
             )
         }
-        
+
         Spacer(modifier = Modifier.height(4.dp))
-        
+
         // 第二行：显示宗门关键数据
         Text(
             text = "👥 弟子总数：128 | 💎 资源：灵石25000 | 🏗️ 设施：12 | 🗺️ 占领区域：5 | 🏆 声望：8500 | ✅ 状态：稳定",
             color = textColor,
             fontSize = 12.sp
         )
-        
+
         Spacer(modifier = Modifier.height(4.dp))
-        
+
         // 第三行：显示功能分类导航
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -65,21 +67,21 @@ fun TopNavigationBar(modifier: Modifier) {
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
             )
-            
+
             // 功能区域
             Text(
                 text = "🗺️地图·📋任务·📚功法",
                 color = textColor,
                 fontSize = 12.sp
             )
-            
+
             // 生产系统
             Text(
                 text = "🧪炼丹·⚒️炼器",
                 color = textColor,
                 fontSize = 12.sp
             )
-            
+
             // 系统
             Text(
                 text = "👤社交·⚙️设置",

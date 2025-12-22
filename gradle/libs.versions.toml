@@ -29,12 +29,15 @@ ksp = "2.0.0-1.0.32"
 junit-jupiter = "5.9.3"
 mockk = "1.13.8"
 kotlinx-serialization = "1.7.0"  # 新增
+compose-lifecycle = "2.9.6"
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-multiplatform" }
+compose-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "compose-lifecycle" }
+compose-lifecycle = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "compose-lifecycle" }
 
 #implementation "androidx.compose.ui:ui-tooling-preview:1.0.0"
 compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-multiplatform" }

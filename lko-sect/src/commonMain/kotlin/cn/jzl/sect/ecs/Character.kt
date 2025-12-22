@@ -6,6 +6,7 @@ import cn.jzl.di.singleton
 import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.query.ECSDsl
+import cn.jzl.sect.ecs.cultivation.CultivationService
 
 
 sealed class Character
@@ -21,14 +22,12 @@ val characterAddon = createAddon("character") {
 
 class CharacterService(world: World) : EntityRelationContext(world) {
 
-    private val levelingService by world.di.instance<LevelingService>()
-    private val healthService by world.di.instance<HealthService>()
+    private val cultivationService by world.di.instance<CultivationService>()
 
     @ECSDsl
-    fun createCharacter(named: Named, maxHealth: Long = 100, block: EntityCreateContext.(Entity) -> Unit): Entity {
+    fun createCharacter(named: Named, block: EntityCreateContext.(Entity) -> Unit): Entity {
         return world.entity {
-            levelingService.upgradeable(this, it)
-            healthService.initializeHealth(this, it, maxHealth)
+            cultivationService.cultivable(this, it)
             it.addTag<Character>()
             it.addComponent(named)
             block(it)
