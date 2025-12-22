@@ -1,24 +1,13 @@
-package cn.jzl.sect.v2
+package cn.jzl.sect.ecs
 
 import cn.jzl.di.new
 import cn.jzl.di.singleton
-import cn.jzl.ecs.Entity
-import cn.jzl.ecs.EntityCreateContext
-import cn.jzl.ecs.EntityRelationContext
-import cn.jzl.ecs.FamilyMatcher
-import cn.jzl.ecs.World
+import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
-import cn.jzl.ecs.componentId
-import cn.jzl.ecs.components
-import cn.jzl.ecs.instanceOf
-import cn.jzl.ecs.prefab
 import cn.jzl.ecs.query.ECSDsl
 import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.query.associatedBy
 import cn.jzl.ecs.query.query
-import cn.jzl.ecs.relation
-import cn.jzl.ecs.relations
-import cn.jzl.sect.ecs.core.Named
 
 
 sealed class Item

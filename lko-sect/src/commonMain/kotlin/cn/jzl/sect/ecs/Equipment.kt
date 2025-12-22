@@ -1,9 +1,6 @@
-@file:Suppress(
-    "unused",
-    "UnusedPrivateMember",
-)
+@file:Suppress("unused", "UnusedPrivateMember",)
 
-package cn.jzl.sect.v2
+package cn.jzl.sect.ecs
 
 import cn.jzl.di.instance
 import cn.jzl.di.new
@@ -13,8 +10,6 @@ import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.query.ECSDsl
 import cn.jzl.ecs.query.firstOrNull
 import cn.jzl.ecs.query.forEach
-import cn.jzl.sect.ecs.core.Named
-import cn.jzl.sect.ecs.core.OwnedBy
 
 sealed class Equipment
 

@@ -3,7 +3,12 @@ package cn.jzl.sect.v2
 import cn.jzl.di.instance
 import cn.jzl.ecs.entity
 import cn.jzl.ecs.world
-import cn.jzl.sect.ecs.core.Named
+import cn.jzl.sect.ecs.AttributeProvider
+import cn.jzl.sect.ecs.AttributeService
+import cn.jzl.sect.ecs.AttributeValue
+import cn.jzl.sect.ecs.Named
+import cn.jzl.sect.ecs.attributeAddon
+import cn.jzl.sect.ecs.attributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

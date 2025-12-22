@@ -1,4 +1,4 @@
-package cn.jzl.sect.v2
+package cn.jzl.sect.ecs
 
 import cn.jzl.di.instance
 import cn.jzl.di.new

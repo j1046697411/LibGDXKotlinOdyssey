@@ -1,9 +1,22 @@
 package cn.jzl.sect.v2
 
 import cn.jzl.di.instance
+import cn.jzl.ecs.Entity
 import cn.jzl.ecs.World
 import cn.jzl.ecs.entity
 import cn.jzl.ecs.world
+import cn.jzl.sect.ecs.AStarPlanner
+import cn.jzl.sect.ecs.Action
+import cn.jzl.sect.ecs.ActionEffect
+import cn.jzl.sect.ecs.ActionProvider
+import cn.jzl.sect.ecs.GOAPGoal
+import cn.jzl.sect.ecs.PlanningService
+import cn.jzl.sect.ecs.Precondition
+import cn.jzl.sect.ecs.StateKey
+import cn.jzl.sect.ecs.StateResolver
+import cn.jzl.sect.ecs.StateResolverRegistry
+import cn.jzl.sect.ecs.WorldStateReader
+import cn.jzl.sect.ecs.planning
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -80,7 +93,7 @@ class AStarPlannerTest {
             planning {
                 register(CounterRegistry())
                 register(object : ActionProvider {
-                    override fun getActions(stateProvider: WorldStateReader, agent: cn.jzl.ecs.Entity): Sequence<Action> =
+                    override fun getActions(stateProvider: WorldStateReader, agent: Entity): Sequence<Action> =
                         sequenceOf(IncAction(1))
                 })
             }
@@ -103,7 +116,7 @@ class AStarPlannerTest {
             planning {
                 register(CounterRegistry())
                 register(object : ActionProvider {
-                    override fun getActions(stateProvider: WorldStateReader, agent: cn.jzl.ecs.Entity): Sequence<Action> =
+                    override fun getActions(stateProvider: WorldStateReader, agent: Entity): Sequence<Action> =
                         sequenceOf(IncAction(1))
                 })
             }

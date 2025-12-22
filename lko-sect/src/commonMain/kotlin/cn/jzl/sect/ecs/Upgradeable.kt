@@ -1,18 +1,11 @@
-package cn.jzl.sect.v2
+package cn.jzl.sect.ecs
 
 import cn.jzl.di.instance
 import cn.jzl.di.new
 import cn.jzl.di.singleton
-import cn.jzl.ecs.Entity
-import cn.jzl.ecs.EntityCreateContext
-import cn.jzl.ecs.EntityRelationContext
-import cn.jzl.ecs.World
+import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
-import cn.jzl.ecs.componentId
-import cn.jzl.ecs.entity
 import cn.jzl.ecs.observers.emit
-import cn.jzl.sect.ecs.core.Named
-import kotlin.getValue
 
 
 sealed class Upgradeable

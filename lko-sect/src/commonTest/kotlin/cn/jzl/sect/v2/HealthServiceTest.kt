@@ -3,6 +3,15 @@ package cn.jzl.sect.v2
 import cn.jzl.di.instance
 import cn.jzl.ecs.entity
 import cn.jzl.ecs.world
+import cn.jzl.sect.ecs.HealingAmount
+import cn.jzl.sect.ecs.HealthService
+import cn.jzl.sect.ecs.InventoryService
+import cn.jzl.sect.ecs.ItemService
+import cn.jzl.sect.ecs.Usable
+import cn.jzl.sect.ecs.attributeAddon
+import cn.jzl.sect.ecs.healthAddon
+import cn.jzl.sect.ecs.inventoryAddon
+import cn.jzl.sect.ecs.itemAddon
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

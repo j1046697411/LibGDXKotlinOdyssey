@@ -1,10 +1,11 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package cn.jzl.sect.v2
+package cn.jzl.sect.ecs
 
 import cn.jzl.di.instance
-import cn.jzl.ecs.*
-import cn.jzl.sect.ecs.core.Named
+import cn.jzl.ecs.Entity
+import cn.jzl.ecs.EntityRelationContext
+import cn.jzl.ecs.World
 
 class ItemActionProvider(world: World) : ActionProvider, EntityRelationContext(world) {
 

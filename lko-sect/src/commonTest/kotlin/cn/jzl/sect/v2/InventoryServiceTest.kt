@@ -4,8 +4,13 @@ import cn.jzl.di.instance
 import cn.jzl.ecs.entity
 import cn.jzl.ecs.system.update
 import cn.jzl.ecs.world
-import cn.jzl.sect.ecs.core.Named
-import cn.jzl.sect.ecs.core.OwnedBy
+import cn.jzl.sect.ecs.Amount
+import cn.jzl.sect.ecs.InventoryService
+import cn.jzl.sect.ecs.ItemService
+import cn.jzl.sect.ecs.Named
+import cn.jzl.sect.ecs.OwnedBy
+import cn.jzl.sect.ecs.Stackable
+import cn.jzl.sect.ecs.inventoryAddon
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

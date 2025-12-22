@@ -1,5 +1,9 @@
 package cn.jzl.sect.v2
 
+import cn.jzl.sect.ecs.AttributeModifier
+import cn.jzl.sect.ecs.EffectStack
+import cn.jzl.sect.ecs.ModifierType
+import cn.jzl.sect.ecs.TickInterval
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

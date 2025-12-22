@@ -1,4 +1,4 @@
-package cn.jzl.sect.v2
+package cn.jzl.sect.ecs
 
 import cn.jzl.di.instance
 import cn.jzl.di.new
@@ -7,7 +7,6 @@ import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.observers.emit
 import cn.jzl.ecs.query.*
-import cn.jzl.sect.ecs.core.Named
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
