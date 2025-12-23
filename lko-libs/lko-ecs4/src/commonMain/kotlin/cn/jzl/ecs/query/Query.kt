@@ -708,6 +708,11 @@ class Query<E : EntityQueryContext>(@PublishedApi internal val context: E) : Que
         return family.familyMatcher.match(archetype)
     }
 
+    operator fun contains(entity: Entity): Boolean {
+        if (entity == Entity.ENTITY_INVALID) return false
+        return world.entityService.runOn(entity) { contains(this) }
+    }
+
     override fun collect(collector: QueryCollector<E>) {
         if (family.archetypes.isEmpty()) return
         family.archetypes.forEach { archetype ->
@@ -715,7 +720,7 @@ class Query<E : EntityQueryContext>(@PublishedApi internal val context: E) : Que
             var entityIndex = 0
             while (entityIndex < archetype.table.entities.size) {
                 context.entityIndex = entityIndex
-                 val oldEntity = context.entity
+                val oldEntity = context.entity
                 context.batchEntityEditor.entity = oldEntity
                 val result = runCatching { collector.emit(context) }
                 check(entityIndex == context.entityIndex)
