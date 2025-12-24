@@ -96,14 +96,12 @@ internal class EntityObserver(
         }.exec {
             if (query == null || this@EntityObserver.entity.value !in query) {
                 this@EntityObserver.entity.value = provider() ?: Entity.ENTITY_INVALID
-                println("onRemembered update ${this.entity}")
+                println("onRemembered update ${this@EntityObserver.entity.value}")
             }
         }
-        println("onRemembered")
     }
 
     override fun onForgotten() {
-        println("onForgotten")
         observer?.close()
         observer = null
     }
@@ -130,8 +128,7 @@ inline fun <reified C> Entity.relation(target: Entity, defaultValue: C): State<C
 internal value class EmptyState<T>(override val value: T) : State<T>
 
 @Composable
-inline fun <reified C> Entity.component(defaultValue: C): androidx.compose.runtime.State<C> {
-    if (this == Entity.ENTITY_INVALID) return EmptyState(defaultValue)
+inline fun <reified C> Entity.component(defaultValue: C): State<C> {
     val worldContext = uiWorldContext
     val relationObserver = remember(this, C::class) {
         val relation = worldContext.relations.component<C>()
@@ -152,6 +149,7 @@ internal class RelationObserver<T>(
     val data = mutableStateOf(defaultValue)
     private var observer: Observer? = null
     override fun onRemembered() {
+        if (entity == Entity.ENTITY_INVALID) return
         observer?.close()
         data.value = provider(entity)
         observer = world.observe(entity) {

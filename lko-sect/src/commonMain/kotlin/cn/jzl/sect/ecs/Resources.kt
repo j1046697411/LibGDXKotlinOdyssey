@@ -25,6 +25,9 @@ import cn.jzl.ecs.query.query
 val resourcesAddon = createAddon("resources") {
     install(itemAddon)
     injects { this bind singleton { new(::Resources) } }
+    entities {
+        world.componentId<Resource> { it.tag() }
+    }
 }
 
 sealed class Resource

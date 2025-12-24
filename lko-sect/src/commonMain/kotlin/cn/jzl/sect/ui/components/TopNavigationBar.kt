@@ -4,13 +4,29 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import cn.jzl.sect.ui.viewmodel.SectViewModel
+import cn.jzl.di.instance
+import cn.jzl.sect.App
+import cn.jzl.sect.currentWorld
+import cn.jzl.sect.ecs.Amount
+import cn.jzl.sect.ecs.InventoryService
+import cn.jzl.sect.ecs.Named
+import cn.jzl.sect.ecs.Resources
+import cn.jzl.sect.ecs.sect.SectService
+import cn.jzl.sect.ui.component
+import cn.jzl.sect.ui.entityList
+import cn.jzl.sect.ui.entityProvider
+import cn.jzl.sect.ui.relation
+import cn.jzl.sect.ui.service
+import kotlinx.coroutines.delay
+import kotlin.getValue
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * 顶部导航栏组件
@@ -20,7 +36,6 @@ fun TopNavigationBar(modifier: Modifier) {
     val backgroundColor = Color(0xFF2C3E50)
     val textColor = Color.White
     val highlightColor = Color(0xFFFFA500)
-    val sectViewModel = viewModel<SectViewModel>()
     Column(
         modifier = modifier
             .background(backgroundColor)
@@ -31,8 +46,28 @@ fun TopNavigationBar(modifier: Modifier) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            val sectService by currentWorld.di.instance<SectService>()
+            val resources = service<Resources>()
+            val sect = sectService.playerSect
+            val named by sect.component<Named>(Named("宗门名称"))
+            val inventoryService = service<InventoryService>()
+            val entity by entityProvider(inventoryService.getAllItems(sect)) {
+                inventoryService.getItem(sect, resources.spiritStonePrefab)?.apply {
+                    println("entity found: $this")
+                }
+            }
+            val amount by entity.component<Amount>(Amount(0))
+            println("enyity $entity $amount")
+            LaunchedEffect(sectService) {
+                while (true) {
+                    inventoryService.addItem(sect, resources.spiritStonePrefab, 20)
+                    delay(1.seconds)
+                    println("10灵石已添加到宗门库存")
+                }
+            }
+            println("-------------")
             Text(
-                text = "🏔️ 青云宗·千绝谷 ☀️ ⏳125年·3月·20日·14:30 [x1]",
+                text = "🏔️ ${named.name} ☀️ ⏳125年·3月·20日·14:30 [x1] ${amount.value}",
                 color = textColor,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold

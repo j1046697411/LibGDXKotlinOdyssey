@@ -24,7 +24,7 @@ val cultivationAddon = createAddon("cultivation") {
     install(attributeAddon)
     injects { this bind singleton { new(::CultivationService) } }
     components {
-        world.componentId<Cultivation> { it.tag() }
+        world.componentId<Cultivation>()
         world.componentId<Breakthrough> { it.tag() }
         world.componentId<Cultivable> {
             it.tag()

@@ -49,13 +49,17 @@ class InventoryService(world: World) : EntityRelationContext(world) {
         require(itemService.isItemPrefab(itemPrefab))
     }
 
-    fun getAllItems(owner: Entity): QueryStream<EntityItemContext> {
+    fun getAllItems(owner: Entity): Query<EntityItemContext> {
         return getOwnerItems(owner).query
     }
 
     fun getItemCount(owner: Entity, itemPrefab: Entity): Int {
         checkItemPrefab(itemPrefab)
         return getOwnerItemsByItemPrefab(owner, itemPrefab)?.sumBy { amount?.value ?: 1 } ?: 0
+    }
+
+    fun getItem(owner: Entity, itemPrefab: Entity) : Entity? {
+        return getOwnerItemsByItemPrefab(owner, itemPrefab)?.map { entity }?.firstOrNull()
     }
 
     fun getItems(owner: Entity, itemPrefab: Entity): QueryStream<EntityItemContext>? {
@@ -69,7 +73,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
         checkItemPrefab(itemPrefab)
         require(count > 0)
         return if (itemService.isStackable(itemPrefab)) {
-            val item = getItems(owner, itemPrefab)?.map { entity }?.firstOrNull()
+            val item = getItem(owner, itemPrefab)
             sequenceOf(
                 if (item != null) {
                 world.entity(item) {

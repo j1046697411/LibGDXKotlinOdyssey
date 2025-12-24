@@ -15,6 +15,7 @@ import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.query.QueryStream
 import cn.jzl.ecs.query.filter
 import cn.jzl.ecs.query.firstOrNull
+import cn.jzl.ecs.query.map
 import cn.jzl.ecs.query.query
 import cn.jzl.ecs.relation
 import cn.jzl.ecs.relations
@@ -35,7 +36,7 @@ enum class Member {
 
 val sectAddon = createAddon("sect") {
     install(characterAddon)
-    injects { this bind singleton { new(::SectServices) } }
+    injects { this bind singleton { new(::SectService) } }
     components {
         world.componentId<Sect> { it.tag() }
         world.componentId<PlayerOwner> { it.tag() }
@@ -43,13 +44,13 @@ val sectAddon = createAddon("sect") {
     }
 }
 
-class SectServices(world: World) : EntityRelationContext(world) {
+class SectService(world: World) : EntityRelationContext(world) {
 
     private val characterService by world.di.instance<CharacterService>()
     private val sects by lazy { world.query { SectContext(this) } }
 
     val playerSect by lazy {
-        sects.filter { isPlayerOwner }.firstOrNull() ?: createPlayerSect(
+        sects.filter { isPlayerOwner }.map { entity }.firstOrNull() ?: createPlayerSect(
             Named("玩家宗门"),
             characterService.createCharacter(Named("宗主")) {}
         )
