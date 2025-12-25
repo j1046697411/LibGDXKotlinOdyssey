@@ -12,20 +12,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.jzl.di.instance
-import cn.jzl.sect.App
 import cn.jzl.sect.currentWorld
 import cn.jzl.sect.ecs.Amount
+import cn.jzl.sect.ecs.DateSeason
 import cn.jzl.sect.ecs.InventoryService
 import cn.jzl.sect.ecs.Named
 import cn.jzl.sect.ecs.Resources
+import cn.jzl.sect.ecs.Season
+import cn.jzl.sect.ecs.TimeService
+import cn.jzl.sect.ecs.Timer
 import cn.jzl.sect.ecs.sect.SectService
-import cn.jzl.sect.ui.component
-import cn.jzl.sect.ui.entityList
-import cn.jzl.sect.ui.entityProvider
-import cn.jzl.sect.ui.relation
+import cn.jzl.sect.ui.observeComponent
+import cn.jzl.sect.ui.observeEntity
 import cn.jzl.sect.ui.service
 import kotlinx.coroutines.delay
-import kotlin.getValue
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -49,14 +49,19 @@ fun TopNavigationBar(modifier: Modifier) {
             val sectService by currentWorld.di.instance<SectService>()
             val resources = service<Resources>()
             val sect = sectService.playerSect
-            val named by sect.component<Named>(Named("宗门名称"))
+            val named by sect.observeComponent<Named>(Named("宗门名称"))
             val inventoryService = service<InventoryService>()
-            val entity by entityProvider(inventoryService.getAllItems(sect)) {
+            val timeService = service<TimeService>()
+
+            val entity by observeEntity(inventoryService.getAllItems(sect)) {
                 inventoryService.getItem(sect, resources.spiritStonePrefab)?.apply {
                     println("entity found: $this")
                 }
             }
-            val amount by entity.component<Amount>(Amount(0))
+            val amount by entity.observeComponent<Amount>(Amount(0))
+            val timer by timeService.timeEntity.observeComponent(Timer(0.seconds))
+            val dateSeason by timeService.timeEntity.observeComponent(DateSeason(Season.SPRING,1,3,20))
+
             println("enyity $entity $amount")
             LaunchedEffect(sectService) {
                 while (true) {
@@ -67,7 +72,7 @@ fun TopNavigationBar(modifier: Modifier) {
             }
             println("-------------")
             Text(
-                text = "🏔️ ${named.name} ☀️ ⏳125年·3月·20日·14:30 [x1] ${amount.value}",
+                text = "🏔️ ${named.name} ☀️ ⏳$dateSeason [x1] ${amount.value}",
                 color = textColor,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold

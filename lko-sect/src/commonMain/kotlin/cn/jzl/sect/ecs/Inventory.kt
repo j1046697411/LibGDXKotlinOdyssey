@@ -33,36 +33,35 @@ val inventoryAddon = createAddon("inventory") {
 class InventoryService(world: World) : EntityRelationContext(world) {
 
     private val itemService by world.di.instance<ItemService>()
+    private val ownerItemQueries = mutableMapOf<Entity, Query<EntityItemContext>>()
 
     // QueryGroupedBy is not guaranteed to stay consistent across entity destroy/transfer in this ECS,
     // so avoid caching it per owner.
 
-    private fun getOwnerItems(owner: Entity): QueryGroupedBy<Entity, EntityItemContext> {
-        return world.query { EntityItemContext(this, owner) }.groupedBy { itemPrefab }
+    private fun getOwnerItems(owner: Entity): Query<EntityItemContext> {
+        return ownerItemQueries.getOrPut(owner) { world.query { EntityItemContext(this, owner) } }
     }
 
-    private fun getOwnerItemsByItemPrefab(owner: Entity, itemPrefab: Entity): QueryGroupedBy.QueryGroup<Entity, EntityItemContext>? {
-        return getOwnerItems(owner)[itemPrefab]
+    private fun getOwnerItemsByItemPrefab(owner: Entity, itemPrefab: Entity): QueryStream<EntityItemContext> {
+        return getOwnerItems(owner).filter { this.itemPrefab == itemPrefab }
     }
 
     private fun checkItemPrefab(itemPrefab: Entity) {
         require(itemService.isItemPrefab(itemPrefab))
     }
 
-    fun getAllItems(owner: Entity): Query<EntityItemContext> {
-        return getOwnerItems(owner).query
-    }
+    fun getAllItems(owner: Entity): Query<EntityItemContext> = getOwnerItems(owner)
 
     fun getItemCount(owner: Entity, itemPrefab: Entity): Int {
         checkItemPrefab(itemPrefab)
-        return getOwnerItemsByItemPrefab(owner, itemPrefab)?.sumBy { amount?.value ?: 1 } ?: 0
+        return getOwnerItemsByItemPrefab(owner, itemPrefab).sumBy { amount?.value ?: 1 }
     }
 
     fun getItem(owner: Entity, itemPrefab: Entity) : Entity? {
-        return getOwnerItemsByItemPrefab(owner, itemPrefab)?.map { entity }?.firstOrNull()
+        return getOwnerItemsByItemPrefab(owner, itemPrefab).map { entity }.firstOrNull()
     }
 
-    fun getItems(owner: Entity, itemPrefab: Entity): QueryStream<EntityItemContext>? {
+    fun getItems(owner: Entity, itemPrefab: Entity): QueryStream<EntityItemContext> {
         checkItemPrefab(itemPrefab)
         return getOwnerItemsByItemPrefab(owner, itemPrefab)
     }
