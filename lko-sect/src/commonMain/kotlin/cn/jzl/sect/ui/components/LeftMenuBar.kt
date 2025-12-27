@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -114,12 +116,21 @@ fun LeftMenuBar(
         }
     }
     
-    Column(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(12.dp)
-            .verticalScroll(androidx.compose.foundation.rememberScrollState())
+    Card(
+        modifier = modifier,
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp,
+            hoveredElevation = 12.dp
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
+        Column(
+            modifier = Modifier
+                .padding(12.dp)
+                .verticalScroll(androidx.compose.foundation.rememberScrollState())
+        ) {
         // 面板标题
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -147,7 +158,7 @@ fun LeftMenuBar(
         
         // 功能区域
         MenuCategory(title = "功能区域") {
-            MenuItem(text = "🗺️ 地图探索", shortcut = "5", menuOption = MenuOption.MAP_EXPLORATION)
+            MenuItem(text = "🗺️ 地图探索", shortcut = "5", menuOption = MenuOption.MAP_EXPLORATION, hasNotification = true)
             MenuItem(text = "📋 任务大厅", shortcut = "6", menuOption = MenuOption.TASK_HALL, hasNotification = true)
             MenuItem(text = "📚 功法堂", shortcut = "7", menuOption = MenuOption.TECHNIQUE_HALL)
         }
@@ -162,6 +173,7 @@ fun LeftMenuBar(
         MenuCategory(title = "系统") {
             MenuItem(text = "👤 社交", shortcut = "0", menuOption = MenuOption.SOCIAL)
             MenuItem(text = "⚙️ 设置", shortcut = "S", menuOption = MenuOption.SETTINGS)
+        }
         }
     }
 }

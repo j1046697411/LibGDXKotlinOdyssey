@@ -21,7 +21,7 @@ fun MainUI() {
     // 当前选中菜单状态
     var currentMenu by remember { mutableStateOf(MenuOption.ZONGMEN_OVERVIEW) }
 
-    TerminalTheme {
+    TerminalTheme(darkTheme = false) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
                 // 顶部导航栏
