@@ -28,13 +28,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cn.jzl.sect.ui.MenuOption
 
+/**
+ * 左侧菜单栏组件
+ * 
+ * @param modifier 修饰符
+ * @param currentMenu 当前选中的菜单选项
+ * @param onMenuChange 菜单切换回调函数
+ */
 @Composable
 fun LeftMenuBar(
     modifier: Modifier,
     currentMenu: MenuOption,
     onMenuChange: (MenuOption) -> Unit
 ) {
-    // 菜单选项点击处理
+    /**
+     * 单个菜单项组件
+     * 
+     * @param text 菜单项文本
+     * @param shortcut 快捷键提示
+     * @param menuOption 对应的菜单选项枚举
+     * @param hasNotification 是否显示通知标记
+     */
     @Composable
     fun MenuItem(text: String, shortcut: String, menuOption: MenuOption, hasNotification: Boolean = false) {
         val isSelected = currentMenu == menuOption
@@ -99,7 +113,12 @@ fun LeftMenuBar(
         }
     }
     
-    // 菜单分类
+    /**
+     * 菜单分类组件
+     * 
+     * @param title 分类标题
+     * @param content 分类内容，包含多个菜单项
+     */
     @Composable
     fun MenuCategory(title: String, content: @Composable () -> Unit) {
         Column {

@@ -14,7 +14,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// 设施建设内容
+/**
+ * 设施建设内容组件
+ * 
+ * 显示设施建设的详细信息和操作界面，包括：
+ * 1. 设施统计（总数、建设状态等）
+ * 2. 设施列表与筛选
+ * 3. 设施详情
+ * 4. 建设队列管理
+ * 5. 升级建议
+ */
 @Composable
 fun FacilityConstructionContent() {
     TerminalCard(

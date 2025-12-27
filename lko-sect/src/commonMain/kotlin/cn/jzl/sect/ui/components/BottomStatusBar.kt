@@ -14,6 +14,14 @@ import androidx.compose.ui.unit.sp
 
 /**
  * 底部状态栏组件
+ * 
+ * 显示游戏的各种状态信息和通知，包括：
+ * 1. 通知和基本状态（新任务、弟子传讯、宗门事件等）
+ * 2. 快捷键提示
+ * 3. 消息提示
+ * 4. 系统状态（内存使用、CPU使用率、网络状态等）
+ * 
+ * @param modifier 修饰符
  */
 @Composable
 fun BottomStatusBar(modifier: Modifier) {

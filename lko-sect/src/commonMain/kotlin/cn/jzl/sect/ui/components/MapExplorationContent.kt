@@ -7,7 +7,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-// 地图探索内容
+/**
+ * 地图探索内容组件
+ * 
+ * 显示地图探索的详细信息和操作界面，包括：
+ * 1. 地图区域列表
+ * 2. 已探索区域详情
+ * 3. 探索队伍管理
+ * 4. 探索任务列表
+ * 5. 资源分布信息
+ */
 @Composable
 fun MapExplorationContent() {
     Column(

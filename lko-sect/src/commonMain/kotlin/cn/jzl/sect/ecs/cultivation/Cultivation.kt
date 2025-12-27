@@ -13,17 +13,46 @@ import cn.jzl.sect.ecs.attribute.attributeAddon
 import cn.jzl.sect.ecs.core.coreAddon
 import kotlin.math.min
 
+/**
+ * 修炼系统包，包含修炼组件、服务和addon配置
+ * 
+ * 主要功能：
+ * 1. 定义修炼境界和可修炼实体
+ * 2. 提供修炼等级和境界突破机制
+ * 3. 管理各种修炼境界的属性
+ * 4. 支持修炼值增长和自动晋级
+ */
+
+/**
+ * 修炼境界组件
+ * 表示实体的修炼等级
+ * 
+ * @param level 修炼等级，用于区分不同境界
+ */
 @JvmInline
 value class Cultivation(val level: Int)
 
+/**
+ * 可修炼标记组件
+ * 表示实体可以进行修炼
+ */
 sealed class Cultivable
+
+/**
+ * 突破标记组件
+ * 表示该境界是一个需要突破的关键节点
+ */
 sealed class Breakthrough
 
+/**
+ * 修炼系统addon
+ * 注册修炼相关组件和服务
+ */
 val cultivationAddon = createAddon("cultivation") {
     install(coreAddon)
     install(attributeAddon)
     injects { this bind singleton { new(::CultivationService) } }
-    components {
+    components { 
         world.componentId<Cultivation>()
         world.componentId<Breakthrough> { it.tag() }
         world.componentId<Cultivable> {
@@ -33,18 +62,30 @@ val cultivationAddon = createAddon("cultivation") {
     }
 }
 
+/**
+ * 修炼服务
+ * 管理修炼系统的核心功能
+ * 
+ * @param world ECS世界实例
+ */
 class CultivationService(world: World) : EntityRelationContext(world) {
 
     private val attributes by world.di.instance<SectAttributes>()
     private val attributeService by world.di.instance<AttributeService>()
 
-    // 凡人
+    /**
+     * 凡人境界
+     * 修炼等级的起点
+     */
     val mortal: Entity = realm(Named("mortal"), 0) {
         lifespan(0)
         cultivation(100)
     }
 
-    // 练气
+    /**
+     * 练气境界列表
+     * 包含9个练气等级
+     */
     val qiRefining: List<Entity> = listOf(
         realm(Named("qi_refining_1"), 10) {
             lifespan(5)
@@ -84,7 +125,10 @@ class CultivationService(world: World) : EntityRelationContext(world) {
         },
     )
 
-    // 筑基
+    /**
+     * 筑基境界列表
+     * 包含4个筑基等级，第一个等级需要突破
+     */
     val foundationEstablishment: List<Entity> = listOf(
         realm(Named("foundation_establishment_1"), 20, true) {
             lifespan(100)
@@ -104,7 +148,10 @@ class CultivationService(world: World) : EntityRelationContext(world) {
         },
     )
 
-    // 金丹
+    /**
+     * 金丹境界列表
+     * 包含6个金丹等级，第一个等级需要突破
+     */
     val goldenCore: List<Entity> = listOf(
         realm(Named("golden_core_1"), 30, true) {
             lifespan(400)
@@ -132,7 +179,10 @@ class CultivationService(world: World) : EntityRelationContext(world) {
         },
     )
 
-    // 元婴
+    /**
+     * 元婴境界列表
+     * 包含5个元婴等级，第一个等级需要突破
+     */
     val nascentSoul: List<Entity> = listOf(
         realm(Named("nascent_soul_1"), 40, true) {
             lifespan(1500)
@@ -156,7 +206,10 @@ class CultivationService(world: World) : EntityRelationContext(world) {
         },
     )
 
-    // 化神
+    /**
+     * 化神境界列表
+     * 包含5个化神等级，第一个等级需要突破
+     */
     val spiritTransformation: List<Entity> = listOf(
         realm(Named("spirit_transformation_1"), 50, true) {
             lifespan(5000)
@@ -180,6 +233,10 @@ class CultivationService(world: World) : EntityRelationContext(world) {
         },
     )
 
+    /**
+     * 所有修炼境界的列表
+     * 按照修炼等级从小到大排序
+     */
     val allRealms: List<Entity> = buildList {
         add(mortal)
         addAll(qiRefining)
@@ -189,13 +246,32 @@ class CultivationService(world: World) : EntityRelationContext(world) {
         addAll(spiritTransformation)
     }
 
+    /**
+     * 创建修炼境界实体
+     * 
+     * @param named 境界名称
+     * @param level 境界等级
+     * @param breakthrough 是否需要突破
+     * @param block 境界属性配置块
+     * @return 创建的境界实体
+     */
     private fun realm(named: Named, level: Int, breakthrough: Boolean = false, block: RealmContext.() -> Unit): Entity {
         return world.entity {
             val realmContext = object : RealmContext {
+                /**
+                 * 设置境界的寿命
+                 * 
+                 * @param lifespan 寿命值
+                 */
                 override fun lifespan(lifespan: Long) {
                     attributeService.setAttributeValue(this@entity, it, attributes.lifespan, AttributeValue(lifespan))
                 }
 
+                /**
+                 * 设置境界的最大修炼值
+                 * 
+                 * @param cultivation 最大修炼值
+                 */
                 override fun cultivation(cultivation: Long) {
                     attributeService.setAttributeValue(this@entity, it, attributes.maxCultivation, AttributeValue(cultivation))
                 }
@@ -207,6 +283,13 @@ class CultivationService(world: World) : EntityRelationContext(world) {
         }
     }
 
+    /**
+     * 将实体设置为可修炼
+     * 
+     * @param context 实体创建上下文
+     * @param entity 目标实体
+     * @param level 初始修炼等级，默认为凡人(-1)
+     */
     fun cultivable(context: EntityCreateContext, entity: Entity, level: Int = -1) = context.run {
         val realm = if (level != -1) {
             allRealms.first { it.getComponent<Cultivation>().level == level }
@@ -217,6 +300,13 @@ class CultivationService(world: World) : EntityRelationContext(world) {
         attributeService.setAttributeValue(this, entity, attributes.cultivation, AttributeValue(0))
     }
 
+    /**
+     * 增加实体的修炼值
+     * 自动处理修炼值溢出和境界提升
+     * 
+     * @param entity 目标实体
+     * @param cultivation 要增加的修炼值
+     */
     fun cultivation(entity: Entity, cultivation: Long) {
         require(cultivation > 0) { "Cultivation must be non-negative" }
         val currentRealm = entity.getRelationUp<Cultivation>()
@@ -258,6 +348,12 @@ class CultivationService(world: World) : EntityRelationContext(world) {
         }
     }
 
+    /**
+     * 尝试突破到下一个境界
+     * 只有当修炼值达到当前境界上限时才能突破
+     * 
+     * @param entity 目标实体
+     */
     fun breakthrough(entity: Entity) {
         val currentRealm = entity.getRelationUp<Cultivation>()
         requireNotNull(currentRealm) { "Entity is not cultivable" }
@@ -272,8 +368,23 @@ class CultivationService(world: World) : EntityRelationContext(world) {
         }
     }
 
+    /**
+     * 境界配置上下文
+     * 用于配置境界的属性
+     */
     interface RealmContext {
+        /**
+         * 设置境界的寿命
+         * 
+         * @param lifespan 寿命值
+         */
         fun lifespan(lifespan: Long)
+        
+        /**
+         * 设置境界的最大修炼值
+         * 
+         * @param cultivation 最大修炼值
+         */
         fun cultivation(cultivation: Long)
     }
 }

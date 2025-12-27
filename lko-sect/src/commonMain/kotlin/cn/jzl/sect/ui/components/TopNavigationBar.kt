@@ -29,6 +29,15 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * 顶部导航栏组件
+ * 
+ * 显示游戏的核心状态信息，包括：
+ * 1. 宗门名称和位置
+ * 2. 天气、日期和时间流速
+ * 3. 搜索框和详情按钮
+ * 4. 关键数据统计（弟子总数、资源、设施等）
+ * 5. 功能分类导航芯片
+ * 
+ * @param modifier 修饰符
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -52,7 +61,7 @@ fun TopNavigationBar(modifier: Modifier) {
         }
         val amount by entity.observeComponent<Amount>(Amount(0))
         val timer by timeService.timeEntity.observeComponent(Timer(0.seconds))
-        val dateSeason by timeService.timeEntity.observeComponent(DateSeason(Season.SPRING, 1, 3, 20))
+        val dateSeason by timeService.timeEntity.observeComponent(DateSeason(Season.SPRING, 1, 1, 1))
 
 
         // 第一行：核心状态信息

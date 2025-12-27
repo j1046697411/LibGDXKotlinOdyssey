@@ -15,7 +15,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 
-// 资源管理内容
+/**
+ * 资源管理内容组件
+ * 
+ * 显示资源管理的详细信息和操作界面，包括：
+ * 1. 仓库基本信息（容量、物品总数等）
+ * 2. 资源分类与筛选
+ * 3. 资源列表表格
+ * 4. 资源详情
+ * 5. 资源流动记录
+ */
 @Composable
 fun InventoryManagementContent() {
     TerminalCard(

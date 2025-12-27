@@ -14,7 +14,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// 炼丹房内容
+/**
+ * 炼丹房内容组件
+ * 
+ * 显示炼丹房的详细信息和操作界面，包括：
+ * 1. 丹炉与炼丹师信息
+ * 2. 当前炼制进度
+ * 3. 丹药列表与筛选
+ * 4. 丹药列表表格
+ * 5. 炼制历史记录
+ * 6. 功能标签页
+ */
 @Composable
 fun AlchemyRoomContent() {
     TerminalCard(

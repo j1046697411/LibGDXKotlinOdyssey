@@ -15,7 +15,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// 任务大厅内容
+/**
+ * 任务大厅内容组件
+ * 
+ * 显示任务大厅的详细信息和操作界面，包括：
+ * 1. 任务统计（已接、可接、完成任务数量）
+ * 2. 任务分类与筛选
+ * 3. 任务列表表格
+ * 4. 任务详情
+ * 5. 任务进度追踪
+ */
 @Composable
 fun TaskHallContent() {
     TerminalCard(

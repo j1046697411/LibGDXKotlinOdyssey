@@ -10,6 +10,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * 终端风格深色主题配色方案
+ */
 private val TerminalDarkColorScheme = darkColorScheme(
     primary = Color(0xFF00AA00),
     secondary = Color(0xFF0088CC),
@@ -26,6 +29,9 @@ private val TerminalDarkColorScheme = darkColorScheme(
     outlineVariant = Color(0xFF444444)
 )
 
+/**
+ * 终端风格浅色主题配色方案
+ */
 private val TerminalLightColorScheme = lightColorScheme(
     primary = Color(0xFF006600),
     secondary = Color(0xFF0066CC),
@@ -42,6 +48,11 @@ private val TerminalLightColorScheme = lightColorScheme(
     outlineVariant = Color(0xFFDDDDDD)
 )
 
+/**
+ * 终端风格排版设置
+ * 
+ * 所有文本均使用等宽字体，确保终端风格的一致性
+ */
 val TerminalTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = FontFamily.Monospace,
@@ -135,6 +146,11 @@ val TerminalTypography = Typography(
     )
 )
 
+/**
+ * 终端风格形状定义
+ * 
+ * 采用轻微圆角设计，平衡终端风格的硬朗感和现代UI的柔和感
+ */
 val TerminalShapes = Shapes(
     extraSmall = RoundedCornerShape(2.dp),
     small = RoundedCornerShape(4.dp),
@@ -143,6 +159,12 @@ val TerminalShapes = Shapes(
     extraLarge = RoundedCornerShape(12.dp)
 )
 
+/**
+ * 终端风格主题
+ * 
+ * @param darkTheme 是否使用深色主题，默认为true
+ * @param content 主题包裹的内容
+ */
 @Composable
 fun TerminalTheme(
     darkTheme: Boolean = true,

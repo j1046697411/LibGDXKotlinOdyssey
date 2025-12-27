@@ -10,6 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cn.jzl.sect.ui.MenuOption
 
+/**
+ * 中央内容区域组件
+ * 
+ * 根据当前选中的菜单选项显示不同的内容组件
+ * 
+ * @param modifier 修饰符
+ * @param currentMenu 当前选中的菜单选项
+ */
 @Composable
 fun CentralContentArea(modifier: Modifier, currentMenu: MenuOption) {
     Column(

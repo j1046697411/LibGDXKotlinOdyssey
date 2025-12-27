@@ -7,7 +7,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-// 社交内容
+/**
+ * 社交内容组件
+ * 
+ * 显示社交系统的详细信息和操作界面，包括：
+ * 1. 宗门关系管理
+ * 2. 好友列表
+ * 3. 消息中心
+ * 4. 活动报名
+ * 5. 礼物赠送
+ */
 @Composable
 fun SocialContent() {
     Column(

@@ -16,43 +16,128 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * 效果系统包，包含效果组件、服务和addon配置
+ * 
+ * 主要功能：
+ * 1. 定义各种类型的效果及其行为
+ * 2. 提供效果应用、更新和移除机制
+ * 3. 支持周期性效果和状态效果
+ * 4. 实现属性修饰和堆叠机制
+ * 5. 提供效果相关的状态解析器
+ */
+
+/**
+ * 效果标记组件
+ * 用于标识实体为效果
+ */
 sealed class Effect
 
+/**
+ * 效果应用时间组件
+ * 记录效果被应用的游戏时间
+ * 
+ * @param gameTime 效果被应用的游戏时间
+ */
 @JvmInline
 value class AppliedTime(val gameTime: Duration)
 
+/**
+ * 效果上次触发时间组件
+ * 记录周期性效果上次触发的时间和次数
+ * 
+ * @param gameTime 上次触发的游戏时间
+ * @param tickCount 触发次数
+ */
 data class LastTickTime(
     val gameTime: Duration,
     val tickCount: Int
 )
 
+/**
+ * 效果类型枚举
+ * 定义不同类型的效果
+ */
 enum class EffectType {
+    /** 增益效果 */
     BUFF,
+    /** 减益效果 */
     DEBUFF,
+    /** 治疗效果 */
     HEAL,
+    /** 伤害效果 */
     DAMAGE,
+    /** 属性修改效果 */
     STAT_MOD,
+    /** 状态效果 */
     STATUS,
+    /** 可驱散效果 */
     DISPELLABLE,
+    /** 永久效果 */
     PERMANENT
 }
 
+/**
+ * 触发间隔组件
+ * 定义周期性效果的触发间隔
+ * 
+ * @param duration 触发间隔时长
+ */
 @JvmInline
 value class TickInterval(val duration: Duration) {
+    /**
+     * 伴生对象，提供便捷的创建方法
+     */
     companion object {
+        /**
+         * 创建指定秒数的触发间隔
+         * 
+         * @param s 秒数
+         * @return TickInterval实例
+         */
         fun seconds(s: Int) = TickInterval(s.seconds)
+        /**
+         * 创建指定秒数（小数）的触发间隔
+         * 
+         * @param s 秒数
+         * @return TickInterval实例
+         */
         fun seconds(s: Double) = TickInterval(s.seconds)
+        /**
+         * 创建指定分钟数的触发间隔
+         * 
+         * @param m 分钟数
+         * @return TickInterval实例
+         */
         fun minutes(m: Int) = TickInterval(m.minutes)
     }
+    /**
+     * 转换为整秒数
+     */
     val inWholeSeconds: Long get() = duration.inWholeSeconds
 }
 
+/**
+ * 堆叠行为枚举
+ * 定义效果堆叠时的行为
+ */
 enum class StackBehavior {
+    /** 不堆叠，新效果替换旧效果 */
     NONE,
+    /** 刷新持续时间 */
     REFRESH_DURATION,
+    /** 增加堆叠次数 */
     INCREMENT_STACK
 }
 
+/**
+ * 效果堆叠配置
+ * 定义效果的堆叠规则
+ * 
+ * @param maxStacks 最大堆叠次数，默认1
+ * @param currentStacks 当前堆叠次数，默认1
+ * @param stackBehavior 堆叠行为，默认NONE
+ */
 data class EffectStack(
     val maxStacks: Int = 1,
     val currentStacks: Int = 1,
@@ -64,12 +149,28 @@ data class EffectStack(
     }
 }
 
+/**
+ * 属性修饰类型枚举
+ * 定义属性修饰的方式
+ */
 enum class ModifierType {
+    /** 加法修饰 */
     ADD,
+    /** 乘法修饰 */
     MULTIPLY,
+    /** 赋值修饰 */
     SET
 }
 
+/**
+ * 属性修饰器
+ * 定义对特定属性的修饰
+ * 
+ * @param attribute 目标属性实体
+ * @param modifierType 修饰类型
+ * @param value 修饰值
+ * @param multiplier 乘数，默认1.0f
+ */
 data class AttributeModifier(
     val attribute: Entity,
     val modifierType: ModifierType,
@@ -81,21 +182,56 @@ data class AttributeModifier(
     }
 }
 
+/**
+ * 加法属性修饰组件
+ * 
+ * @param value 加法修饰值
+ */
 @JvmInline
 value class AddAttributeModifier(val  value: Long)
+
+/**
+ * 乘法属性修饰组件
+ * 
+ * @param value 乘法修饰值
+ */
 @JvmInline
 value class MultiplyAttributeModifier(val value: Double)
+
+/**
+ * 赋值属性修饰组件
+ * 
+ * @param value 赋值修饰值
+ */
 @JvmInline
 value class AssignmentAttributeModifier(val value: Long)
 
+/**
+ * 效果移除原因枚举
+ * 定义效果被移除的原因
+ */
 enum class RemovalReason {
+    /** 效果过期 */
     EXPIRED,
+    /** 效果被驱散 */
     DISPELLED,
+    /** 手动移除 */
     MANUAL,
+    /** 效果出错 */
     ERROR,
+    /** 目标死亡 */
     TARGET_DIED
 }
 
+/**
+ * 效果应用事件
+ * 当效果被应用时触发
+ * 
+ * @param effect 效果实体
+ * @param target 目标实体
+ * @param source 来源实体，可为空
+ * @param gameTime 应用时间
+ */
 data class OnEffectApplied(
     val effect: Entity,
     val target: Entity,
@@ -103,6 +239,15 @@ data class OnEffectApplied(
     val gameTime: Duration
 )
 
+/**
+ * 效果移除事件
+ * 当效果被移除时触发
+ * 
+ * @param effect 效果实体
+ * @param target 目标实体
+ * @param reason 移除原因，默认EXPIRED
+ * @param gameTime 移除时间
+ */
 data class OnEffectRemoved(
     val effect: Entity,
     val target: Entity,
@@ -110,6 +255,15 @@ data class OnEffectRemoved(
     val gameTime: Duration
 )
 
+/**
+ * 效果触发事件
+ * 当周期性效果触发时触发
+ * 
+ * @param effect 效果实体
+ * @param target 目标实体
+ * @param tickCount 触发次数
+ * @param gameTime 触发时间
+ */
 data class OnEffectTick(
     val effect: Entity,
     val target: Entity,
@@ -117,39 +271,94 @@ data class OnEffectTick(
     val gameTime: Duration
 )
 
+/**
+ * 状态效果类型枚举
+ * 定义不同类型的状态效果
+ */
 enum class StatusEffectType {
+    /** 眩晕效果 */
     STUN,
+    /** 沉默效果 */
     SILENCE,
+    /** 定身效果 */
     ROOT,
+    /** 中毒效果 */
     POISON,
+    /** 流血效果 */
     BLEED
 }
 
+/**
+ * 状态效果数据类
+ * 定义状态效果的属性
+ * 
+ * @param type 状态效果类型
+ * @param duration 效果持续时间，可为空
+ * @param damagePerTick 每秒伤害，默认0
+ * @param tickInterval 触发间隔，可为空
+ */
 data class StatusEffect(
     val type: StatusEffectType,
     val duration: Duration? = null,
     val damagePerTick: Long = 0,
     val tickInterval: TickInterval? = null
 ) {
+    /**
+     * 伴生对象，提供便捷的创建方法
+     */
     companion object {
+        /**
+         * 创建眩晕效果
+         * 
+         * @param duration 持续时间
+         * @return StatusEffect实例
+         */
         fun stun(duration: Duration) = StatusEffect(
             type = StatusEffectType.STUN,
             duration = duration
         )
+        /**
+         * 创建沉默效果
+         * 
+         * @param duration 持续时间
+         * @return StatusEffect实例
+         */
         fun silence(duration: Duration) = StatusEffect(
             type = StatusEffectType.SILENCE,
             duration = duration
         )
+        /**
+         * 创建定身效果
+         * 
+         * @param duration 持续时间
+         * @return StatusEffect实例
+         */
         fun root(duration: Duration) = StatusEffect(
             type = StatusEffectType.ROOT,
             duration = duration
         )
+        /**
+         * 创建中毒效果
+         * 
+         * @param damagePerTick 每秒伤害
+         * @param tickInterval 触发间隔
+         * @param duration 持续时间
+         * @return StatusEffect实例
+         */
         fun poison(damagePerTick: Long, tickInterval: TickInterval, duration: Duration) = StatusEffect(
             type = StatusEffectType.POISON,
             duration = duration,
             damagePerTick = damagePerTick,
             tickInterval = tickInterval
         )
+        /**
+         * 创建流血效果
+         * 
+         * @param damagePerTick 每秒伤害
+         * @param tickInterval 触发间隔
+         * @param duration 持续时间
+         * @return StatusEffect实例
+         */
         fun bleed(damagePerTick: Long, tickInterval: TickInterval, duration: Duration) = StatusEffect(
             type = StatusEffectType.BLEED,
             duration = duration,
@@ -159,34 +368,91 @@ data class StatusEffect(
     }
 }
 
+/**
+ * 眩晕状态标记
+ * 表示实体处于眩晕状态
+ */
 sealed class Stunned
+
+/**
+ * 沉默状态标记
+ * 表示实体处于沉默状态
+ */
 sealed class Silenced
+
+/**
+ * 定身状态标记
+ * 表示实体处于定身状态
+ */
 sealed class Rooted
+
+/**
+ * 中毒状态标记
+ * 表示实体处于中毒状态
+ */
 sealed class Poisoned
+
+/**
+ * 流血状态标记
+ * 表示实体处于流血状态
+ */
 sealed class Bleeding
 
+/**
+ * 效果应用异常
+ * 当效果应用失败时抛出
+ * 
+ * @param message 异常信息
+ */
 sealed class EffectApplicationException(message: String) : Exception(message) {
+    /**
+     * 等级要求未满足
+     * 
+     * @param required 所需等级
+     * @param actual 实际等级
+     */
     data class LevelRequirementNotMet(
         val required: Int,
         val actual: Int
     ) : EffectApplicationException(
         "Level requirement not met: required $required, actual $actual"
     )
+    /**
+     * 缺少必需效果
+     * 
+     * @param required 必需效果实体
+     */
     data class MissingRequiredEffect(
         val required: Entity
     ) : EffectApplicationException(
         "Missing required effect: $required"
     )
+    /**
+     * 存在不兼容效果
+     * 
+     * @param incompatible 不兼容效果实体
+     */
     data class IncompatibleEffectPresent(
         val incompatible: Entity
     ) : EffectApplicationException(
         "Incompatible effect present: $incompatible"
     )
+    /**
+     * 无效目标
+     * 
+     * @param target 无效目标实体
+     */
     data class InvalidTarget(
         val target: Entity
     ) : EffectApplicationException(
         "Invalid target: $target"
     )
+    /**
+     * 已达到最大堆叠次数
+     * 
+     * @param effectPrefab 效果预制体
+     * @param maxStacks 最大堆叠次数
+     */
     data class MaxStacksReached(
         val effectPrefab: Entity,
         val maxStacks: Int
@@ -195,8 +461,22 @@ sealed class EffectApplicationException(message: String) : Exception(message) {
     )
 }
 
+/**
+ * 效果应用者关系标记
+ * 表示效果由谁应用
+ */
 sealed class AppliedBy
+
+/**
+ * 效果目标关系标记
+ * 表示效果应用到谁身上
+ */
 sealed class AppliedTo
+
+/**
+ * 装备来源关系标记
+ * 表示效果来自装备
+ */
 sealed class FromEquipment
 
 class ActiveEffectContext(world: World) : EntityQueryContext(world) {

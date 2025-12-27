@@ -16,16 +16,62 @@ import java.util.PriorityQueue
 import kotlin.collections.plus
 import kotlin.getValue
 
+/**
+ * 规划系统包，包含GOAP（面向目标的动作规划）系统的核心组件
+ * 
+ * 主要功能：
+ * 1. 定义世界状态和智能体状态
+ * 2. 提供动作、目标和规划器接口
+ * 3. 实现A*搜索算法进行规划
+ * 4. 支持状态解析和注册机制
+ * 5. 提供规划服务和addon配置
+ */
+
+/**
+ * 世界状态接口
+ * 表示世界的当前状态
+ */
 interface WorldState : WorldStateReader {
+    /**
+     * 当前状态中的所有键
+     */
     val stateKeys: Sequence<StateKey<*>>
 }
 
+/**
+ * 智能体状态接口
+ * 表示智能体的当前状态，继承自世界状态
+ */
 interface AgentState : WorldState {
+    /**
+     * 创建状态副本
+     * 
+     * @return 状态副本
+     */
     fun copy(): AgentState
+    
+    /**
+     * 合并动作效果到当前状态
+     * 
+     * @param effects 动作效果序列
+     * @return 合并后的新状态
+     */
     fun mergeEffects(effects: Sequence<ActionEffect>): AgentState
+    
+    /**
+     * 检查当前状态是否满足条件序列
+     * 
+     * @param conditions 条件序列
+     * @return 是否满足所有条件
+     */
     fun satisfiesConditions(conditions: Sequence<Precondition>): Boolean
 }
 
+/**
+ * 世界状态实现类
+ * 
+ * @param map 状态键值对映射
+ */
 @JvmInline
 value class WorldStateImpl(private val map: Map<StateKey<*>, Any?>) : WorldState {
     override val stateKeys: Sequence<StateKey<*>> get() = map.keys.asSequence()
@@ -36,21 +82,72 @@ value class WorldStateImpl(private val map: Map<StateKey<*>, Any?>) : WorldState
     }
 }
 
+/**
+ * 状态键接口
+ * 用于标识状态值的类型
+ * 
+ * @param T 状态值类型
+ */
 interface StateKey<T>
 
+/**
+ * 状态解析器接口
+ * 用于从世界中获取特定键的状态值
+ * 
+ * @param K 状态键类型
+ * @param T 状态值类型
+ */
 interface StateResolver<K : StateKey<T>, T> {
+    /**
+     * 从世界中获取特定智能体的状态值
+     * 
+     * @param agent 智能体实体
+     * @param key 状态键
+     * @return 状态值
+     */
     fun EntityRelationContext.getWorldState(agent: Entity, key: K): T
 }
 
+/**
+ * 状态解析器注册表接口
+ * 用于注册和获取状态解析器
+ */
 interface StateResolverRegistry {
+    /**
+     * 获取特定状态键的解析器
+     * 
+     * @param key 状态键
+     * @return 状态解析器，可为空
+     */
     fun <K : StateKey<T>, T> getStateHandler(key: K): StateResolver<K, T>?
 }
 
+/**
+ * 世界状态读取器接口
+ * 用于读取世界状态
+ */
 interface WorldStateReader {
+    /**
+     * 获取特定智能体的状态值
+     * 
+     * @param agent 智能体实体
+     * @param key 状态键
+     * @return 状态值
+     */
     fun <K : StateKey<T>, T> getValue(agent: Entity, key: K): T
 }
 
+/**
+ * 世界状态写入器接口
+ * 用于写入世界状态
+ */
 interface WorldStateWriter : WorldStateReader {
+    /**
+     * 设置状态值
+     * 
+     * @param key 状态键
+     * @param value 状态值
+     */
     fun <K : StateKey<T>, T> setValue(key: K, value: T)
 }
 

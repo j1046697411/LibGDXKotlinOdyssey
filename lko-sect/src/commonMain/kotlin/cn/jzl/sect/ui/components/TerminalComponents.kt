@@ -16,6 +16,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
+/**
+ * 终端风格卡片组件
+ * 
+ * 用于显示带有标题和边框的内容卡片，适用于终端风格的UI界面
+ * 
+ * @param modifier 修饰符
+ * @param title 卡片标题，显示在卡片顶部
+ * @param borderColor 卡片边框颜色，默认使用主题的主色调
+ * @param contentPadding 卡片内容的内边距
+ * @param content 卡片内容的Composable函数
+ */
 @Composable
 fun TerminalCard(
     modifier: Modifier = Modifier,
@@ -53,6 +64,18 @@ fun TerminalCard(
     }
 }
 
+/**
+ * 终端风格按钮组件
+ * 
+ * 支持三种按钮变体，适用于终端风格的UI界面
+ * 
+ * @param onClick 点击事件回调
+ * @param modifier 修饰符
+ * @param enabled 是否启用按钮
+ * @param label 按钮文本
+ * @param shortcut 快捷键提示，显示在按钮文本右侧
+ * @param variant 按钮变体，默认为OUTLINED
+ */
 @Composable
 fun TerminalButton(
     onClick: () -> Unit,
@@ -132,10 +155,26 @@ fun TerminalButton(
     }
 }
 
+/**
+ * 按钮变体枚举
+ * 
+ * - FILLED: 填充式按钮，使用主题主色调作为背景
+ * - OUTLINED: 轮廓式按钮，只有边框，没有背景
+ * - TEXT: 文本式按钮，只有文本，没有边框和背景
+ */
 enum class ButtonVariant {
     FILLED, OUTLINED, TEXT
 }
 
+/**
+ * 终端风格分隔线组件
+ * 
+ * 用于分隔不同内容区域，适用于终端风格的UI界面
+ * 
+ * @param modifier 修饰符
+ * @param thickness 分隔线厚度，单位为dp
+ * @param color 分隔线颜色，默认使用主题的轮廓变体颜色
+ */
 @Composable
 fun TerminalDivider(
     modifier: Modifier = Modifier,
@@ -149,6 +188,15 @@ fun TerminalDivider(
     )
 }
 
+/**
+ * 终端风格徽章组件
+ * 
+ * 用于显示小型状态或标签信息，适用于终端风格的UI界面
+ * 
+ * @param text 徽章文本
+ * @param color 徽章颜色，默认使用主题的主色调
+ * @param modifier 修饰符
+ */
 @Composable
 fun TerminalBadge(
     text: String,
@@ -170,6 +218,17 @@ fun TerminalBadge(
     }
 }
 
+/**
+ * 终端风格芯片组件
+ * 
+ * 用于显示可选择的标签或选项，适用于终端风格的UI界面
+ * 
+ * @param text 芯片文本
+ * @param selected 是否已选中
+ * @param onClick 点击事件回调
+ * @param modifier 修饰符
+ * @param icon 可选的图标文本
+ */
 @Composable
 fun TerminalChip(
     text: String,
@@ -221,6 +280,16 @@ fun TerminalChip(
     }
 }
 
+/**
+ * 终端风格进度条组件
+ * 
+ * 用于显示任务或操作的进度，适用于终端风格的UI界面
+ * 
+ * @param progress 进度值，范围为0.0到1.0
+ * @param modifier 修饰符
+ * @param color 进度条颜色，默认使用主题的主色调
+ * @param backgroundColor 进度条背景颜色，默认使用主题的表面变体颜色
+ */
 @Composable
 fun TerminalProgressBar(
     progress: Float,
@@ -245,6 +314,18 @@ fun TerminalProgressBar(
     }
 }
 
+/**
+ * 终端风格文本输入框组件
+ * 
+ * 用于接收用户输入，适用于终端风格的UI界面
+ * 
+ * @param value 当前输入值
+ * @param onValueChange 输入值变化回调
+ * @param modifier 修饰符
+ * @param label 可选的标签文本
+ * @param placeholder 可选的占位符文本
+ * @param leadingIcon 可选的前置图标文本
+ */
 @Composable
 fun TerminalTextField(
     value: String,
@@ -297,6 +378,16 @@ fun TerminalTextField(
     )
 }
 
+/**
+ * 终端风格标签行组件
+ * 
+ * 用于切换不同的标签页，适用于终端风格的UI界面
+ * 
+ * @param selectedTabIndex 当前选中的标签索引
+ * @param modifier 修饰符
+ * @param tabs 标签文本列表
+ * @param onTabSelected 标签选择回调
+ */
 @Composable
 fun TerminalTabRow(
     selectedTabIndex: Int,
@@ -339,6 +430,15 @@ fun TerminalTabRow(
     }
 }
 
+/**
+ * 键值对显示组件
+ * 
+ * 用于显示带有图标和标签的数值信息，适用于终端风格的UI界面
+ * 
+ * @param label 标签文本
+ * @param value 数值文本
+ * @param icon 图标文本
+ */
 @Composable
 fun KeyValueDisplay(label: String, value: String, icon: String) {
     Row(
@@ -364,6 +464,14 @@ fun KeyValueDisplay(label: String, value: String, icon: String) {
     }
 }
 
+/**
+ * 导航芯片组件
+ * 
+ * 用于显示导航选项，适用于终端风格的UI界面
+ * 
+ * @param icon 图标文本
+ * @param text 芯片文本
+ */
 @Composable
 fun NavigationChip(icon: String, text: String) {
     Box(

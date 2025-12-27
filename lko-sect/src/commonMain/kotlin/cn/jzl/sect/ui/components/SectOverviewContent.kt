@@ -11,7 +11,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-// 宗门总览内容
+/**
+ * 宗门总览内容组件
+ * 
+ * 显示宗门的详细信息，包括：
+ * 1. 宗门基本信息（名称、等级、类型等）
+ * 2. 核心数据统计（弟子总数、灵石储备等）
+ * 3. 宗门影响力（友好和敌对宗门）
+ * 4. 核心设施状态
+ * 5. 近期动态
+ * 6. 发展建议
+ * 7. 功能标签页
+ */
 @Composable
 fun SectOverviewContent() {
     Column {

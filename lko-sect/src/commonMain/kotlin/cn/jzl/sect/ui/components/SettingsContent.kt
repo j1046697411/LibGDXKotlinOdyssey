@@ -7,7 +7,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-// 设置内容
+/**
+ * 设置内容组件
+ * 
+ * 显示游戏设置的详细信息和操作界面，包括：
+ * 1. 游戏速度设置
+ * 2. 音效和音乐设置
+ * 3. 自动存档设置
+ * 4. 显示设置
+ * 5. 系统信息
+ * 6. 帮助与支持
+ */
 @Composable
 fun SettingsContent() {
     Column(

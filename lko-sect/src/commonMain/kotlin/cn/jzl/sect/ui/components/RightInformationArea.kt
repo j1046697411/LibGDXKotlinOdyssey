@@ -14,6 +14,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.jzl.sect.ui.MenuOption
 
+/**
+ * 右侧信息区域组件
+ * 
+ * 根据当前选中的菜单选项显示不同的信息内容，包括各种统计数据、快捷操作和相关信息
+ * 
+ * @param modifier 修饰符
+ * @param currentMenu 当前选中的菜单选项
+ */
 @Composable
 fun RightInformationArea(modifier: Modifier, currentMenu: MenuOption) {
     Card(

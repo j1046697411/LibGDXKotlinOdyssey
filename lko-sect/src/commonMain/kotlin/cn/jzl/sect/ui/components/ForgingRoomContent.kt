@@ -7,7 +7,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-// 炼器房内容
+/**
+ * 炼器房内容组件
+ * 
+ * 显示炼器房的详细信息和操作界面，包括：
+ * 1. 熔炉与炼器师信息
+ * 2. 当前锻造进度
+ * 3. 装备列表与筛选
+ * 4. 装备列表表格
+ * 5. 锻造历史记录
+ * 6. 功能标签页
+ */
 @Composable
 fun ForgingRoomContent() {
     Column(

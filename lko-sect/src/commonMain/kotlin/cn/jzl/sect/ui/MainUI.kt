@@ -13,11 +13,22 @@ import cn.jzl.sect.ui.components.LeftMenuBar
 import cn.jzl.sect.ui.components.RightInformationArea
 import cn.jzl.sect.ui.components.TopNavigationBar
 
+/**
+ * 主界面组件，应用的根UI组件
+ * 
+ * 布局结构：
+ * - 顶部导航栏（TopNavigationBar）
+ * - 中间内容区域，包含：
+ *   - 左侧菜单栏（LeftMenuBar）：占比2
+ *   - 中央内容区（CentralContentArea）：占比5
+ *   - 右侧信息区（RightInformationArea）：占比2
+ * - 底部状态栏（BottomStatusBar）
+ * 
+ * 优化适配1920×1080分辨率，采用160字符×60行的布局设计
+ */
 @Preview
 @Composable
 fun MainUI() {
-    // 1920×1080 分辨率优化 - 160字符×60行，左:中:右 = 2:5:2
-    
     // 当前选中菜单状态
     var currentMenu by remember { mutableStateOf(MenuOption.ZONGMEN_OVERVIEW) }
 

@@ -14,8 +14,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-
-// 弟子管理内容
+/**
+ * 弟子管理内容组件
+ * 
+ * 显示弟子管理的详细信息，包括：
+ * 1. 弟子统计（总数、在线状态、境界分布等）
+ * 2. 弟子分类与筛选（按境界、资质、年龄等筛选）
+ * 3. 弟子列表表格（显示弟子基本信息）
+ * 4. 弟子详情（当前选中弟子的详细信息）
+ * 5. 功能标签页（快速切换不同功能）
+ */
 @Composable
 fun DiscipleManagementContent() {
     TerminalCard(

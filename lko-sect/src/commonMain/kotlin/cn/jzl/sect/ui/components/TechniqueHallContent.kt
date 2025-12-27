@@ -16,7 +16,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 
-// 功法堂内容
+/**
+ * 功法堂内容组件
+ * 
+ * 显示功法堂的详细信息和操作界面，包括：
+ * 1. 功法统计（总数、已学习、可学习功法数量）
+ * 2. 功法分类与筛选
+ * 3. 功法列表表格
+ * 4. 功法详情
+ * 5. 修炼进度追踪
+ */
 @Composable
 fun TechniqueHallContent() {
     TerminalCard(
