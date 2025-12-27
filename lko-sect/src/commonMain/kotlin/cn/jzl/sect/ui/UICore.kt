@@ -7,6 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.State
+import androidx.compose.ui.graphics.colorspace.Connector
+import androidx.compose.ui.unit.Constraints
 import cn.jzl.di.instance
 import cn.jzl.ecs.Components
 import cn.jzl.ecs.Entity
@@ -21,6 +23,7 @@ import cn.jzl.ecs.query.forEach
 import cn.jzl.ecs.relations
 import cn.jzl.sect.currentWorld
 import cn.jzl.sect.uiWorldContext
+
 /**
  * 基础状态观察者抽象类
  *
@@ -111,11 +114,10 @@ internal class EntityStateObserver(
     private val provider: EntityRelationContext.() -> Entity?
 ) : BaseStateObserver(world) {
 
-    val entityState = mutableStateOf(Entity.ENTITY_INVALID)
+    val entityState = mutableStateOf(provider())
 
     override fun createObserver(): Observer {
         val queryFilter = this.query
-        entityState.value = provider() ?: Entity.ENTITY_INVALID
         // 创建 Observer 监听后续变化
         return world.observe {
             yield(relations.id<Components.OnEntityCreated>())
@@ -124,7 +126,8 @@ internal class EntityStateObserver(
         }.let {
             if (queryFilter != null) it.filter(queryFilter) else it
         }.exec {
-            if (queryFilter == null || entityState.value !in queryFilter) {
+            val entity = entityState.value
+            if (queryFilter == null || entity == null || entity !in queryFilter) {
                 entityState.value = provider() ?: Entity.ENTITY_INVALID
             }
         }
@@ -141,27 +144,12 @@ internal class RelationStateObserver<T>(
     world: World,
     val entity: Entity,
     private val relation: Relation,
-    private val defaultValue: T,
     private val provider: EntityRelationContext.(Entity) -> T
 ) : BaseStateObserver(world) {
 
-    val dataState = mutableStateOf(defaultValue)
+    val dataState = mutableStateOf(provider(entity))
 
     override fun createObserver(): Observer {
-        // 如果实体无效，设置默认值并返回空观察者
-        if (entity == Entity.ENTITY_INVALID) {
-            dataState.value = defaultValue
-            // 返回一个空的观察者，不会触发任何更新
-            return world.observe {
-                // 不监听任何事件
-            }.exec {
-                // 空执行
-            }
-        }
-
-        // 初始化数据
-        dataState.value = provider(entity)
-
         return world.observe(entity) {
             yield(relations.id<Components.OnInserted>())
             yield(relations.id<Components.OnUpdated>())
@@ -220,10 +208,11 @@ fun observeEntityList(query: Query<out EntityQueryContext>): SnapshotStateList<E
 @Composable
 fun observeEntity(
     query: Query<*>? = null,
+    vararg keys: Any?,
     provider: EntityRelationContext.() -> Entity?
-): State<Entity> {
+): State<Entity?> {
     val worldContext = uiWorldContext
-    val observer = remember(worldContext, query) {
+    val observer = remember(worldContext, query, *keys) {
         EntityStateObserver(worldContext.world, query, provider)
     }
     return observer.entityState
@@ -235,15 +224,14 @@ fun observeEntity(
  * 自动监听关系变化并更新状态
  *
  * @param target 目标实体
- * @param defaultValue 默认值
  * @return 关系值状态
  */
 @Composable
-inline fun <reified C> Entity.observeRelation(target: Entity, defaultValue: C): State<C> {
+inline fun <reified C> Entity.observeRelation(target: Entity): State<C> {
     val worldContext = uiWorldContext
     val observer = remember(worldContext, this, target) {
         val relation = worldContext.relations.relation<C>(target)
-        RelationStateObserver(worldContext.world, this, relation, defaultValue) {
+        RelationStateObserver(worldContext.world, this, relation) {
             it.getRelation<C>(target)
         }
     }
@@ -255,17 +243,45 @@ inline fun <reified C> Entity.observeRelation(target: Entity, defaultValue: C): 
  *
  * 自动监听组件变化并更新状态
  *
- * @param defaultValue 默认值
  * @return 组件值状态
  */
 @Composable
-inline fun <reified C> Entity.observeComponent(defaultValue: C): State<C> {
+inline fun <reified C> Entity.observeComponent(): State<C> {
     val worldContext = uiWorldContext
     val observer = remember(worldContext, this, C::class) {
         val relation = worldContext.relations.component<C>()
-        RelationStateObserver(worldContext.world, this, relation, defaultValue) {
-            it.getComponent()
+        RelationStateObserver(worldContext.world, this, relation) {
+            it.getComponent<C>()
         }
     }
     return observer.dataState
+}
+
+@Composable
+inline fun <reified E : EntityQueryContext, reified R> Query<E>.observeState(
+    vararg keys: Array<out Any?>,
+    noinline transform: (Query<E>) -> R
+): State<R> {
+    val worldContext = uiWorldContext
+    val observer = remember(worldContext, this, *keys) {
+        QueryStateObserver(this, transform)
+    }
+    return observer.result
+}
+
+@PublishedApi
+internal class QueryStateObserver<E : EntityQueryContext, R>(
+    private val query: Query<E>,
+    private val transform: (Query<E>) -> R
+) : BaseStateObserver(query.world) {
+
+    val result = mutableStateOf(transform(query))
+
+    override fun createObserver(): Observer {
+        return world.observe {
+            yield(relations.id<Components.OnInserted>())
+            yield(relations.id<Components.OnUpdated>())
+            yield(relations.id<Components.OnRemoved>())
+        }.filter(query).exec { result.value = transform(query) }
+    }
 }

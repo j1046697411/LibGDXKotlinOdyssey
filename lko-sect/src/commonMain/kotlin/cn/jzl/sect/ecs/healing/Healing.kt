@@ -16,7 +16,7 @@ import cn.jzl.sect.ecs.item.itemAddon
 
 /**
  * 治疗系统包，包含治疗组件、服务和addon配置
- * 
+ *
  * 主要功能：
  * 1. 定义治疗量组件
  * 2. 提供生命值管理服务
@@ -27,7 +27,7 @@ import cn.jzl.sect.ecs.item.itemAddon
 /**
  * 治疗量组件
  * 用于表示物品或技能的治疗效果量
- * 
+ *
  * @param value 治疗量值
  */
 @JvmInline
@@ -36,7 +36,7 @@ value class HealingAmount(val value: Long)
 /**
  * 生命值服务
  * 管理实体的生命值系统
- * 
+ *
  * @param world ECS世界实例
  */
 class HealthService(world: World) : EntityRelationContext(world) {
@@ -48,7 +48,7 @@ class HealthService(world: World) : EntityRelationContext(world) {
      * 懒加载，确保在需要时才创建
      */
     val attributeCurrentHealth by lazy { attributeService.attribute(ATTRIBUTE_CURRENT_HEALTH) }
-    
+
     /**
      * 最大生命值属性
      * 懒加载，确保在需要时才创建
@@ -72,7 +72,7 @@ class HealthService(world: World) : EntityRelationContext(world) {
 
     /**
      * 初始化实体的生命值
-     * 
+     *
      * @param context 实体创建上下文
      * @param entity 目标实体
      * @param maxHealth 最大生命值，默认100
@@ -92,7 +92,7 @@ class HealthService(world: World) : EntityRelationContext(world) {
 
     /**
      * 获取实体的当前生命值
-     * 
+     *
      * @param entity 目标实体
      * @return 当前生命值，默认为0
      */
@@ -102,7 +102,7 @@ class HealthService(world: World) : EntityRelationContext(world) {
 
     /**
      * 获取实体的最大生命值
-     * 
+     *
      * @param entity 目标实体
      * @return 最大生命值，默认为0
      */
@@ -112,7 +112,7 @@ class HealthService(world: World) : EntityRelationContext(world) {
 
     /**
      * 对实体造成伤害
-     * 
+     *
      * @param entity 目标实体
      * @param amount 伤害量
      * @throws IllegalArgumentException 如果伤害量小于等于0
@@ -128,7 +128,7 @@ class HealthService(world: World) : EntityRelationContext(world) {
 
     /**
      * 治疗实体
-     * 
+     *
      * @param entity 目标实体
      * @param amount 治疗量
      * @throws IllegalArgumentException 如果治疗量小于等于0
@@ -145,7 +145,7 @@ class HealthService(world: World) : EntityRelationContext(world) {
 
     /**
      * 使用治疗物品
-     * 
+     *
      * @param entity 使用物品的实体
      * @param itemPrefab 治疗物品预制体
      * @return 是否成功使用物品
@@ -186,11 +186,11 @@ val healthAddon = createAddon("health") {
     install(itemAddon)
     install(inventoryAddon)
 
-    injects { 
+    injects {
         this bind singleton { new(::HealthService) }
     }
 
-    components { 
+    components {
         world.componentId<HealingAmount>()
     }
 }

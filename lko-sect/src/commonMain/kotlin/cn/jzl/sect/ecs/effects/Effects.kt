@@ -18,7 +18,7 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * 效果系统包，包含效果组件、服务和addon配置
- * 
+ *
  * 主要功能：
  * 1. 定义各种类型的效果及其行为
  * 2. 提供效果应用、更新和移除机制
@@ -36,7 +36,7 @@ sealed class Effect
 /**
  * 效果应用时间组件
  * 记录效果被应用的游戏时间
- * 
+ *
  * @param gameTime 效果被应用的游戏时间
  */
 @JvmInline
@@ -45,7 +45,7 @@ value class AppliedTime(val gameTime: Duration)
 /**
  * 效果上次触发时间组件
  * 记录周期性效果上次触发的时间和次数
- * 
+ *
  * @param gameTime 上次触发的游戏时间
  * @param tickCount 触发次数
  */
@@ -61,18 +61,25 @@ data class LastTickTime(
 enum class EffectType {
     /** 增益效果 */
     BUFF,
+
     /** 减益效果 */
     DEBUFF,
+
     /** 治疗效果 */
     HEAL,
+
     /** 伤害效果 */
     DAMAGE,
+
     /** 属性修改效果 */
     STAT_MOD,
+
     /** 状态效果 */
     STATUS,
+
     /** 可驱散效果 */
     DISPELLABLE,
+
     /** 永久效果 */
     PERMANENT
 }
@@ -80,7 +87,7 @@ enum class EffectType {
 /**
  * 触发间隔组件
  * 定义周期性效果的触发间隔
- * 
+ *
  * @param duration 触发间隔时长
  */
 @JvmInline
@@ -91,26 +98,29 @@ value class TickInterval(val duration: Duration) {
     companion object {
         /**
          * 创建指定秒数的触发间隔
-         * 
+         *
          * @param s 秒数
          * @return TickInterval实例
          */
         fun seconds(s: Int) = TickInterval(s.seconds)
+
         /**
          * 创建指定秒数（小数）的触发间隔
-         * 
+         *
          * @param s 秒数
          * @return TickInterval实例
          */
         fun seconds(s: Double) = TickInterval(s.seconds)
+
         /**
          * 创建指定分钟数的触发间隔
-         * 
+         *
          * @param m 分钟数
          * @return TickInterval实例
          */
         fun minutes(m: Int) = TickInterval(m.minutes)
     }
+
     /**
      * 转换为整秒数
      */
@@ -124,8 +134,10 @@ value class TickInterval(val duration: Duration) {
 enum class StackBehavior {
     /** 不堆叠，新效果替换旧效果 */
     NONE,
+
     /** 刷新持续时间 */
     REFRESH_DURATION,
+
     /** 增加堆叠次数 */
     INCREMENT_STACK
 }
@@ -133,7 +145,7 @@ enum class StackBehavior {
 /**
  * 效果堆叠配置
  * 定义效果的堆叠规则
- * 
+ *
  * @param maxStacks 最大堆叠次数，默认1
  * @param currentStacks 当前堆叠次数，默认1
  * @param stackBehavior 堆叠行为，默认NONE
@@ -156,8 +168,10 @@ data class EffectStack(
 enum class ModifierType {
     /** 加法修饰 */
     ADD,
+
     /** 乘法修饰 */
     MULTIPLY,
+
     /** 赋值修饰 */
     SET
 }
@@ -165,7 +179,7 @@ enum class ModifierType {
 /**
  * 属性修饰器
  * 定义对特定属性的修饰
- * 
+ *
  * @param attribute 目标属性实体
  * @param modifierType 修饰类型
  * @param value 修饰值
@@ -184,15 +198,15 @@ data class AttributeModifier(
 
 /**
  * 加法属性修饰组件
- * 
+ *
  * @param value 加法修饰值
  */
 @JvmInline
-value class AddAttributeModifier(val  value: Long)
+value class AddAttributeModifier(val value: Long)
 
 /**
  * 乘法属性修饰组件
- * 
+ *
  * @param value 乘法修饰值
  */
 @JvmInline
@@ -200,7 +214,7 @@ value class MultiplyAttributeModifier(val value: Double)
 
 /**
  * 赋值属性修饰组件
- * 
+ *
  * @param value 赋值修饰值
  */
 @JvmInline
@@ -213,12 +227,16 @@ value class AssignmentAttributeModifier(val value: Long)
 enum class RemovalReason {
     /** 效果过期 */
     EXPIRED,
+
     /** 效果被驱散 */
     DISPELLED,
+
     /** 手动移除 */
     MANUAL,
+
     /** 效果出错 */
     ERROR,
+
     /** 目标死亡 */
     TARGET_DIED
 }
@@ -226,7 +244,7 @@ enum class RemovalReason {
 /**
  * 效果应用事件
  * 当效果被应用时触发
- * 
+ *
  * @param effect 效果实体
  * @param target 目标实体
  * @param source 来源实体，可为空
@@ -242,7 +260,7 @@ data class OnEffectApplied(
 /**
  * 效果移除事件
  * 当效果被移除时触发
- * 
+ *
  * @param effect 效果实体
  * @param target 目标实体
  * @param reason 移除原因，默认EXPIRED
@@ -258,7 +276,7 @@ data class OnEffectRemoved(
 /**
  * 效果触发事件
  * 当周期性效果触发时触发
- * 
+ *
  * @param effect 效果实体
  * @param target 目标实体
  * @param tickCount 触发次数
@@ -278,12 +296,16 @@ data class OnEffectTick(
 enum class StatusEffectType {
     /** 眩晕效果 */
     STUN,
+
     /** 沉默效果 */
     SILENCE,
+
     /** 定身效果 */
     ROOT,
+
     /** 中毒效果 */
     POISON,
+
     /** 流血效果 */
     BLEED
 }
@@ -291,7 +313,7 @@ enum class StatusEffectType {
 /**
  * 状态效果数据类
  * 定义状态效果的属性
- * 
+ *
  * @param type 状态效果类型
  * @param duration 效果持续时间，可为空
  * @param damagePerTick 每秒伤害，默认0
@@ -309,7 +331,7 @@ data class StatusEffect(
     companion object {
         /**
          * 创建眩晕效果
-         * 
+         *
          * @param duration 持续时间
          * @return StatusEffect实例
          */
@@ -317,9 +339,10 @@ data class StatusEffect(
             type = StatusEffectType.STUN,
             duration = duration
         )
+
         /**
          * 创建沉默效果
-         * 
+         *
          * @param duration 持续时间
          * @return StatusEffect实例
          */
@@ -327,9 +350,10 @@ data class StatusEffect(
             type = StatusEffectType.SILENCE,
             duration = duration
         )
+
         /**
          * 创建定身效果
-         * 
+         *
          * @param duration 持续时间
          * @return StatusEffect实例
          */
@@ -337,9 +361,10 @@ data class StatusEffect(
             type = StatusEffectType.ROOT,
             duration = duration
         )
+
         /**
          * 创建中毒效果
-         * 
+         *
          * @param damagePerTick 每秒伤害
          * @param tickInterval 触发间隔
          * @param duration 持续时间
@@ -351,9 +376,10 @@ data class StatusEffect(
             damagePerTick = damagePerTick,
             tickInterval = tickInterval
         )
+
         /**
          * 创建流血效果
-         * 
+         *
          * @param damagePerTick 每秒伤害
          * @param tickInterval 触发间隔
          * @param duration 持续时间
@@ -401,13 +427,13 @@ sealed class Bleeding
 /**
  * 效果应用异常
  * 当效果应用失败时抛出
- * 
+ *
  * @param message 异常信息
  */
 sealed class EffectApplicationException(message: String) : Exception(message) {
     /**
      * 等级要求未满足
-     * 
+     *
      * @param required 所需等级
      * @param actual 实际等级
      */
@@ -417,9 +443,10 @@ sealed class EffectApplicationException(message: String) : Exception(message) {
     ) : EffectApplicationException(
         "Level requirement not met: required $required, actual $actual"
     )
+
     /**
      * 缺少必需效果
-     * 
+     *
      * @param required 必需效果实体
      */
     data class MissingRequiredEffect(
@@ -427,9 +454,10 @@ sealed class EffectApplicationException(message: String) : Exception(message) {
     ) : EffectApplicationException(
         "Missing required effect: $required"
     )
+
     /**
      * 存在不兼容效果
-     * 
+     *
      * @param incompatible 不兼容效果实体
      */
     data class IncompatibleEffectPresent(
@@ -437,9 +465,10 @@ sealed class EffectApplicationException(message: String) : Exception(message) {
     ) : EffectApplicationException(
         "Incompatible effect present: $incompatible"
     )
+
     /**
      * 无效目标
-     * 
+     *
      * @param target 无效目标实体
      */
     data class InvalidTarget(
@@ -447,9 +476,10 @@ sealed class EffectApplicationException(message: String) : Exception(message) {
     ) : EffectApplicationException(
         "Invalid target: $target"
     )
+
     /**
      * 已达到最大堆叠次数
-     * 
+     *
      * @param effectPrefab 效果预制体
      * @param maxStacks 最大堆叠次数
      */
@@ -614,6 +644,7 @@ object EffectActionEffects {
             stateWriter.setValue(EffectCountKey(effectPrefab), currentCount + 1)
         }
     }
+
     fun removeEffect(effectPrefab: Entity): ActionEffect {
         return ActionEffect { stateWriter, agent ->
             val currentCount = stateWriter.getValue(agent, EffectCountKey(effectPrefab))
@@ -624,23 +655,27 @@ object EffectActionEffects {
             }
         }
     }
+
     fun modifyAttribute(attributeKey: cn.jzl.sect.ecs.AttributeKey, value: Long): ActionEffect {
         return ActionEffect { stateWriter, agent ->
             val currentValue = stateWriter.getValue(agent, attributeKey)
             stateWriter.setValue(attributeKey, currentValue + value)
         }
     }
+
     fun setStatus(statusType: StatusEffectType, value: Boolean): ActionEffect {
         return ActionEffect { stateWriter, agent ->
             stateWriter.setValue(IsStatusAffectedKey(statusType), value)
         }
     }
+
     fun incrementStack(effectPrefab: Entity, stacks: Int = 1): ActionEffect {
         return ActionEffect { stateWriter, agent ->
             val currentCount = stateWriter.getValue(agent, EffectCountKey(effectPrefab))
             stateWriter.setValue(EffectCountKey(effectPrefab), currentCount + stacks)
         }
     }
+
     fun dispelEffects(effectPrefab: Entity? = null, maxCount: Int = Int.MAX_VALUE): ActionEffect {
         return ActionEffect { stateWriter, agent ->
             if (effectPrefab != null) {
@@ -662,26 +697,31 @@ object EffectConditions {
             stateProvider.getValue(agent, HasEffectKey(effectPrefab))
         }
     }
+
     fun hasEffectCount(effectPrefab: Entity, minCount: Int): Precondition {
         return Precondition { stateProvider, agent ->
             stateProvider.getValue(agent, EffectCountKey(effectPrefab)) >= minCount
         }
     }
+
     fun canApplyEffect(effectPrefab: Entity): Precondition {
         return Precondition { stateProvider, agent ->
             true
         }
     }
+
     fun isAffectedBy(statusType: StatusEffectType): Precondition {
         return Precondition { stateProvider, agent ->
             stateProvider.getValue(agent, IsStatusAffectedKey(statusType))
         }
     }
+
     fun notHasEffect(effectPrefab: Entity): Precondition {
         return Precondition { stateProvider, agent ->
             !stateProvider.getValue(agent, HasEffectKey(effectPrefab))
         }
     }
+
     fun notAffectedBy(statusType: StatusEffectType): Precondition {
         return Precondition { stateProvider, agent ->
             !stateProvider.getValue(agent, IsStatusAffectedKey(statusType))
@@ -705,6 +745,7 @@ class EffectService(world: World) : EntityRelationContext(world) {
         }
         configure(it)
     }
+
     @ECSDsl
     fun applyEffect(
         target: Entity,
@@ -746,6 +787,7 @@ class EffectService(world: World) : EntityRelationContext(world) {
         )
         return effectInstance
     }
+
     fun removeEffect(
         effect: Entity,
         reason: RemovalReason = RemovalReason.MANUAL,
@@ -771,12 +813,15 @@ class EffectService(world: World) : EntityRelationContext(world) {
         }
         world.destroy(effect)
     }
+
     fun getActiveEffects(target: Entity): QueryStream<ActiveEffectContext> {
         return world.query { ActiveEffectContext(this) }.filter { this.target == target }
     }
+
     fun hasEffect(target: Entity, effectPrefab: Entity): Boolean {
         return getActiveEffects(target).any { this.effectPrefab == effectPrefab }
     }
+
     fun getEffectCount(
         target: Entity,
         effectPrefab: Entity? = null
@@ -788,18 +833,21 @@ class EffectService(world: World) : EntityRelationContext(world) {
             activeEffects.count { this.effectPrefab == effectPrefab }
         }
     }
+
     fun getEffectsByType(
         target: Entity,
         type: EffectType
     ): QueryStream<ActiveEffectContext> {
         return getActiveEffects(target).filter { this.effectType == type }
     }
+
     fun getEffectsBySource(
         target: Entity,
         source: Entity
     ): QueryStream<ActiveEffectContext> {
         return getActiveEffects(target).filter { this.source == source }
     }
+
     fun dispelEffects(
         target: Entity,
         dispelType: EffectType? = null,
@@ -816,6 +864,7 @@ class EffectService(world: World) : EntityRelationContext(world) {
         }
         return count
     }
+
     fun updateEffects(deltaTime: Float, gameTime: Duration = Duration.ZERO) {
         val effectsToRemove = mutableListOf<Entity>()
         val errorEffects = mutableListOf<Pair<Entity, Exception>>()
@@ -848,8 +897,10 @@ class EffectService(world: World) : EntityRelationContext(world) {
             }
         }
     }
+
     fun tickPeriodicEffects(gameTime: Duration) {
         data class TickUpdate(val effect: Entity, val target: Entity, val tickCount: Int)
+
         val tickUpdates = mutableListOf<TickUpdate>()
         val errorEffects = mutableListOf<Pair<Entity, Exception>>()
         world.query { PeriodicEffectContext(this) }.forEach {
@@ -900,9 +951,11 @@ class EffectService(world: World) : EntityRelationContext(world) {
             }
         }
     }
+
     private fun checkStackable(target: Entity, effectPrefab: Entity): Entity? {
         return getActiveEffects(target).filter { effectPrefab == this.effectPrefab }.map { entity }.firstOrNull()
     }
+
     private fun handleStacking(
         existingEffect: Entity,
         effectPrefab: Entity,
@@ -913,6 +966,7 @@ class EffectService(world: World) : EntityRelationContext(world) {
             StackBehavior.NONE -> {
                 throw EffectApplicationException.MaxStacksReached(effectPrefab, stackConfig.maxStacks)
             }
+
             StackBehavior.REFRESH_DURATION -> {
                 val newDuration = durationOverride ?: effectPrefab.getComponent<Duration?>()
                 if (newDuration != null) {
@@ -922,6 +976,7 @@ class EffectService(world: World) : EntityRelationContext(world) {
                 }
                 return existingEffect
             }
+
             StackBehavior.INCREMENT_STACK -> {
                 val currentStack = existingEffect.getComponent<EffectStack?>()
                 val currentStacks = currentStack?.currentStacks ?: 1
@@ -940,6 +995,7 @@ class EffectService(world: World) : EntityRelationContext(world) {
             }
         }
     }
+
     private fun applyStatusEffect(effectInstance: Entity, target: Entity) {
         val statusEffect = effectInstance.getComponent<StatusEffect?>() ?: return
         world.entity(target) {
@@ -952,6 +1008,7 @@ class EffectService(world: World) : EntityRelationContext(world) {
             }
         }
     }
+
     private fun removeStatusEffect(effectInstance: Entity, target: Entity) {
         val statusEffect = effectInstance.getComponent<StatusEffect?>() ?: return
         world.entity(target) {

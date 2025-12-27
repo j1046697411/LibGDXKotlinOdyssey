@@ -1,6 +1,6 @@
 /**
  * 资源系统模块，负责管理宗门的各种资源类型和资源实体。
- * 
+ *
  * 资源包括基础物质资源（粮食、布料、木材等）和人力/人口资源（凡俗百姓、宗门杂役、外门弟子）。
  * 资源系统与物品系统深度集成，所有资源都是可堆叠的物品。
  */
@@ -33,7 +33,7 @@ import cn.jzl.sect.ecs.item.itemAddon
 
 /**
  * 资源系统插件，用于注册资源相关的组件、服务和依赖注入。
- * 
+ *
  * 该插件负责：
  * - 安装物品系统插件
  * - 注册资源类为标签组件
@@ -44,22 +44,26 @@ val resourcesAddon = createAddon("resources") {
     injects { this bind singleton { new(::Resources) } }
     entities {
         world.componentId<Resource> { it.tag() }
+        world.componentId<ResourceIcon>()
     }
 }
 
 /**
  * 资源标签组件，用于标识实体为资源。
- * 
+ *
  * 所有资源实体都必须添加此标签，以便资源系统进行管理和识别。
  */
 sealed class Resource
 
+@JvmInline
+value class ResourceIcon(val icon: String)
+
 /**
  * 资源服务类，负责创建和管理各种资源预制体。
- * 
+ *
  * 该服务提供了宗门所需的各种资源预制体，包括物质资源和人力资源。
  * 所有资源都是通过物品系统创建的可堆叠物品。
- * 
+ *
  * @property world ECS世界实例
  */
 class Resources(world: World) : EntityRelationContext(world) {
@@ -67,45 +71,81 @@ class Resources(world: World) : EntityRelationContext(world) {
     private val itemService by world.di.instance<ItemService>()
 
     /** 粮食资源预制体，用于宗门弟子饮食和杂役俸禄 */
-    val foodPrefab: Entity by lazy { createResourcePrefab(Named("food")) }
+    val foodPrefab: Entity by lazy {
+        createResourcePrefab(Named("food")) {
+            it.addComponent(ResourceIcon("🌾"))
+        }
+    }
 
     /** 布料资源预制体，用于弟子衣物和宗门装饰 */
-    val clothPrefab: Entity by lazy { createResourcePrefab(Named("cloth")) }
+    val clothPrefab: Entity by lazy {
+        createResourcePrefab(Named("cloth")) {
+            it.addComponent(ResourceIcon("👕"))
+        }
+    }
 
     /** 木材资源预制体，用于设施建设和家具制造 */
-    val woodPrefab: Entity by lazy { createResourcePrefab(Named("wood")) }
+    val woodPrefab: Entity by lazy {
+        createResourcePrefab(Named("wood")) {
+            it.addComponent(ResourceIcon("🌲"))
+        }
+    }
 
     /** 矿石资源预制体，用于设施建设和武器打造 */
-    val stonePrefab: Entity by lazy { createResourcePrefab(Named("stone")) }
+    val stonePrefab: Entity by lazy {
+        createResourcePrefab(Named("stone")) {
+            it.addComponent(ResourceIcon("⛏️"))
+        }
+    }
 
     /** 灵石资源预制体，用于修炼加速和高级交易 */
-    val spiritStonePrefab: Entity by lazy { createResourcePrefab(Named("spirit_stone")) }
+    val spiritStonePrefab: Entity by lazy {
+        createResourcePrefab(Named("spirit_stone")) {
+            it.addComponent(ResourceIcon("💎"))
+        }
+    }
 
     /** 草药资源预制体，用于炼制丹药和治疗 */
-    val medicineHerbPrefab: Entity by lazy { createResourcePrefab(Named("medicine_herb")) }
+    val medicineHerbPrefab: Entity by lazy {
+        createResourcePrefab(Named("medicine_herb")) {
+            it.addComponent(ResourceIcon("🌿"))
+        }
+    }
 
     /** 凡俗百姓资源预制体，提供基础劳动力和资源 */
-    val ordinaryPeoplePrefab: Entity by lazy { createResourcePrefab(Named("ordinary_people")) }
+    val ordinaryPeoplePrefab: Entity by lazy {
+        createResourcePrefab(Named("ordinary_people")) {
+            it.addComponent(ResourceIcon("👨‍🌾"))
+        }
+    }
 
     /** 宗门杂役资源预制体，负责宗门日常维护和基础建设 */
-    val sectServantsPrefab: Entity by lazy { createResourcePrefab(Named("sect_servants")) }
+    val sectServantsPrefab: Entity by lazy {
+        createResourcePrefab(Named("sect_servants")) {
+            it.addComponent(ResourceIcon("👷"))
+        }
+    }
 
     /** 外门弟子资源预制体，执行基础任务和资源采集 */
-    val outerDisciplesPrefab: Entity by lazy { createResourcePrefab(Named("outer_disciples")) }
+    val outerDisciplesPrefab: Entity by lazy {
+        createResourcePrefab(Named("outer_disciples")) {
+            it.addComponent(ResourceIcon("🧑‍"))
+        }
+    }
 
     /** 宗门贡献点资源预制体，宗门内部交易货币 */
     val sectContributionPointsPrefab: Entity by lazy { createResourcePrefab(Named("sect_contribution_points")) }
 
     /**
      * 创建资源预制体的内部方法。
-     * 
+     *
      * @param named 资源名称组件
      * @param block 可选的额外配置块，用于自定义资源属性
      * @return 创建的资源实体
      */
     private fun createResourcePrefab(
         named: Named,
-        block: Entity.() -> Unit = {}
+        block: EntityCreateContext.(Entity) -> Unit = {}
     ): Entity = itemService.itemPrefab(named) {
         it.addTag<Stackable>()
         it.addTag<Resource>()

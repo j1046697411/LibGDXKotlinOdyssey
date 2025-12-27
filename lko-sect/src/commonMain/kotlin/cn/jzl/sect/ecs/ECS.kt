@@ -25,7 +25,7 @@ import cn.jzl.sect.ecs.planning.increase
 
 /**
  * ECS系统核心文件，包含各种行动提供者和状态解析器
- * 
+ *
  * 主要功能：
  * 1. 提供物品使用行动
  * 2. 实现物品数量和属性的状态解析
@@ -35,7 +35,7 @@ import cn.jzl.sect.ecs.planning.increase
 /**
  * 物品行动提供者
  * 负责为可使用的物品提供行动选项
- * 
+ *
  * @param world ECS世界实例
  */
 class ItemActionProvider(world: World) : ActionProvider, EntityRelationContext(world) {
@@ -47,7 +47,7 @@ class ItemActionProvider(world: World) : ActionProvider, EntityRelationContext(w
 
     /**
      * 获取指定代理可以执行的物品相关行动
-     * 
+     *
      * @param stateProvider 世界状态读取器，用于获取当前状态
      * @param agent 执行行动的代理实体
      * @return 可执行的行动序列
@@ -63,7 +63,7 @@ class ItemActionProvider(world: World) : ActionProvider, EntityRelationContext(w
     /**
      * 物品使用行动
      * 表示使用特定物品的行动
-     * 
+     *
      * @param world ECS世界实例
      * @param itemPrefab 物品预制体
      * @param inventoryService 库存服务
@@ -119,7 +119,7 @@ class ItemActionProvider(world: World) : ActionProvider, EntityRelationContext(w
         /**
          * 行动执行任务
          * 从代理的库存中移除1个物品
-         * 
+         *
          * @param agent 执行行动的代理实体
          */
         override val task: suspend World.(Entity) -> Unit = { agent ->
@@ -136,7 +136,7 @@ class ItemActionProvider(world: World) : ActionProvider, EntityRelationContext(w
 /**
  * 物品数量状态键
  * 用于标识特定物品的数量状态
- * 
+ *
  * @param itemPrefab 物品预制体
  */
 @JvmInline
@@ -145,15 +145,15 @@ value class ItemAmountKey(val itemPrefab: Entity) : StateKey<Int>
 /**
  * 物品数量状态解析器
  * 负责解析实体拥有的特定物品数量
- * 
+ *
  * @param world ECS世界实例
  */
 class ItemAmountStateResolver(world: World) : StateResolver<ItemAmountKey, Int> {
     private val inventoryService by world.di.instance<InventoryService>()
-    
+
     /**
      * 获取指定代理拥有的特定物品数量
-     * 
+     *
      * @param agent 代理实体
      * @param key 物品数量状态键
      * @return 物品数量
@@ -166,7 +166,7 @@ class ItemAmountStateResolver(world: World) : StateResolver<ItemAmountKey, Int> 
 /**
  * 物品状态解析器注册表
  * 管理物品相关的状态解析器
- * 
+ *
  * @param world ECS世界实例
  */
 class ItemStateResolverRegistry(world: World) : StateResolverRegistry {
@@ -174,7 +174,7 @@ class ItemStateResolverRegistry(world: World) : StateResolverRegistry {
 
     /**
      * 获取指定状态键的状态解析器
-     * 
+     *
      * @param key 状态键
      * @return 对应的状态解析器，若不存在则返回null
      */
@@ -188,7 +188,7 @@ class ItemStateResolverRegistry(world: World) : StateResolverRegistry {
 /**
  * 属性状态键
  * 用于标识特定属性的状态
- * 
+ *
  * @param attribute 属性实体
  */
 @JvmInline
@@ -197,7 +197,7 @@ value class AttributeKey(val attribute: Entity) : StateKey<Long>
 /**
  * 属性状态解析器
  * 负责解析实体的属性值
- * 
+ *
  * @param world ECS世界实例
  */
 class AttributeStateResolver(world: World) : StateResolver<AttributeKey, Long> {
@@ -206,7 +206,7 @@ class AttributeStateResolver(world: World) : StateResolver<AttributeKey, Long> {
 
     /**
      * 获取指定代理的特定属性值
-     * 
+     *
      * @param agent 代理实体
      * @param key 属性状态键
      * @return 属性值，若不存在则返回0
@@ -219,7 +219,7 @@ class AttributeStateResolver(world: World) : StateResolver<AttributeKey, Long> {
 /**
  * 属性状态解析器注册表
  * 管理属性相关的状态解析器
- * 
+ *
  * @param world ECS世界实例
  */
 class AttributeStateResolverRegistry(world: World) : StateResolverRegistry {
@@ -227,7 +227,7 @@ class AttributeStateResolverRegistry(world: World) : StateResolverRegistry {
 
     /**
      * 获取指定状态键的状态解析器
-     * 
+     *
      * @param key 状态键
      * @return 对应的状态解析器，若不存在则返回null
      */

@@ -25,7 +25,7 @@ import cn.jzl.sect.ecs.production.resourceProductionAddon
 
 /**
  * 区域系统包，包含区域组件、服务和addon配置
- * 
+ *
  * 主要功能：
  * 1. 定义区域标记和包含关系
  * 2. 提供区域创建和管理服务
@@ -64,7 +64,7 @@ val regionAddon = createAddon("Region") {
 /**
  * 区域服务
  * 管理区域系统的核心功能
- * 
+ *
  * @param world ECS世界实例
  */
 class RegionService(world: World) : EntityRelationContext(world) {
@@ -78,7 +78,7 @@ class RegionService(world: World) : EntityRelationContext(world) {
 
     /**
      * 创建区域
-     * 
+     *
      * @param named 区域名称
      * @param parentRegion 父区域，可为空
      * @param block 资源产出配置块
@@ -96,7 +96,7 @@ class RegionService(world: World) : EntityRelationContext(world) {
 
     /**
      * 获取子区域查询
-     * 
+     *
      * @param region 父区域
      * @return 子区域查询
      */
@@ -106,21 +106,21 @@ class RegionService(world: World) : EntityRelationContext(world) {
 
     /**
      * 获取根区域查询
-     * 
+     *
      * @return 根区域查询
      */
     fun getRootRegion(): Query<RootRegionContext> = rootRegion
 
     /**
      * 获取所有区域查询
-     * 
+     *
      * @return 所有区域查询
      */
     fun getAllRegions(): Query<RegionContext> = regionQuery
 
     /**
      * 区域查询上下文
-     * 
+     *
      * @param world ECS世界实例
      */
     open class RegionContext(world: World) : EntityQueryContext(world) {
@@ -133,7 +133,7 @@ class RegionService(world: World) : EntityRelationContext(world) {
 
     /**
      * 根区域查询上下文
-     * 
+     *
      * @param world ECS世界实例
      */
     open class RootRegionContext(world: World) : RegionContext(world) {
@@ -144,7 +144,7 @@ class RegionService(world: World) : EntityRelationContext(world) {
 
     /**
      * 子区域查询上下文
-     * 
+     *
      * @param world ECS世界实例
      * @param region 父区域
      */

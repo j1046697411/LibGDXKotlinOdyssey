@@ -181,7 +181,7 @@ fun TerminalDivider(
     thickness: Int = 1,
     color: Color = MaterialTheme.colorScheme.outlineVariant
 ) {
-    Divider(
+    HorizontalDivider(
         modifier = modifier,
         thickness = thickness.dp,
         color = color

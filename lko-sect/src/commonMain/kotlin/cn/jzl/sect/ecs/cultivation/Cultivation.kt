@@ -15,7 +15,7 @@ import kotlin.math.min
 
 /**
  * 修炼系统包，包含修炼组件、服务和addon配置
- * 
+ *
  * 主要功能：
  * 1. 定义修炼境界和可修炼实体
  * 2. 提供修炼等级和境界突破机制
@@ -26,7 +26,7 @@ import kotlin.math.min
 /**
  * 修炼境界组件
  * 表示实体的修炼等级
- * 
+ *
  * @param level 修炼等级，用于区分不同境界
  */
 @JvmInline
@@ -52,7 +52,7 @@ val cultivationAddon = createAddon("cultivation") {
     install(coreAddon)
     install(attributeAddon)
     injects { this bind singleton { new(::CultivationService) } }
-    components { 
+    components {
         world.componentId<Cultivation>()
         world.componentId<Breakthrough> { it.tag() }
         world.componentId<Cultivable> {
@@ -65,7 +65,7 @@ val cultivationAddon = createAddon("cultivation") {
 /**
  * 修炼服务
  * 管理修炼系统的核心功能
- * 
+ *
  * @param world ECS世界实例
  */
 class CultivationService(world: World) : EntityRelationContext(world) {
@@ -248,7 +248,7 @@ class CultivationService(world: World) : EntityRelationContext(world) {
 
     /**
      * 创建修炼境界实体
-     * 
+     *
      * @param named 境界名称
      * @param level 境界等级
      * @param breakthrough 是否需要突破
@@ -260,7 +260,7 @@ class CultivationService(world: World) : EntityRelationContext(world) {
             val realmContext = object : RealmContext {
                 /**
                  * 设置境界的寿命
-                 * 
+                 *
                  * @param lifespan 寿命值
                  */
                 override fun lifespan(lifespan: Long) {
@@ -269,7 +269,7 @@ class CultivationService(world: World) : EntityRelationContext(world) {
 
                 /**
                  * 设置境界的最大修炼值
-                 * 
+                 *
                  * @param cultivation 最大修炼值
                  */
                 override fun cultivation(cultivation: Long) {
@@ -285,7 +285,7 @@ class CultivationService(world: World) : EntityRelationContext(world) {
 
     /**
      * 将实体设置为可修炼
-     * 
+     *
      * @param context 实体创建上下文
      * @param entity 目标实体
      * @param level 初始修炼等级，默认为凡人(-1)
@@ -303,7 +303,7 @@ class CultivationService(world: World) : EntityRelationContext(world) {
     /**
      * 增加实体的修炼值
      * 自动处理修炼值溢出和境界提升
-     * 
+     *
      * @param entity 目标实体
      * @param cultivation 要增加的修炼值
      */
@@ -351,7 +351,7 @@ class CultivationService(world: World) : EntityRelationContext(world) {
     /**
      * 尝试突破到下一个境界
      * 只有当修炼值达到当前境界上限时才能突破
-     * 
+     *
      * @param entity 目标实体
      */
     fun breakthrough(entity: Entity) {
@@ -375,14 +375,14 @@ class CultivationService(world: World) : EntityRelationContext(world) {
     interface RealmContext {
         /**
          * 设置境界的寿命
-         * 
+         *
          * @param lifespan 寿命值
          */
         fun lifespan(lifespan: Long)
-        
+
         /**
          * 设置境界的最大修炼值
-         * 
+         *
          * @param cultivation 最大修炼值
          */
         fun cultivation(cultivation: Long)

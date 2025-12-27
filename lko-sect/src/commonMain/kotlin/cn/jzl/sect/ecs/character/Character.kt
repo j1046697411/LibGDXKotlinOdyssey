@@ -14,7 +14,7 @@ import cn.jzl.sect.ecs.upgradeable.levelingAddon
 
 /**
  * 角色系统包，包含角色组件、服务和addon配置
- * 
+ *
  * 主要功能：
  * 1. 定义角色实体标记
  * 2. 提供角色创建服务
@@ -44,7 +44,7 @@ val characterAddon = createAddon("character") {
 /**
  * 角色服务
  * 负责角色的创建和管理
- * 
+ *
  * @param world ECS世界实例
  */
 class CharacterService(world: World) : EntityRelationContext(world) {
@@ -53,7 +53,7 @@ class CharacterService(world: World) : EntityRelationContext(world) {
 
     /**
      * 创建角色实体
-     * 
+     *
      * @param named 角色名称
      * @param block 角色配置块，用于添加额外组件和关系
      * @return 创建的角色实体

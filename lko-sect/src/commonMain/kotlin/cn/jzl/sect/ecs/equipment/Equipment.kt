@@ -1,4 +1,4 @@
-@file:Suppress("unused", "UnusedPrivateMember",)
+@file:Suppress("unused", "UnusedPrivateMember")
 
 package cn.jzl.sect.ecs.equipment
 
@@ -27,7 +27,7 @@ import cn.jzl.sect.ecs.upgradeable.levelingAddon
 
 /**
  * 装备系统包，包含装备组件、服务和addon配置
- * 
+ *
  * 主要功能：
  * 1. 定义装备的基本属性和类型
  * 2. 提供装备创建、装备和卸下功能
@@ -48,8 +48,10 @@ sealed class Equipment
 enum class EquipmentType {
     /** 武器类型 */
     WEAPON,
+
     /** 防具类型 */
     ARMOR,
+
     /** 饰品类型 */
     ACCESSORY
 }
@@ -61,6 +63,7 @@ enum class EquipmentType {
 enum class EquipmentQuality {
     /** 普通品质 */
     COMMON,
+
     /** 稀有品质 */
     RARE
 }
@@ -72,18 +75,25 @@ enum class EquipmentQuality {
 enum class EquipmentSlot {
     /** 武器槽 */
     WEAPON,
+
     /** 头盔槽 */
     HELMET,
+
     /** 胸甲槽 */
     ARMOR,
+
     /** 腿部槽 */
     LEGS,
+
     /** 靴子槽 */
     BOOTS,
+
     /** 手套槽 */
     GLOVES,
+
     /** 饰品1槽 */
     ACCESSORY1,
+
     /** 饰品2槽 */
     ACCESSORY2
 }
@@ -91,13 +101,13 @@ enum class EquipmentSlot {
 /**
  * 装备异常
  * 当装备操作失败时抛出
- * 
+ *
  * @param message 异常信息
  */
 sealed class EquipmentException(message: String) : Exception(message) {
     /**
      * 等级要求未满足
-     * 
+     *
      * @param required 所需等级
      * @param actual 实际等级
      */
@@ -110,7 +120,7 @@ sealed class EquipmentException(message: String) : Exception(message) {
 
     /**
      * 槽位类型不匹配
-     * 
+     *
      * @param equipmentType 装备类型
      * @param slot 装备槽位
      */
@@ -123,7 +133,7 @@ sealed class EquipmentException(message: String) : Exception(message) {
 
     /**
      * 装备不在背包中
-     * 
+     *
      * @param equipment 装备实体
      * @param character 角色实体
      */
@@ -136,7 +146,7 @@ sealed class EquipmentException(message: String) : Exception(message) {
 
     /**
      * 槽位中没有装备
-     * 
+     *
      * @param character 角色实体
      * @param slot 装备槽位
      */
@@ -149,7 +159,7 @@ sealed class EquipmentException(message: String) : Exception(message) {
 
     /**
      * 装备已锁定
-     * 
+     *
      * @param equipment 装备实体
      */
     data class EquipmentLocked(
@@ -160,7 +170,7 @@ sealed class EquipmentException(message: String) : Exception(message) {
 
     /**
      * 装备已装备
-     * 
+     *
      * @param equipment 装备实体
      */
     data class EquipmentEquipped(
@@ -171,7 +181,7 @@ sealed class EquipmentException(message: String) : Exception(message) {
 
     /**
      * 材料不足
-     * 
+     *
      * @param required 所需材料
      * @param actual 实际材料
      */
@@ -184,7 +194,7 @@ sealed class EquipmentException(message: String) : Exception(message) {
 
     /**
      * 强化失败
-     * 
+     *
      * @param equipment 装备实体
      * @param level 强化等级
      */
@@ -203,7 +213,7 @@ sealed class EquipmentException(message: String) : Exception(message) {
 fun interface EquipmentRequirement {
     /**
      * 检查角色是否满足装备需求
-     * 
+     *
      * @param character 角色实体
      * @param equipment 装备实体
      * @return 是否满足需求
@@ -218,7 +228,7 @@ fun interface EquipmentRequirement {
 fun interface EquipmentPrefabContext {
     /**
      * 添加装备属性
-     * 
+     *
      * @param attribute 属性实体
      * @param value 属性值
      */
@@ -228,7 +238,7 @@ fun interface EquipmentPrefabContext {
 /**
  * 装备服务
  * 管理装备系统的核心功能
- * 
+ *
  * @param world ECS世界实例
  */
 class EquipmentService(world: World) : EntityRelationContext(world) {
@@ -240,7 +250,7 @@ class EquipmentService(world: World) : EntityRelationContext(world) {
 
     /**
      * 创建装备预制体
-     * 
+     *
      * @param name 装备名称
      * @param type 装备类型
      * @param equipmentRequirement 装备需求，可为空
@@ -267,7 +277,7 @@ class EquipmentService(world: World) : EntityRelationContext(world) {
 
     /**
      * 检查角色是否可以装备该装备
-     * 
+     *
      * @param character 角色实体
      * @param equipment 装备实体
      * @return 是否可以装备
@@ -281,7 +291,7 @@ class EquipmentService(world: World) : EntityRelationContext(world) {
 
     /**
      * 获取角色特定槽位的装备
-     * 
+     *
      * @param character 角色实体
      * @param slot 装备槽位
      * @return 装备实体，可为空
@@ -292,7 +302,7 @@ class EquipmentService(world: World) : EntityRelationContext(world) {
 
     /**
      * 获取角色所有已装备的装备
-     * 
+     *
      * @param character 角色实体
      * @return 装备槽位到装备实体的映射
      */
@@ -304,7 +314,7 @@ class EquipmentService(world: World) : EntityRelationContext(world) {
 
     /**
      * 装备物品到指定槽位
-     * 
+     *
      * @param character 角色实体
      * @param equipment 装备实体
      * @param slot 装备槽位
@@ -327,7 +337,7 @@ class EquipmentService(world: World) : EntityRelationContext(world) {
 
     /**
      * 从指定槽位卸下装备
-     * 
+     *
      * @param character 角色实体
      * @param slot 装备槽位
      */
@@ -340,7 +350,7 @@ class EquipmentService(world: World) : EntityRelationContext(world) {
 
     /**
      * 检查装备类型与槽位是否兼容
-     * 
+     *
      * @param equipmentType 装备类型
      * @param slot 装备槽位
      * @return 是否兼容
@@ -359,7 +369,7 @@ class EquipmentService(world: World) : EntityRelationContext(world) {
 
     /**
      * 检查装备是否已装备
-     * 
+     *
      * @param character 角色实体
      * @param equipment 装备实体
      * @return 是否已装备
@@ -372,7 +382,7 @@ class EquipmentService(world: World) : EntityRelationContext(world) {
 /**
  * 装备属性提供者
  * 用于提供装备的属性值
- * 
+ *
  * @param world ECS世界实例
  */
 class EquipmentAttributeProvider(world: World) : AttributeProvider, EntityRelationContext(world) {
@@ -381,7 +391,7 @@ class EquipmentAttributeProvider(world: World) : AttributeProvider, EntityRelati
 
     /**
      * 获取装备提供的属性值
-     * 
+     *
      * @param attributeService 属性服务
      * @param entity 角色实体
      * @param attribute 属性实体
@@ -408,7 +418,7 @@ val equipmentAddon = createAddon("equipment") {
     attributes { provider { EquipmentAttributeProvider(this.world) } }
 
     injects { this bind singleton { new(::EquipmentService) } }
-    components { 
+    components {
         world.componentId<EquipmentType>()
         world.componentId<EquipmentQuality>()
         world.componentId<EquipmentRequirement>()

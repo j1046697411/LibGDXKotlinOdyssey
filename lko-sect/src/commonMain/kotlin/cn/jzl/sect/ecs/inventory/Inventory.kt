@@ -20,7 +20,7 @@ import kotlin.math.min
 
 /**
  * 库存系统包，包含库存组件、服务和addon配置
- * 
+ *
  * 主要功能：
  * 1. 定义物品数量组件
  * 2. 提供物品管理服务
@@ -32,7 +32,7 @@ import kotlin.math.min
 /**
  * 物品数量组件
  * 用于表示物品的数量
- * 
+ *
  * @param value 物品数量值
  */
 @JvmInline
@@ -43,6 +43,7 @@ value class Amount(val value: Int) {
     companion object {
         /** 零数量 */
         val zero = Amount(0)
+
         /** 一个数量 */
         val one = Amount(1)
     }
@@ -56,7 +57,7 @@ val inventoryAddon = createAddon("inventory") {
     install(coreAddon)
     install(itemAddon)
     injects { this bind singleton { new(::InventoryService) } }
-    components { 
+    components {
         world.componentId<Amount>()
     }
     planning {
@@ -68,7 +69,7 @@ val inventoryAddon = createAddon("inventory") {
 /**
  * 库存服务
  * 管理实体的物品库存
- * 
+ *
  * @param world ECS世界实例
  */
 class InventoryService(world: World) : EntityRelationContext(world) {
@@ -81,7 +82,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     /**
      * 获取所有者的物品查询
-     * 
+     *
      * @param owner 所有者实体
      * @return 物品查询对象
      */
@@ -91,7 +92,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     /**
      * 根据物品预制体获取所有者的物品
-     * 
+     *
      * @param owner 所有者实体
      * @param itemPrefab 物品预制体
      * @return 物品查询流
@@ -102,7 +103,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     /**
      * 检查实体是否为物品预制体
-     * 
+     *
      * @param itemPrefab 要检查的实体
      * @throws IllegalArgumentException 如果不是物品预制体
      */
@@ -112,7 +113,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     /**
      * 获取所有者的所有物品
-     * 
+     *
      * @param owner 所有者实体
      * @return 物品查询对象
      */
@@ -120,7 +121,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     /**
      * 获取所有者的特定物品数量
-     * 
+     *
      * @param owner 所有者实体
      * @param itemPrefab 物品预制体
      * @return 物品数量
@@ -132,18 +133,18 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     /**
      * 获取所有者的特定物品实例
-     * 
+     *
      * @param owner 所有者实体
      * @param itemPrefab 物品预制体
      * @return 物品实体，可为空
      */
-    fun getItem(owner: Entity, itemPrefab: Entity) : Entity? {
+    fun getItem(owner: Entity, itemPrefab: Entity): Entity? {
         return getOwnerItemsByItemPrefab(owner, itemPrefab).map { entity }.firstOrNull()
     }
 
     /**
      * 获取所有者的特定物品集合
-     * 
+     *
      * @param owner 所有者实体
      * @param itemPrefab 物品预制体
      * @return 物品查询流
@@ -155,7 +156,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     /**
      * 检查所有者是否拥有足够数量的物品
-     * 
+     *
      * @param owner 所有者实体
      * @param itemPrefab 物品预制体
      * @param count 所需数量
@@ -165,7 +166,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     /**
      * 向所有者添加物品
-     * 
+     *
      * @param owner 所有者实体
      * @param itemPrefab 物品预制体
      * @param count 添加数量
@@ -178,16 +179,16 @@ class InventoryService(world: World) : EntityRelationContext(world) {
             val item = getItem(owner, itemPrefab)
             sequenceOf(
                 if (item != null) {
-                world.entity(item) {
-                    it.addComponent(Amount(it.getComponent<Amount>().value + count))
-                }
-                item
-            } else {
-                itemService.item(itemPrefab) {
-                    it.addRelation<OwnedBy>(owner)
-                    it.addComponent(Amount(count))
-                }
-            })
+                    world.entity(item) {
+                        it.addComponent(Amount(it.getComponent<Amount>().value + count))
+                    }
+                    item
+                } else {
+                    itemService.item(itemPrefab) {
+                        it.addRelation<OwnedBy>(owner)
+                        it.addComponent(Amount(count))
+                    }
+                })
         } else {
             val entities = mutableListOf<Entity>()
             repeat(count) {
@@ -201,7 +202,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     /**
      * 从所有者移除物品
-     * 
+     *
      * @param owner 所有者实体
      * @param itemPrefab 物品预制体
      * @param count 移除数量
@@ -242,7 +243,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     /**
      * 消耗所有者的多种物品
-     * 
+     *
      * @param owner 所有者实体
      * @param items 物品及其数量的映射
      * @throws IllegalArgumentException 如果没有足够的物品消耗
@@ -259,7 +260,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
 
     /**
      * 转移物品从提供者到接收者
-     * 
+     *
      * @param provider 物品提供者
      * @param receiver 物品接收者
      * @param item 要转移的物品
@@ -294,7 +295,7 @@ class InventoryService(world: World) : EntityRelationContext(world) {
     /**
      * 实体物品查询上下文
      * 用于查询实体拥有的物品及其属性
-     * 
+     *
      * @param world ECS世界实例
      * @param owner 所有者实体
      */
