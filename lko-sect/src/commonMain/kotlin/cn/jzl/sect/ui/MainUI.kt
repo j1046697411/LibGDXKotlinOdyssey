@@ -6,6 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import cn.jzl.sect.ui.components.BottomStatusBar
 import cn.jzl.sect.ui.components.CentralContentArea
 import cn.jzl.sect.ui.components.LeftMenuBar
@@ -20,13 +21,13 @@ fun MainUI() {
     // 当前选中菜单状态
     var currentMenu by remember { mutableStateOf(MenuOption.ZONGMEN_OVERVIEW) }
 
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
+    TerminalTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
                 // 顶部导航栏
                 TopNavigationBar(modifier = Modifier.fillMaxWidth())
                 // 中间内容区域
-                Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                Row(modifier = Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(1.dp)) {
                     // 左侧菜单栏 - 传递当前菜单和菜单切换回调
                     LeftMenuBar(
                         modifier = Modifier.weight(2f).fillMaxHeight(),
