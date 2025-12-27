@@ -1,4 +1,4 @@
-package cn.jzl.sect.ecs
+package cn.jzl.sect.ecs.upgradeable
 
 import cn.jzl.di.instance
 import cn.jzl.di.new
@@ -6,6 +6,10 @@ import cn.jzl.di.singleton
 import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.observers.emit
+import cn.jzl.sect.ecs.attribute.AttributeService
+import cn.jzl.sect.ecs.attribute.AttributeValue
+import cn.jzl.sect.ecs.attribute.attributeAddon
+import cn.jzl.sect.ecs.core.Named
 
 
 sealed class Upgradeable

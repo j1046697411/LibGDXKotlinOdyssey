@@ -1,4 +1,4 @@
-package cn.jzl.sect.ecs
+package cn.jzl.sect.ecs.attribute
 
 import cn.jzl.di.instance
 import cn.jzl.di.new
@@ -12,7 +12,7 @@ import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.query.associatedBy
 import cn.jzl.ecs.query.query
 import cn.jzl.ecs.system.Phase
-import kotlin.math.max
+import cn.jzl.sect.ecs.core.Named
 import kotlin.math.roundToLong
 import kotlin.random.Random
 

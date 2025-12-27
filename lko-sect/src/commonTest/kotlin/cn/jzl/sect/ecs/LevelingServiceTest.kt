@@ -3,7 +3,13 @@ package cn.jzl.sect.ecs
 import cn.jzl.di.instance
 import cn.jzl.ecs.entity
 import cn.jzl.ecs.world
+import cn.jzl.sect.ecs.attribute.AttributeService
+import cn.jzl.sect.ecs.attribute.AttributeValue
 import cn.jzl.sect.ecs.core.Named
+import cn.jzl.sect.ecs.upgradeable.ExperienceFormula
+import cn.jzl.sect.ecs.upgradeable.LevelingService
+import cn.jzl.sect.ecs.upgradeable.Upgradeable
+import cn.jzl.sect.ecs.upgradeable.levelingAddon
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -165,7 +171,7 @@ class LevelingServiceTest {
      */
     @Test
     fun testCustomExperienceFormula() {
-        val customFormula = ExperienceFormula { level -> level * 50 }
+        val customFormula = cn.jzl.sect.ecs.upgradeable.ExperienceFormula { level -> level * 50 }
 
         val entity = world.entity {
             it.addComponent(Named("测试对象"))

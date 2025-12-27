@@ -1,4 +1,4 @@
-package cn.jzl.sect.ecs
+package cn.jzl.sect.ecs.planning
 
 import cn.jzl.di.instance
 import cn.jzl.di.new

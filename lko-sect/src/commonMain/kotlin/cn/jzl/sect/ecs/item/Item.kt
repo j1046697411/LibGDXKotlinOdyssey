@@ -1,4 +1,4 @@
-package cn.jzl.sect.ecs
+package cn.jzl.sect.ecs.item
 
 import cn.jzl.di.new
 import cn.jzl.di.singleton
@@ -8,6 +8,7 @@ import cn.jzl.ecs.query.ECSDsl
 import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.query.associatedBy
 import cn.jzl.ecs.query.query
+import cn.jzl.sect.ecs.core.Named
 
 
 sealed class Item

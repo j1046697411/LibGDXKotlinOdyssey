@@ -6,6 +6,22 @@ import cn.jzl.di.instance
 import cn.jzl.ecs.Entity
 import cn.jzl.ecs.EntityRelationContext
 import cn.jzl.ecs.World
+import cn.jzl.sect.ecs.attribute.AttributeService
+import cn.jzl.sect.ecs.core.Named
+import cn.jzl.sect.ecs.healing.HealingAmount
+import cn.jzl.sect.ecs.healing.HealthService
+import cn.jzl.sect.ecs.inventory.InventoryService
+import cn.jzl.sect.ecs.item.ItemService
+import cn.jzl.sect.ecs.planning.Action
+import cn.jzl.sect.ecs.planning.ActionEffect
+import cn.jzl.sect.ecs.planning.ActionProvider
+import cn.jzl.sect.ecs.planning.Precondition
+import cn.jzl.sect.ecs.planning.StateKey
+import cn.jzl.sect.ecs.planning.StateResolver
+import cn.jzl.sect.ecs.planning.StateResolverRegistry
+import cn.jzl.sect.ecs.planning.WorldStateReader
+import cn.jzl.sect.ecs.planning.decrease
+import cn.jzl.sect.ecs.planning.increase
 
 class ItemActionProvider(world: World) : ActionProvider, EntityRelationContext(world) {
 

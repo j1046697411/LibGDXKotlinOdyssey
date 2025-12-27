@@ -1,6 +1,6 @@
 @file:Suppress("unused", "UnusedPrivateMember",)
 
-package cn.jzl.sect.ecs
+package cn.jzl.sect.ecs.equipment
 
 import cn.jzl.di.instance
 import cn.jzl.di.new
@@ -10,6 +10,20 @@ import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.query.ECSDsl
 import cn.jzl.ecs.query.firstOrNull
 import cn.jzl.ecs.query.forEach
+import cn.jzl.sect.ecs.inventory.InventoryService
+import cn.jzl.sect.ecs.item.ItemService
+import cn.jzl.sect.ecs.attribute.AttributeProvider
+import cn.jzl.sect.ecs.attribute.AttributeService
+import cn.jzl.sect.ecs.attribute.AttributeValue
+import cn.jzl.sect.ecs.attribute.SectAttributes
+import cn.jzl.sect.ecs.attribute.attributes
+import cn.jzl.sect.ecs.character.characterAddon
+import cn.jzl.sect.ecs.core.Named
+import cn.jzl.sect.ecs.core.OwnedBy
+import cn.jzl.sect.ecs.effects.effectAddon
+import cn.jzl.sect.ecs.inventory.inventoryAddon
+import cn.jzl.sect.ecs.item.itemAddon
+import cn.jzl.sect.ecs.upgradeable.levelingAddon
 
 sealed class Equipment
 

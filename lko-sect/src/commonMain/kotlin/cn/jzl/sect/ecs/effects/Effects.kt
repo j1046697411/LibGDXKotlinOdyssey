@@ -1,4 +1,4 @@
-package cn.jzl.sect.ecs
+package cn.jzl.sect.ecs.effects
 
 import cn.jzl.di.instance
 import cn.jzl.di.new
@@ -7,6 +7,11 @@ import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.observers.emit
 import cn.jzl.ecs.query.*
+import cn.jzl.sect.ecs.AttributeKey
+import cn.jzl.sect.ecs.attribute.AttributeService
+import cn.jzl.sect.ecs.attribute.attributeAddon
+import cn.jzl.sect.ecs.core.Named
+import cn.jzl.sect.ecs.planning.*
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -233,7 +238,7 @@ data class EffectAttributeKey(val effectPrefab: Entity, val attribute: Entity) :
 class EffectAttributeResolver(world: World) : StateResolver<AttributeKey, Long> {
     private val attributeService by world.di.instance<AttributeService>()
     private val effectService by world.di.instance<EffectService>()
-    override fun EntityRelationContext.getWorldState(agent: Entity, key: AttributeKey): Long {
+    override fun EntityRelationContext.getWorldState(agent: Entity, key: cn.jzl.sect.ecs.AttributeKey): Long {
         val baseValue = attributeService.getAttributeValue(agent, key.attribute)?.value ?: 0L
         var addModifierTotalValue = 0L
         var multiplyModifierTotalValue = 1f
@@ -302,7 +307,7 @@ class EffectAttributeKeyResolver(world: World) : StateResolver<EffectAttributeKe
 
 class EffectEnhancedAttributeStateResolverRegistry(world: World) : StateResolverRegistry {
     private val effectAttributeResolver = EffectAttributeResolver(world)
-    private val itemAmountResolver = ItemAmountStateResolver(world)
+    private val itemAmountResolver = _root_ide_package_.cn.jzl.sect.ecs.ItemAmountStateResolver(world)
     private val isStatusAffectedResolver = IsStatusAffectedResolver(world)
     private val effectCountResolver = EffectCountResolver(world)
     private val hasEffectResolver = HasEffectResolver(world)
@@ -310,8 +315,8 @@ class EffectEnhancedAttributeStateResolverRegistry(world: World) : StateResolver
     override fun <K : StateKey<T>, T> getStateHandler(key: K): StateResolver<K, T>? {
         @Suppress("UNCHECKED_CAST")
         return when (key) {
-            is AttributeKey -> effectAttributeResolver as StateResolver<K, T>
-            is ItemAmountKey -> itemAmountResolver as StateResolver<K, T>
+            is cn.jzl.sect.ecs.AttributeKey -> effectAttributeResolver as StateResolver<K, T>
+            is cn.jzl.sect.ecs.ItemAmountKey -> itemAmountResolver as StateResolver<K, T>
             is IsStatusAffectedKey -> isStatusAffectedResolver as StateResolver<K, T>
             is EffectCountKey -> effectCountResolver as StateResolver<K, T>
             is HasEffectKey -> hasEffectResolver as StateResolver<K, T>
@@ -339,7 +344,7 @@ object EffectActionEffects {
             }
         }
     }
-    fun modifyAttribute(attributeKey: AttributeKey, value: Long): ActionEffect {
+    fun modifyAttribute(attributeKey: cn.jzl.sect.ecs.AttributeKey, value: Long): ActionEffect {
         return ActionEffect { stateWriter, agent ->
             val currentValue = stateWriter.getValue(agent, attributeKey)
             stateWriter.setValue(attributeKey, currentValue + value)

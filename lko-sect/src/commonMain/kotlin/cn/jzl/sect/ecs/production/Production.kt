@@ -1,4 +1,4 @@
-package cn.jzl.sect.ecs
+package cn.jzl.sect.ecs.production
 
 import cn.jzl.di.instance
 import cn.jzl.di.new
@@ -10,6 +10,8 @@ import cn.jzl.ecs.World
 import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.componentId
 import cn.jzl.ecs.query.ECSDsl
+import cn.jzl.sect.ecs.inventory.InventoryService
+import cn.jzl.sect.ecs.item.ItemService
 import kotlin.getValue
 import kotlin.sequences.forEach
 

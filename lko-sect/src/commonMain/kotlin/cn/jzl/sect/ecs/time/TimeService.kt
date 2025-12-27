@@ -1,4 +1,4 @@
-package cn.jzl.sect.ecs
+package cn.jzl.sect.ecs.time
 
 import cn.jzl.di.instance
 import cn.jzl.di.new
@@ -12,6 +12,7 @@ import cn.jzl.ecs.entity
 import cn.jzl.ecs.observers.emit
 import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.system.system
+import cn.jzl.sect.ecs.core.coreAddon
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 

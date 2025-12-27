@@ -6,8 +6,12 @@ import cn.jzl.ecs.EntityRelationContext
 import cn.jzl.ecs.World
 import cn.jzl.ecs.system.update
 import cn.jzl.ecs.world
-import cn.jzl.sect.ecs.*
+import cn.jzl.sect.ecs.attribute.attributeAddon
+import cn.jzl.sect.ecs.character.characterAddon
+import cn.jzl.sect.ecs.inventory.inventoryAddon
+import cn.jzl.sect.ecs.resources.resourcesAddon
 import cn.jzl.sect.ecs.sect.sectAddon
+import cn.jzl.sect.ecs.time.timeAddon
 import cn.jzl.sect.ui.MainUI
 import kotlin.time.Duration.Companion.milliseconds
 

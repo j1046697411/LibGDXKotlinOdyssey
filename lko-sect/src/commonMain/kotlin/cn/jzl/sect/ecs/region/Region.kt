@@ -1,10 +1,9 @@
-package cn.jzl.sect.ecs
+package cn.jzl.sect.ecs.region
 
 import cn.jzl.di.instance
 import cn.jzl.di.new
 import cn.jzl.di.singleton
 import cn.jzl.ecs.Entity
-import cn.jzl.ecs.EntityCreateContext
 import cn.jzl.ecs.EntityRelationContext
 import cn.jzl.ecs.FamilyMatcher
 import cn.jzl.ecs.World
@@ -19,6 +18,10 @@ import cn.jzl.ecs.query.Query
 import cn.jzl.ecs.query.query
 import cn.jzl.ecs.relation
 import cn.jzl.ecs.relations
+import cn.jzl.sect.ecs.core.Named
+import cn.jzl.sect.ecs.production.ResourceOutputConfig
+import cn.jzl.sect.ecs.production.ResourceProductionService
+import cn.jzl.sect.ecs.production.resourceProductionAddon
 
 sealed class Region
 sealed class ContainsRelation

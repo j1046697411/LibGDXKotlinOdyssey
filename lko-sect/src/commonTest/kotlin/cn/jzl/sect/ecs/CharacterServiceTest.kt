@@ -3,7 +3,11 @@ package cn.jzl.sect.ecs
 import cn.jzl.di.instance
 import cn.jzl.ecs.entity
 import cn.jzl.ecs.world
+import cn.jzl.sect.ecs.character.Character
+import cn.jzl.sect.ecs.character.CharacterService
+import cn.jzl.sect.ecs.character.characterAddon
 import cn.jzl.sect.ecs.core.Named
+import cn.jzl.sect.ecs.upgradeable.Upgradeable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

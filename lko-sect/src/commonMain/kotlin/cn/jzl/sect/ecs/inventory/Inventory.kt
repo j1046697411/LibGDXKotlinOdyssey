@@ -1,4 +1,4 @@
-package cn.jzl.sect.ecs
+package cn.jzl.sect.ecs.inventory
 
 import cn.jzl.di.instance
 import cn.jzl.di.new
@@ -6,6 +6,16 @@ import cn.jzl.di.singleton
 import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.query.*
+import cn.jzl.sect.ecs.item.Item
+import cn.jzl.sect.ecs.ItemActionProvider
+import cn.jzl.sect.ecs.item.ItemService
+import cn.jzl.sect.ecs.ItemStateResolverRegistry
+import cn.jzl.sect.ecs.item.Stackable
+import cn.jzl.sect.ecs.item.Usable
+import cn.jzl.sect.ecs.core.OwnedBy
+import cn.jzl.sect.ecs.core.coreAddon
+import cn.jzl.sect.ecs.item.itemAddon
+import cn.jzl.sect.ecs.planning.planning
 import kotlin.math.min
 
 

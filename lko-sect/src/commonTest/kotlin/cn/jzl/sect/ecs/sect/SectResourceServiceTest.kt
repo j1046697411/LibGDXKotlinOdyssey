@@ -5,6 +5,7 @@ import cn.jzl.ecs.entity
 import cn.jzl.ecs.world
 import cn.jzl.sect.ecs.*
 import cn.jzl.sect.ecs.core.Named
+import cn.jzl.sect.ecs.inventory.InventoryService
 import cn.jzl.sect.ecs.item.ItemService
 import cn.jzl.sect.ecs.item.Stackable
 import kotlin.test.Test

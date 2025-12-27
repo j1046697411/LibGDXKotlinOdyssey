@@ -1,4 +1,4 @@
-package cn.jzl.sect.ecs
+package cn.jzl.sect.ecs.core
 
 import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.componentId

@@ -1,13 +1,14 @@
-package cn.jzl.sect.ecs
+package cn.jzl.sect.ecs.resources
 
 import cn.jzl.di.instance
 import cn.jzl.di.new
 import cn.jzl.di.singleton
 import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
-import cn.jzl.ecs.query.EntityQueryContext
-import cn.jzl.ecs.query.QueryStream
-import cn.jzl.ecs.query.query
+import cn.jzl.sect.ecs.core.Named
+import cn.jzl.sect.ecs.item.ItemService
+import cn.jzl.sect.ecs.item.Stackable
+import cn.jzl.sect.ecs.item.itemAddon
 
 /**
  * <p>粮食 (FOOD)	🌾	宗门生存基础	弟子饮食、杂役俸禄	农田产出、区域占领	每位弟子10单位/月</p>

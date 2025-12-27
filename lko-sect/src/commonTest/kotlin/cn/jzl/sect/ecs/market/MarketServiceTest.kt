@@ -4,11 +4,9 @@ import cn.jzl.di.instance
 import cn.jzl.ecs.Entity
 import cn.jzl.ecs.entity
 import cn.jzl.ecs.instanceOf
-import cn.jzl.ecs.query.count
 import cn.jzl.ecs.query.first
-import cn.jzl.ecs.query.map
 import cn.jzl.ecs.world
-import cn.jzl.sect.ecs.InventoryService
+import cn.jzl.sect.ecs.inventory.InventoryService
 import cn.jzl.sect.ecs.Money
 import cn.jzl.sect.ecs.MoneyService
 import cn.jzl.sect.ecs.core.Named

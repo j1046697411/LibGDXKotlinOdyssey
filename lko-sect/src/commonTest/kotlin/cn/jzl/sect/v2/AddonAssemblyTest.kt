@@ -2,8 +2,8 @@ package cn.jzl.sect.v2
 
 import cn.jzl.di.instance
 import cn.jzl.ecs.world
-import cn.jzl.sect.ecs.PlanningService
-import cn.jzl.sect.ecs.planningAddon
+import cn.jzl.sect.ecs.planning.PlanningService
+import cn.jzl.sect.ecs.planning.planningAddon
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 

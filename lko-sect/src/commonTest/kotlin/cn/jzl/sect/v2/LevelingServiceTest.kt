@@ -3,10 +3,10 @@ package cn.jzl.sect.v2
 import cn.jzl.di.instance
 import cn.jzl.ecs.entity
 import cn.jzl.ecs.world
-import cn.jzl.sect.ecs.ExperienceFormula
-import cn.jzl.sect.ecs.LevelingService
-import cn.jzl.sect.ecs.attributeAddon
-import cn.jzl.sect.ecs.levelingAddon
+import cn.jzl.sect.ecs.upgradeable.ExperienceFormula
+import cn.jzl.sect.ecs.upgradeable.LevelingService
+import cn.jzl.sect.ecs.attribute.attributeAddon
+import cn.jzl.sect.ecs.upgradeable.levelingAddon
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

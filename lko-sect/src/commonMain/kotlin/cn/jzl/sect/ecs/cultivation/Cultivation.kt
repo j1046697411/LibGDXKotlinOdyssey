@@ -5,12 +5,12 @@ import cn.jzl.di.new
 import cn.jzl.di.singleton
 import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
-import cn.jzl.sect.ecs.AttributeService
-import cn.jzl.sect.ecs.AttributeValue
-import cn.jzl.sect.ecs.Named
-import cn.jzl.sect.ecs.SectAttributes
-import cn.jzl.sect.ecs.attributeAddon
-import cn.jzl.sect.ecs.coreAddon
+import cn.jzl.sect.ecs.attribute.AttributeService
+import cn.jzl.sect.ecs.attribute.AttributeValue
+import cn.jzl.sect.ecs.core.Named
+import cn.jzl.sect.ecs.attribute.SectAttributes
+import cn.jzl.sect.ecs.attribute.attributeAddon
+import cn.jzl.sect.ecs.core.coreAddon
 import kotlin.math.min
 
 @JvmInline

@@ -19,10 +19,10 @@ import cn.jzl.ecs.query.map
 import cn.jzl.ecs.query.query
 import cn.jzl.ecs.relation
 import cn.jzl.ecs.relations
-import cn.jzl.sect.ecs.Character
-import cn.jzl.sect.ecs.CharacterService
-import cn.jzl.sect.ecs.Named
-import cn.jzl.sect.ecs.characterAddon
+import cn.jzl.sect.ecs.character.Character
+import cn.jzl.sect.ecs.character.CharacterService
+import cn.jzl.sect.ecs.core.Named
+import cn.jzl.sect.ecs.character.characterAddon
 
 sealed class Sect
 sealed class PlayerOwner
@@ -72,7 +72,7 @@ class SectService(world: World) : EntityRelationContext(world) {
 
     private fun addSectMember(sect: Entity, member: Entity, type: Member) {
         require(sect.hasTag<Sect>()) { "Entity $sect is not a Sect" }
-        require(member.hasTag<cn.jzl.sect.ecs.Character>()) { "Entity $member is not a Character" }
+        require(member.hasTag<Character>()) { "Entity $member is not a Character" }
         world.entity(member) { it.addRelation(sect, type) }
     }
 
