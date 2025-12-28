@@ -24,10 +24,18 @@ import cn.jzl.ecs.componentId
 import cn.jzl.ecs.entity
 import cn.jzl.ecs.observers.emit
 import cn.jzl.ecs.query.EntityQueryContext
+import cn.jzl.ecs.query.filter
+import cn.jzl.ecs.query.forEach
+import cn.jzl.ecs.query.query
+import cn.jzl.ecs.relations
+import cn.jzl.ecs.system.Updatable
 import cn.jzl.ecs.system.system
 import cn.jzl.sect.ecs.core.coreAddon
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+
+data class Countdown(val startTime: Duration, val interval: Duration)
+sealed class OnCountdownComplete
 
 /**
  * 游戏时间组件，存储从游戏开始累计的游戏总时间。
@@ -227,6 +235,7 @@ val timeAddon = createAddon("timeAddon") {
     install(coreAddon)
     injects {
         this bind singleton { new(::TimeService) }
+        this bind singleton { new(::CountdownService) }
     }
     components {
         world.componentId<Timer>()
@@ -236,6 +245,8 @@ val timeAddon = createAddon("timeAddon") {
         world.componentId<OnMonthChanged>()
         world.componentId<OnSeasonChanged>()
         world.componentId<OnYearChanged>()
+        world.componentId<Countdown>()
+        world.componentId<OnCountdownComplete> { it.tag() }
     }
     systems {
         /**
@@ -383,9 +394,7 @@ class TimeService(world: World) : EntityRelationContext(world) {
      *
      * @return 当前游戏时间（Duration）
      */
-    fun getCurrentGameTime(): Duration {
-        return timeEntity.getComponent<Timer>()?.gameTime ?: Duration.ZERO
-    }
+    fun getCurrentGameTime(): Duration = timeEntity.getComponent<Timer>().gameTime
 
     /**
      * 获取当前日期季节信息。
@@ -465,5 +474,23 @@ class TimeService(world: World) : EntityRelationContext(world) {
 
         /** 当前时间速度组件 */
         val timeSpeed by component<TimeSpeed>()
+    }
+}
+
+class CountdownService(world: World) : EntityRelationContext(world), Updatable {
+
+    private val countdowns = world.query { CountdownContext(this) }
+    private val timeService by world.di.instance<TimeService>()
+
+    override fun update(delta: Duration) {
+        val currentTime = timeService.getCurrentGameTime()
+        countdowns.filter { countdown.startTime + countdown.interval <= currentTime }.forEach {
+            removeRelation(relations.component<Countdown>())
+            world.emit<OnCountdownComplete>(entity)
+        }
+    }
+
+    class CountdownContext(world: World) : EntityQueryContext(world) {
+        val countdown: Countdown by component()
     }
 }

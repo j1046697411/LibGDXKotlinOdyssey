@@ -5,6 +5,7 @@ import cn.jzl.ecs.Entity
 import cn.jzl.ecs.FamilyMatcher
 import cn.jzl.ecs.Relation
 import cn.jzl.ecs.World
+import cn.jzl.ecs.isActive
 import cn.jzl.ecs.query.OptionalGroup
 import cn.jzl.ecs.query.EntityQueryContext
 import cn.jzl.ecs.query.Query
@@ -39,7 +40,7 @@ internal class ObserveService(private val world: World) {
             if (involved.kind == world.components.any && involvedRelations.none { it.target == involved.target }) return
             if (involved !in involvedRelations) return
         }
-        if (queries.isNotEmpty()) {
+        if (queries.isNotEmpty() && world.isActive(entity)) {
             world.entityService.runOn(entity) { entityIndex ->
                 if (queries.all { query -> this in query }) {
                     queries.forEach {

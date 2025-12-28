@@ -2,6 +2,8 @@ package cn.jzl.sect.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +19,10 @@ import cn.jzl.ecs.Entity
 import cn.jzl.ecs.query.Query
 import cn.jzl.ecs.query.count
 import cn.jzl.sect.currentWorld
+import cn.jzl.sect.ecs.attribute.Attribute
+import cn.jzl.sect.ecs.attribute.AttributeService
+import cn.jzl.sect.ecs.attribute.AttributeValue
+import cn.jzl.sect.ecs.attribute.SectAttributes
 import cn.jzl.sect.ecs.core.Named
 import cn.jzl.sect.ecs.inventory.Amount
 import cn.jzl.sect.ecs.inventory.InventoryService
@@ -28,9 +34,10 @@ import cn.jzl.sect.ecs.time.TimeService
 import cn.jzl.sect.ecs.time.TimeSpeed
 import cn.jzl.sect.ui.observeComponent
 import cn.jzl.sect.ui.observeEntity
+import cn.jzl.sect.ui.observeEntityList
+import cn.jzl.sect.ui.observeRelation
 import cn.jzl.sect.ui.observeState
 import cn.jzl.sect.ui.service
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * 顶部导航栏组件
@@ -55,9 +62,19 @@ fun TopNavigationBar(modifier: Modifier) {
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         val sectService by currentWorld.di.instance<SectService>()
+        val attributes = service<SectAttributes>()
         val sect = sectService.playerSect
         val named by sect.observeComponent<Named>()
+        val entities = observeEntityList(sectService.getSectMembers(sect))
+        val attributeService = service<AttributeService>()
 
+        LazyColumn {
+            items(entities) {
+                val cultivation by it.observeRelation<AttributeValue?>(attributes.cultivation)
+                val maxCultivation = attributeService.getTotalAttributeValue(it, attributes.maxCultivation)
+                Text("${it.id} ${cultivation?.value ?: 0}/${maxCultivation.value}")
+            }
+        }
         // 第一行：核心状态信息
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -212,6 +229,7 @@ fun ResourceView(inventoryService: InventoryService, query: Query<*>, sect: Enti
         inventoryService.getItem(sect, resource)
     }
     val entity = itemEntity ?: resource
+    println("entity $entity")
     val amount by entity.observeComponent<Amount?>()
     val named by entity.observeComponent<Named>()
     val resourceIcon by entity.observeComponent<ResourceIcon>()

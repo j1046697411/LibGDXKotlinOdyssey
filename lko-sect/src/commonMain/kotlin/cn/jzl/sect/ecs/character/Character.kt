@@ -6,6 +6,7 @@ import cn.jzl.di.singleton
 import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.query.ECSDsl
+import cn.jzl.sect.ecs.ai.AIService
 import cn.jzl.sect.ecs.core.Named
 import cn.jzl.sect.ecs.cultivation.CultivationService
 import cn.jzl.sect.ecs.cultivation.cultivationAddon
@@ -50,6 +51,7 @@ val characterAddon = createAddon("character") {
 class CharacterService(world: World) : EntityRelationContext(world) {
 
     private val cultivationService by world.di.instance<CultivationService>()
+    private val aiService by world.di.instance<AIService>()
 
     /**
      * 创建角色实体
@@ -62,6 +64,7 @@ class CharacterService(world: World) : EntityRelationContext(world) {
     fun createCharacter(named: Named, block: EntityCreateContext.(Entity) -> Unit): Entity {
         return world.entity {
             cultivationService.cultivable(this, it)
+            aiService.ai(this, it)
             it.addTag<Character>()
             it.addComponent(named)
             block(it)

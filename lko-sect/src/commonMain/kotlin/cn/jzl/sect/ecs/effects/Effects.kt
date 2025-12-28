@@ -7,7 +7,7 @@ import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
 import cn.jzl.ecs.observers.emit
 import cn.jzl.ecs.query.*
-import cn.jzl.sect.ecs.AttributeKey
+import cn.jzl.sect.ecs.attribute.AttributeKey
 import cn.jzl.sect.ecs.attribute.AttributeService
 import cn.jzl.sect.ecs.attribute.attributeAddon
 import cn.jzl.sect.ecs.core.Named
@@ -548,7 +548,7 @@ data class EffectAttributeKey(val effectPrefab: Entity, val attribute: Entity) :
 class EffectAttributeResolver(world: World) : StateResolver<AttributeKey, Long> {
     private val attributeService by world.di.instance<AttributeService>()
     private val effectService by world.di.instance<EffectService>()
-    override fun EntityRelationContext.getWorldState(agent: Entity, key: cn.jzl.sect.ecs.AttributeKey): Long {
+    override fun EntityRelationContext.getWorldState(agent: Entity, key: AttributeKey): Long {
         val baseValue = attributeService.getAttributeValue(agent, key.attribute)?.value ?: 0L
         var addModifierTotalValue = 0L
         var multiplyModifierTotalValue = 1f
@@ -625,7 +625,7 @@ class EffectEnhancedAttributeStateResolverRegistry(world: World) : StateResolver
     override fun <K : StateKey<T>, T> getStateHandler(key: K): StateResolver<K, T>? {
         @Suppress("UNCHECKED_CAST")
         return when (key) {
-            is cn.jzl.sect.ecs.AttributeKey -> effectAttributeResolver as StateResolver<K, T>
+            is AttributeKey -> effectAttributeResolver as StateResolver<K, T>
             is cn.jzl.sect.ecs.ItemAmountKey -> itemAmountResolver as StateResolver<K, T>
             is IsStatusAffectedKey -> isStatusAffectedResolver as StateResolver<K, T>
             is EffectCountKey -> effectCountResolver as StateResolver<K, T>
@@ -656,7 +656,7 @@ object EffectActionEffects {
         }
     }
 
-    fun modifyAttribute(attributeKey: cn.jzl.sect.ecs.AttributeKey, value: Long): ActionEffect {
+    fun modifyAttribute(attributeKey: AttributeKey, value: Long): ActionEffect {
         return ActionEffect { stateWriter, agent ->
             val currentValue = stateWriter.getValue(agent, attributeKey)
             stateWriter.setValue(attributeKey, currentValue + value)

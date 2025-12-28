@@ -128,7 +128,7 @@ internal class EntityStateObserver(
         }.exec {
             val entity = entityState.value
             if (queryFilter == null || entity == null || entity !in queryFilter) {
-                entityState.value = provider() ?: Entity.ENTITY_INVALID
+                entityState.value = provider()
             }
         }
     }

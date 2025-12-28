@@ -5,13 +5,13 @@ import cn.jzl.di.new
 import cn.jzl.di.singleton
 import cn.jzl.ecs.*
 import cn.jzl.ecs.addon.createAddon
-import cn.jzl.sect.ecs.attribute.AttributeService
-import cn.jzl.sect.ecs.attribute.AttributeValue
+import cn.jzl.sect.ecs.attribute.*
 import cn.jzl.sect.ecs.core.Named
-import cn.jzl.sect.ecs.attribute.SectAttributes
-import cn.jzl.sect.ecs.attribute.attributeAddon
 import cn.jzl.sect.ecs.core.coreAddon
+import cn.jzl.sect.ecs.logger.Logger
+import cn.jzl.sect.ecs.planning.*
 import kotlin.math.min
+import kotlin.time.Duration.Companion.days
 
 /**
  * 修炼系统包，包含修炼组件、服务和addon配置
@@ -60,6 +60,24 @@ val cultivationAddon = createAddon("cultivation") {
             it.singleRelation()
         }
     }
+    planning {
+        val cultivationProvider = CultivationProvider(world)
+        register(cultivationProvider as GoalProvider)
+        register(cultivationProvider as ActionProvider)
+        register(cultivationProvider as StateResolverRegistry)
+    }
+    attributes {
+        provider { RealmAttributeProvider(world) }
+    }
+}
+
+class RealmAttributeProvider(world: World) : AttributeProvider {
+     private val cultivationService by world.di.instance<CultivationService>()
+
+    override fun getAttributeValue(attributeService: AttributeService, entity: Entity, attribute: Entity): AttributeValue {
+        val realm = cultivationService.getRealm(entity) ?: return AttributeValue.zero
+        return attributeService.getTotalAttributeValue(realm, attribute)
+    }
 }
 
 /**
@@ -72,6 +90,7 @@ class CultivationService(world: World) : EntityRelationContext(world) {
 
     private val attributes by world.di.instance<SectAttributes>()
     private val attributeService by world.di.instance<AttributeService>()
+    private val log: Logger by world.di.instance(argProvider = { "CultivationService" })
 
     /**
      * 凡人境界
@@ -300,6 +319,14 @@ class CultivationService(world: World) : EntityRelationContext(world) {
         attributeService.setAttributeValue(this, entity, attributes.cultivation, AttributeValue(0))
     }
 
+    fun getRealm(entity: Entity): Entity? = entity.getRelationUp<Cultivable>()
+
+    fun getRealmLevel(entity: Entity): Cultivation {
+        val realm = getRealm(entity)
+        requireNotNull(realm) { "Entity is not cultivable" }
+        return realm.getComponent<Cultivation>()
+    }
+
     /**
      * 增加实体的修炼值
      * 自动处理修炼值溢出和境界提升
@@ -308,8 +335,9 @@ class CultivationService(world: World) : EntityRelationContext(world) {
      * @param cultivation 要增加的修炼值
      */
     fun cultivation(entity: Entity, cultivation: Long) {
+        log.debug { "$entity cultivation $cultivation" }
         require(cultivation > 0) { "Cultivation must be non-negative" }
-        val currentRealm = entity.getRelationUp<Cultivation>()
+        val currentRealm = entity.getRelationUp<Cultivable>()
         requireNotNull(currentRealm) { "Entity is not cultivable" }
         val currentCultivation = attributeService.getAttributeValue(entity, attributes.cultivation)?.value ?: 0
         val remainingCultivation = currentCultivation + cultivation
@@ -355,6 +383,7 @@ class CultivationService(world: World) : EntityRelationContext(world) {
      * @param entity 目标实体
      */
     fun breakthrough(entity: Entity) {
+        log.debug { "$entity breakthrough" }
         val currentRealm = entity.getRelationUp<Cultivation>()
         requireNotNull(currentRealm) { "Entity is not cultivable" }
         val maxCultivation = attributeService.getAttributeValue(currentRealm, attributes.maxCultivation)?.value ?: 0
@@ -387,4 +416,69 @@ class CultivationService(world: World) : EntityRelationContext(world) {
          */
         fun cultivation(cultivation: Long)
     }
+}
+
+class CultivationProvider(world: World) : EntityRelationContext(world), GoalProvider, ActionProvider, StateResolverRegistry {
+
+    private val cultivationService by world.di.instance<CultivationService>()
+    private val attributeService by world.di.instance<AttributeService>()
+
+    private val sectAttributes by world.di.instance<SectAttributes>()
+
+    private val cultivation = AttributeKey(sectAttributes.cultivation)
+    private val maxCultivation = AttributeKey(sectAttributes.maxCultivation)
+
+    private val realmLevelStateResolver = object : StateResolver<RealmLevelKey, Int> {
+
+        override fun EntityRelationContext.getWorldState(agent: Entity, key: RealmLevelKey): Int {
+            return cultivationService.getRealmLevel(agent).level
+        }
+    }
+
+    private val actions = buildList<GOAPAction> {
+        add(Action(name = "修炼", cost = 1.0, preconditions = emptySequence(), effects = sequence {
+            yield { stateWriter, agent -> stateWriter.increase(agent, cultivation, 20) }
+        }, task = {
+            delay(1.days)
+            cultivationService.cultivation(agent, 20)
+        }))
+
+        add(Action(name = "突破", cost = 1.0, preconditions = sequence {
+            yield { stateReader, agent ->
+                stateReader.getValue(agent, cultivation) >= stateReader.getValue(agent, maxCultivation)
+            }
+        }, effects = sequence {
+            yield { stateWriter, agent -> stateWriter.increase(agent, RealmLevelKey, 1) }
+        }, task = {
+            delay(1.days)
+            cultivationService.breakthrough(agent)
+        }))
+    }
+
+    override fun getGoals(stateReader: WorldStateReader, agent: Entity): Sequence<GOAPGoal> {
+        if (agent.getRelationUp<Cultivable>() == null) return emptySequence()
+        val realmLevel = cultivationService.getRealmLevel(agent)
+        val cultivation = attributeService.getTotalAttributeValue(agent, sectAttributes.cultivation)
+        return sequence {
+            yield(Goal("突破修为", priority = 0.2, satisfied = {
+                getValue(it, RealmLevelKey) > realmLevel.level
+            }))
+            yield(Goal("修炼", priority = 0.1, satisfied = {
+                getValue(it, this@CultivationProvider.cultivation) > cultivation.value
+            }))
+        }
+    }
+
+    override fun getActions(stateReader: WorldStateReader, agent: Entity): Sequence<GOAPAction> {
+        if (agent.getRelationUp<Cultivable>() == null) return emptySequence()
+        return actions.asSequence()
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <K : StateKey<T>, T> getStateHandler(key: K): StateResolver<K, T>? {
+        if (key is RealmLevelKey) return realmLevelStateResolver as? StateResolver<K, T>
+        return null
+    }
+
+    private data object RealmLevelKey : StateKey<Int>
 }

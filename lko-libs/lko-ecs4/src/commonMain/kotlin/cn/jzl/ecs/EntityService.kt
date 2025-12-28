@@ -126,7 +126,7 @@ internal class EntityService(override val world: World) : WorldOwner {
             world.observeService.dispatch(entity, world.componentService.components.onEntityDestroyed)
         }
         // 按收集的顺序一个一个删除
-        entities.forEach { entity ->
+        entities.filter { world.isActive(it) }.forEach { entity ->
             runOn(entity) { entityIndex ->
                 archetypeType.forEach {
                     world.observeService.dispatch(entity, world.components.onRemoved, null, it)

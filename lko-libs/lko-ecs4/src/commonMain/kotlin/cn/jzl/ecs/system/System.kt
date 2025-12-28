@@ -1,5 +1,7 @@
 package cn.jzl.ecs.system
 
+import cn.jzl.di.allInstance
+import cn.jzl.di.instance
 import cn.jzl.ecs.World
 import cn.jzl.ecs.WorldOwner
 import cn.jzl.ecs.query.ECSDsl
@@ -25,13 +27,13 @@ interface Pipeline {
 
     fun <C : EntityQueryContext> addSystem(system: System<C>): TrackedSystem<C>
 
-    fun getRepeatingInExecutionOrder(): Sequence<TrackedSystem<*>>
+    fun getRepeatingInExecutionOrder(): Sequence<Updatable>
 }
 
 class PipelineImpl(override val world: World) : Pipeline, WorldOwner {
 
     private val onSystemAdd = mutableListOf<(System<*>) -> Unit>()
-    private val trackedSystems = mutableListOf<TrackedSystem<*>>()
+    private val trackedSystems = mutableListOf<Updatable>()
     private val scheduled = Array(Phase.entries.size) {
         mutableListOf<WorldOwner.() -> Unit>()
     }
@@ -56,6 +58,8 @@ class PipelineImpl(override val world: World) : Pipeline, WorldOwner {
             if (systems.isEmpty()) return@forEach
             systems.forEach { it() }
         }
+        val systems by world.di.allInstance<Updatable>()
+        trackedSystems.addAll(systems)
     }
 
     override fun <C : EntityQueryContext> addSystem(system: System<C>): TrackedSystem<C> {
@@ -66,7 +70,7 @@ class PipelineImpl(override val world: World) : Pipeline, WorldOwner {
         return trackedSystem
     }
 
-    override fun getRepeatingInExecutionOrder(): Sequence<TrackedSystem<*>> = trackedSystems.asSequence()
+    override fun getRepeatingInExecutionOrder(): Sequence<Updatable> = trackedSystems.asSequence()
 }
 
 data class System<C : EntityQueryContext>(
@@ -76,8 +80,10 @@ data class System<C : EntityQueryContext>(
     val interval: Duration? = null
 )
 
-data class TrackedSystem<C : EntityQueryContext>(val system: System<C>, val query: Query<C>) {
-    fun tick(delta: Duration): Unit = system.run { query.onTick(delta) }
+data class TrackedSystem<C : EntityQueryContext>(val system: System<C>, val query: Query<C>) : Updatable {
+    override fun update(delta: Duration) {
+        system.run { query.onTick(delta) }
+    }
 }
 
 data class SystemBuilder<C : EntityQueryContext>(
@@ -104,6 +110,10 @@ inline fun <reified C : EntityQueryContext> WorldOwner.system(
 ): SystemBuilder<C> = SystemBuilder(world.pipeline, context, name, interval)
 
 fun World.update(delta: Duration) {
-    pipeline.getRepeatingInExecutionOrder().forEach { it.tick(delta) }
+    pipeline.getRepeatingInExecutionOrder().forEach { it.update(delta) }
     entityService.update()
+}
+
+interface Updatable {
+    fun update(delta: Duration)
 }

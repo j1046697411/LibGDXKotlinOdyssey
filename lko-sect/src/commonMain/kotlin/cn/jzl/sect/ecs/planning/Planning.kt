@@ -10,11 +10,11 @@ import cn.jzl.ecs.WorldOwner
 import cn.jzl.ecs.addon.AddonSetup
 import cn.jzl.ecs.addon.WorldSetup
 import cn.jzl.ecs.addon.createAddon
+import cn.jzl.ecs.componentId
 import cn.jzl.ecs.query.ECSDsl
 import cn.jzl.ecs.system.Phase
-import java.util.PriorityQueue
-import kotlin.collections.plus
-import kotlin.getValue
+import cn.jzl.sect.ecs.logger.logAddon
+import java.util.*
 
 /**
  * 规划系统包，包含GOAP（面向目标的动作规划）系统的核心组件
@@ -168,11 +168,11 @@ fun WorldStateWriter.decrease(agent: Entity, key: StateKey<Long>, value: Long) {
 }
 
 interface ActionProvider {
-    fun getActions(stateProvider: WorldStateReader, agent: Entity): Sequence<Action>
+    fun getActions(stateReader: WorldStateReader, agent: Entity): Sequence<GOAPAction>
 }
 
 fun interface Precondition {
-    fun satisfiesCondition(stateProvider: WorldStateReader, agent: Entity): Boolean
+    fun satisfiesCondition(stateReader: WorldStateReader, agent: Entity): Boolean
 }
 
 fun interface ActionEffect {
@@ -180,7 +180,7 @@ fun interface ActionEffect {
 }
 
 interface GoalProvider {
-    fun getGoals(stateProvider: WorldStateReader, agent: Entity): Sequence<GOAPGoal>
+    fun getGoals(stateReader: WorldStateReader, agent: Entity): Sequence<GOAPGoal>
 }
 
 interface PlanningRegistry : WorldOwner {
@@ -205,13 +205,41 @@ interface GOAPGoal {
     fun calculateHeuristic(worldState: WorldStateReader, agent: Entity): Double
 }
 
-interface Action {
+data class Goal(
+    override val name: String,
+    override val priority: Double = 1.0,
+    private val satisfied: WorldStateReader.(Entity) -> Boolean,
+    private val desirability: WorldStateReader.(Entity) -> Double = { 1.0 },
+    private val heuristic: WorldStateReader.(Entity) -> Double = { 1.0 }
+) : GOAPGoal {
+    override fun isSatisfied(worldState: WorldStateReader, agent: Entity): Boolean {
+        return worldState.satisfied(agent)
+    }
+
+    override fun calculateDesirability(worldState: WorldStateReader, agent: Entity): Double {
+        return worldState.desirability(agent)
+    }
+
+    override fun calculateHeuristic(worldState: WorldStateReader, agent: Entity): Double {
+        return worldState.heuristic(agent)
+    }
+}
+
+interface GOAPAction {
     val name: String
     val preconditions: Sequence<Precondition>
     val effects: Sequence<ActionEffect>
     val cost: Double
-    val task: suspend World.(Entity) -> Unit
+    val task: ActionTask
 }
+
+class Action(
+    override val name: String,
+    override val cost: Double,
+    override val preconditions: Sequence<Precondition>,
+    override val effects: Sequence<ActionEffect>,
+    override val task: ActionTask
+) : GOAPAction
 
 interface Planner {
     fun plan(agent: Entity, goal: GOAPGoal): Plan?
@@ -219,7 +247,7 @@ interface Planner {
 
 data class Plan(
     val goal: GOAPGoal,
-    val actions: List<Action>,
+    val actions: List<GOAPAction>,
     val cost: Double
 )
 
@@ -237,10 +265,18 @@ class GOAPBuilder {
 }
 
 val planningAddon = createAddon("planning", { GOAPBuilder() }) {
-    injects { this bind singleton { new(::PlanningService) } }
-    on(Phase.ADDONS_CONFIGURED) {
+    install(logAddon)
+    injects {
+        this bind singleton { new(::PlanningService) }
+        this bind singleton { new(::PlanningExecuteService) }
+    }
+    on(Phase.ENABLE) {
         val service by world.di.instance<PlanningService>()
         configuration.apply(service)
+    }
+
+    components {
+        world.componentId<OnPlanExecutionCompleted> { it.tag() }
     }
 }
 
@@ -280,6 +316,7 @@ class PlanningService(world: World) : EntityRelationContext(world), WorldStateRe
     private val goalProviders = mutableSetOf<GoalProvider>()
     private val stateHandlerProviders = mutableListOf<StateResolverRegistry>()
     private val planner: Planner = AStarPlanner(this)
+    private val planningExecuteService by world.di.instance<PlanningExecuteService>()
 
     override fun register(stateHandlerProvider: StateResolverRegistry) {
         this.stateHandlerProviders.add(stateHandlerProvider)
@@ -300,7 +337,7 @@ class PlanningService(world: World) : EntityRelationContext(world), WorldStateRe
         return getStateHandler(key).run { getWorldState(agent, key) }
     }
 
-    fun getAllActions(agent: Entity): Sequence<Action> = actionProviders.asSequence().flatMap { it.getActions(this, agent) }
+    fun getAllActions(agent: Entity): Sequence<GOAPAction> = actionProviders.asSequence().flatMap { it.getActions(this, agent) }
 
     private fun getAllGoals(agent: Entity): Sequence<GOAPGoal> = goalProviders.asSequence().flatMap { it.getGoals(this, agent) }
 
@@ -308,23 +345,23 @@ class PlanningService(world: World) : EntityRelationContext(world), WorldStateRe
 
     fun planBestGoal(agent: Entity): Plan? {
         val worldState = createAgentState(agent)
-        return getAllGoals(agent)
-            .map { goal -> goal to goal.calculateDesirability(worldState, agent) }
-            .sortedByDescending { (goal, desirability) -> goal.priority * desirability }
+        return getAllGoals(agent).map { goal -> goal to goal.calculateDesirability(worldState, agent) }.sortedByDescending { (goal, desirability) -> goal.priority * desirability }
             .mapNotNull { planner.plan(agent, it.first) }.firstOrNull()
     }
+
+    fun execPlan(agent: Entity, plan: Plan): Entity = planningExecuteService.executePlan(agent, plan)
 
     fun <K : StateKey<T>, T> getStateHandler(key: K): StateResolver<K, T> {
         return stateHandlerProviders.asSequence().mapNotNull { it.getStateHandler(key) }.first()
     }
 }
 
-class AStarPlanner(private val goapService: PlanningService, private val maxSearchDepth: Int = 50) : Planner {
+class AStarPlanner(private val planningService: PlanningService, private val maxSearchDepth: Int = 50) : Planner {
 
     override fun plan(agent: Entity, goal: GOAPGoal): Plan? {
-        val startState = goapService.createAgentState(agent)
+        val startState = planningService.createAgentState(agent)
         // Materialize once; `Sequence` may be one-shot and can't be safely iterated repeatedly.
-        val allActions: List<Action> = goapService.getAllActions(agent).toList()
+        val allActions: List<GOAPAction> = planningService.getAllActions(agent).toList()
 
         // 如果目标已经满足，返回空计划
         if (goal.isSatisfied(startState, agent)) {
@@ -337,10 +374,7 @@ class AStarPlanner(private val goapService: PlanningService, private val maxSear
 
         // 初始节点
         val startNode = AStarNode(
-            worldState = startState,
-            actions = emptyList(),
-            cost = 0.0,
-            heuristic = calculateHeuristic(startState, goal, agent)
+            worldState = startState, actions = emptyList(), cost = 0.0, heuristic = calculateHeuristic(startState, goal, agent)
         )
         openSet.add(startNode)
 
@@ -376,10 +410,7 @@ class AStarPlanner(private val goapService: PlanningService, private val maxSear
                 val newActions = current.actions + action
 
                 val newNode = AStarNode(
-                    worldState = newState,
-                    actions = newActions,
-                    cost = newCost,
-                    heuristic = newHeuristic
+                    worldState = newState, actions = newActions, cost = newCost, heuristic = newHeuristic
                 )
 
                 // 检查新状态是否已经在关闭列表中
@@ -403,8 +434,7 @@ class AStarPlanner(private val goapService: PlanningService, private val maxSear
         return keys.joinToString("|") { key ->
             // 获取键对应的值并包含在哈希中
             try {
-                @Suppress("UNCHECKED_CAST")
-                val value = state.getValue(agent, key as StateKey<Any?>)
+                @Suppress("UNCHECKED_CAST") val value = state.getValue(agent, key as StateKey<Any?>)
                 "$key=$value"
             } catch (e: Exception) {
                 "$key=null"
@@ -418,7 +448,7 @@ class AStarPlanner(private val goapService: PlanningService, private val maxSear
      */
     private data class AStarNode(
         val worldState: AgentState,
-        val actions: List<Action>,
+        val actions: List<GOAPAction>,
         val cost: Double,
         val heuristic: Double
     ) : Comparable<AStarNode> {
@@ -429,3 +459,4 @@ class AStarPlanner(private val goapService: PlanningService, private val maxSear
         }
     }
 }
+
